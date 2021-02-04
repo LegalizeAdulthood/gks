@@ -16,3 +16,8 @@ void ginqopst(Gopst *value)
 {
     *value = g_operState;
 }
+
+void ginqlevelgks(Glevel *value)
+{
+    *value = GL0A;
+}

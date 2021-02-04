@@ -35,3 +35,15 @@ TEST_CASE("Opened and closed", "[gks]")
     REQUIRE( opened == GGKOP );
     REQUIRE( closed == GGKCL );
 }
+
+TEST_CASE("Operating level", "[gks]")
+{
+    gopengks(stderr, 0L);
+
+    Glevel level{};
+    ginqlevelgks(&level);
+
+    REQUIRE( level == GL0A );
+
+    gclosegks();
+}
