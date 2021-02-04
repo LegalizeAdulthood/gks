@@ -39,11 +39,25 @@ typedef enum Glevel_t
     GL2C
 } Glevel;
 
+typedef enum Gclrflag_t
+{
+    GCONDITIONALLY,
+    GALWAYS
+} Gclrflag;
+
+typedef struct Gstrlist_t
+{
+    Gint n_points;
+    const Gchar **strings;
+} Gstrlist;
+
 void gopengks(Gfile *errfile, Glong memory);
 void gclosegks();
 
 void ginqopst(Gopst *value);
 void ginqlevelgks(Glevel *value);
+
+void ginqavailwstypes(Gint bufSize, Gint start, Gstrlist *wsTypes, Gint *numTypes, Gint *errorStatus);
 
 void gerrorhand(Gint errNum, Gint funcName, Gfile *errFile);
 
@@ -52,6 +66,7 @@ void gclosews(Gint wsId);
 
 void gactivatews(Gint wsId);
 void gdeactivatews(Gint wsId);
+void gclearws(Gint wsId, Gclrflag flag);
 
 #if defined(__cplusplus)
 }

@@ -22,6 +22,18 @@ void ginqlevelgks(Glevel *value)
     *value = GL0A;
 }
 
+static const Gchar *g_wsTypes[] =
+{
+    "tek4105",
+};
+
+void ginqavailwstypes(Gint bufSize, Gint start, Gstrlist *wsTypes, Gint *numTypes, Gint *errorStatus)
+{
+    *numTypes = sizeof(g_wsTypes)/sizeof(g_wsTypes[0]);
+    wsTypes->n_points = *numTypes;
+    wsTypes->strings = g_wsTypes;
+}
+
 void gerrorhand(Gint errNum, Gint funcName, Gfile *errFile)
 {
     fprintf(errFile, "GKS error %d in function %d\n", errNum, funcName);
@@ -45,4 +57,8 @@ void gactivatews(Gint wsId)
 void gdeactivatews(Gint wsId)
 {
     g_opState = GWSOP;
+}
+
+void gclearws(Gint wsId, Gclrflag flag)
+{
 }
