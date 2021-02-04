@@ -4,33 +4,33 @@
 
 #include <cstdio>
 
+inline Gopst getGksOpState()
+{
+    Gopst result = static_cast<Gopst>(-1);
+    ginqopst(&result);
+    return result;
+}
+
 TEST_CASE("Initially closed", "[gks]")
 {
-    Gopst state{GGKOP};
-    ginqopst(&state);
-    REQUIRE( GGKCL == state );
+    REQUIRE(getGksOpState() == GGKCL);
 }
 
 TEST_CASE("Opened", "[gks]")
 {
     gopengks(stderr, 0L);
 
-    Gopst state{GGKCL};
-    ginqopst(&state);
-
-    REQUIRE( state == GGKOP );
+    REQUIRE( getGksOpState() == GGKOP );
 
     gclosegks();
 }
 
 TEST_CASE("Opened and closed", "[gks]")
 {
-    Gopst opened{GGKCL}, closed{GGKOP};
-
     gopengks(stderr, 0L);
-    ginqopst(&opened);
+    const Gopst opened = getGksOpState();
     gclosegks();
-    ginqopst(&closed);
+    const Gopst closed = getGksOpState();
 
     REQUIRE( opened == GGKOP );
     REQUIRE( closed == GGKCL );
@@ -158,6 +158,8 @@ TEST_CASE("Workstation types", "[gks]")
     Gint numTypes{};
     Gint errorStatus{};
     ginqavailwstypes(bufSize, start, &wsTypes, &numTypes, &errorStatus);
+
+    REQUIRE(numTypes >= 1);
 
     gclosegks();
 }
