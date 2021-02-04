@@ -45,6 +45,12 @@ typedef enum Gclrflag_t
     GALWAYS
 } Gclrflag;
 
+typedef enum Gregen_t
+{
+    GPOSTPONE,
+    GPERFORM
+} Gregen;
+
 typedef struct Gstrlist_t
 {
     Gint n_points;
@@ -67,6 +73,7 @@ void gclosews(Gint wsId);
 void gactivatews(Gint wsId);
 void gdeactivatews(Gint wsId);
 void gclearws(Gint wsId, Gclrflag flag);
+void gupdatews(Gint wsId, Gregen flag);
 
 #if defined(__cplusplus)
 }

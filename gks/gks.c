@@ -62,3 +62,7 @@ void gdeactivatews(Gint wsId)
 void gclearws(Gint wsId, Gclrflag flag)
 {
 }
+
+void gupdatews(Gint wsId, Gregen flag)
+{
+}

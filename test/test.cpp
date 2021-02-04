@@ -163,3 +163,16 @@ TEST_CASE("Workstation types", "[gks]")
 
     gclosegks();
 }
+
+TEST_CASE("Update", "[ws]")
+{
+    gopengks(stderr, 0L);
+    Gint wsId{1};
+    const Gchar *connId{"tek4105"};
+    Gint wsType{};
+    gopenws(wsId, connId, wsType);
+
+    gupdatews(wsId, GPERFORM);
+
+    gclosegks();
+}
