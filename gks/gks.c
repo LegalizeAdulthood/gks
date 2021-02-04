@@ -21,3 +21,8 @@ void ginqlevelgks(Glevel *value)
 {
     *value = GL0A;
 }
+
+void gerrorhand(Gint errNum, Gint funcName, Gfile *errFile)
+{
+    fprintf(errFile, "GKS error %d in function %d\n", errNum, funcName);
+}

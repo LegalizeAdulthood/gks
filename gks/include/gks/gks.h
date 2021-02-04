@@ -47,6 +47,8 @@ void gclosegks();
 void ginqopst(Gopst *value);
 void ginqlevelgks(Glevel *value);
 
+void gerrorhand(Gint errNum, Gint funcName, Gfile *errFile);
+
 #if defined(__cplusplus)
 }
 #endif

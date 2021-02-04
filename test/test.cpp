@@ -47,3 +47,8 @@ TEST_CASE("Operating level", "[gks]")
 
     gclosegks();
 }
+
+TEST_CASE("Error handling", "[gks]")
+{
+    gerrorhand(1, 1, stderr);
+}
