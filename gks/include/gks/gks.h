@@ -16,8 +16,19 @@ typedef float Gfloat;
 typedef long Glong;
 typedef FILE Gfile;
 
+typedef enum Gopst_t
+{
+    GGKCL,
+    GGKOP,
+    GWSOP,
+    GWSAC,
+    GSGOP
+} Gopst;
+
 void gopengks(Gfile *errfile, Glong memory);
 void gclosegks();
+
+void ginqopst(Gopst *value);
 
 #if defined(__cplusplus)
 }
