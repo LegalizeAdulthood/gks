@@ -36,3 +36,13 @@ void gclosews(Gint wsId)
 {
     g_opState = GGKOP;
 }
+
+void gactivatews(Gint wsId)
+{
+    g_opState = GWSAC;
+}
+
+void gdeactivatews(Gint wsId)
+{
+    g_opState = GWSOP;
+}

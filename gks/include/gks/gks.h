@@ -50,6 +50,9 @@ void gerrorhand(Gint errNum, Gint funcName, Gfile *errFile);
 void gopenws(Gint wsId, const Gchar *connId, Gint wsType);
 void gclosews(Gint wsId);
 
+void gactivatews(Gint wsId);
+void gdeactivatews(Gint wsId);
+
 #if defined(__cplusplus)
 }
 #endif

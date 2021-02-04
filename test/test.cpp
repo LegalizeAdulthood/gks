@@ -89,3 +89,46 @@ TEST_CASE("Close workstation", "[gks]")
 
     gclosegks();
 }
+
+TEST_CASE("Activate workstation", "[gks]")
+{
+    gopengks(stderr, 0L);
+    Gint wsId{1};
+    const Gchar *connId{"tek4105"};
+    Gint wsType{};
+    gopenws(wsId, connId, wsType);
+
+    Gopst before{};
+    ginqopst(&before);
+    gactivatews(wsId);
+    Gopst after{};
+    ginqopst(&after);
+
+    REQUIRE( before == GWSOP );
+    REQUIRE( after == GWSAC );
+
+    gclosews(wsId);
+    gclosegks();
+}
+
+TEST_CASE("Deactivate workstation", "[gks]")
+{
+    gopengks(stderr, 0L);
+    Gint wsId{1};
+    const Gchar *connId{"tek4105"};
+    Gint wsType{};
+    gopenws(wsId, connId, wsType);
+    gactivatews(wsId);
+
+    Gopst before{};
+    ginqopst(&before);
+    gdeactivatews(wsId);
+    Gopst after{};
+    ginqopst(&after);
+
+    REQUIRE( before == GWSAC );
+    REQUIRE( after == GWSOP );
+
+    gclosews(wsId);
+    gclosegks();
+}
