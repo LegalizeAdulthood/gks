@@ -1,20 +1,20 @@
 #include <gks/gks.h>
 
-static Gopst g_operState = GGKCL;
+static Gopst g_opState = GGKCL;
 
 void gopengks(Gfile *errfile, Glong memory)
 {
-    g_operState = GGKOP;
+    g_opState = GGKOP;
 }
 
 void gclosegks()
 {
-    g_operState = GGKCL;
+    g_opState = GGKCL;
 }
 
 void ginqopst(Gopst *value)
 {
-    *value = g_operState;
+    *value = g_opState;
 }
 
 void ginqlevelgks(Glevel *value)
@@ -25,4 +25,14 @@ void ginqlevelgks(Glevel *value)
 void gerrorhand(Gint errNum, Gint funcName, Gfile *errFile)
 {
     fprintf(errFile, "GKS error %d in function %d\n", errNum, funcName);
+}
+
+void gopenws(Gint wsId, const Gchar *connId, Gint wsType)
+{
+    g_opState = GWSOP;
+}
+
+void gclosews(Gint wsId)
+{
+    g_opState = GGKOP;
 }

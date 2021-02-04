@@ -9,9 +9,7 @@ extern "C"
 #endif
 
 typedef char Gchar;
-typedef Gchar Gconn;
 typedef int Gint;
-typedef Gint Gwstype;
 typedef float Gfloat;
 typedef long Glong;
 typedef FILE Gfile;
@@ -48,6 +46,9 @@ void ginqopst(Gopst *value);
 void ginqlevelgks(Glevel *value);
 
 void gerrorhand(Gint errNum, Gint funcName, Gfile *errFile);
+
+void gopenws(Gint wsId, const Gchar *connId, Gint wsType);
+void gclosews(Gint wsId);
 
 #if defined(__cplusplus)
 }
