@@ -1,10 +1,11 @@
 #include <gks/gks.h>
 
+#include <catch2/catch.hpp>
+
 #include <cstdio>
 
-int main()
+TEST_CASE("Open and close", "[gks]")
 {
     gopengks(stderr, 0L);
     gclosegks();
-    return 0;
 }
