@@ -2,6 +2,32 @@
 
 static Gopst g_opState = GGKCL;
 
+static const Gchar *g_wsTypes[] =
+{
+    "tek4105",
+};
+
+static struct
+{
+    Glevel level;
+    Gint numAvailWSTypes;
+    const Gchar **wsTypes;
+    Gint maxOpenWs;
+    Gint maxActiveWs;
+    Gint maxSegAssoc;
+    Gint numTrans;
+}
+g_gksDescription =
+{
+    GL0A,
+    sizeof(g_wsTypes)/sizeof(g_wsTypes[0]),
+    g_wsTypes,
+    1,
+    1,
+    0,
+    2
+};
+
 void gopengks(Gfile *errfile, Glong memory)
 {
     g_opState = GGKOP;
@@ -19,19 +45,14 @@ void ginqopst(Gopst *value)
 
 void ginqlevelgks(Glevel *value)
 {
-    *value = GL0A;
+    *value = g_gksDescription.level;
 }
-
-static const Gchar *g_wsTypes[] =
-{
-    "tek4105",
-};
 
 void ginqavailwstypes(Gint bufSize, Gint start, Gstrlist *wsTypes, Gint *numTypes, Gint *errorStatus)
 {
-    *numTypes = sizeof(g_wsTypes)/sizeof(g_wsTypes[0]);
+    *numTypes = g_gksDescription.numAvailWSTypes;
     wsTypes->n_points = *numTypes;
-    wsTypes->strings = g_wsTypes;
+    wsTypes->strings = g_gksDescription.wsTypes;
 }
 
 void gerrorhand(Gint errNum, Gint funcName, Gfile *errFile)
