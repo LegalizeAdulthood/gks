@@ -1,6 +1,6 @@
 #include <gks/gks.h>
 
-static Gopst g_opState = GGKCL;
+static enum Gopst g_opState = GGKCL;
 
 static const Gchar *g_wsTypes[] =
 {
@@ -17,10 +17,10 @@ enum
 
 typedef struct GGKSDescription_t
 {
-    Glevel level;
+    enum Glevel level;
     Gint numAvailWSTypes;
     const Gchar **wsTypes;
-    Gwsmax wsmax;
+    struct Gwsmax wsmax;
     Gint numTrans;
 } GGKSDescription;
 
@@ -76,12 +76,12 @@ void gclosegks()
     g_opState = GGKCL;
 }
 
-void ginqopst(Gopst *value)
+void ginqopst(enum Gopst *value)
 {
     *value = g_opState;
 }
 
-void ginqlevelgks(Glevel *value)
+void ginqlevelgks(enum Glevel *value)
 {
     *value = g_gksDescription.level;
 }
@@ -92,13 +92,17 @@ void ginqmaxntrannum(Gint *value, Gint *errorStatus)
     *errorStatus = 0;
 }
 
-void ginqwsmaxnum(Gwsmax *value, Gint *errorStatus)
+void ginqwsmaxnum(struct Gwsmax *value, Gint *errorStatus)
 {
     *value = g_gksDescription.wsmax;
     *errorStatus = 0;
 }
 
-void ginqavailwstypes(Gint bufSize, Gint start, Gstrlist *wsTypes, Gint *numTypes, Gint *errorStatus)
+void ginqcolourfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, struct Gcofac *facil, Gint *errorStatus)
+{
+}
+
+void ginqavailwstypes(Gint bufSize, Gint start, struct Gstrlist *wsTypes, Gint *numTypes, Gint *errorStatus)
 {
     *numTypes = g_gksDescription.numAvailWSTypes;
     wsTypes->n_points = *numTypes;
@@ -130,10 +134,10 @@ void gdeactivatews(Gint wsId)
     g_opState = GWSOP;
 }
 
-void gclearws(Gint wsId, Gclrflag flag)
+void gclearws(Gint wsId, enum Gclrflag flag)
 {
 }
 
-void gupdatews(Gint wsId, Gregen flag)
+void gupdatews(Gint wsId, enum Gregen flag)
 {
 }

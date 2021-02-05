@@ -17,16 +17,19 @@ typedef FILE Gfile;
 typedef Gchar Gconn;
 typedef Gint Gwstype;
 
-typedef enum Gopst_t
+enum Gclrflag
 {
-    GGKCL,
-    GGKOP,
-    GWSOP,
-    GWSAC,
-    GSGOP
-} Gopst;
+    GCONDITIONALLY,
+    GALWAYS
+};
 
-typedef enum Glevel_t
+enum Gcoavail
+{
+    GCOLOUR,
+    GMONOCHROME
+};
+
+enum Glevel
 {
     GLMA,
     GLMB,
@@ -40,42 +43,53 @@ typedef enum Glevel_t
     GL2A,
     GL2B,
     GL2C
-} Glevel;
+};
 
-typedef enum Gclrflag_t
+enum Gopst
 {
-    GCONDITIONALLY,
-    GALWAYS
-} Gclrflag;
+    GGKCL,
+    GGKOP,
+    GWSOP,
+    GWSAC,
+    GSGOP
+};
 
-typedef enum Gregen_t
+enum Gregen
 {
     GPOSTPONE,
     GPERFORM
-} Gregen;
+};
 
-typedef struct Gstrlist_t
+struct Gcofac
+{
+    Gint colours;
+    enum Gcoavail coavail;
+    Gint predefined;
+};
+
+struct Gstrlist
 {
     Gint n_points;
     const Gchar **strings;
-} Gstrlist;
+};
 
-typedef struct Gwsmax_t
+struct Gwsmax
 {
     Gint open;
     Gint active;
     Gint assoc;
-} Gwsmax;
+};
 
 void gopengks(Gfile *errfile, Glong memory);
 void gclosegks();
 
-void ginqopst(Gopst *value);
-void ginqlevelgks(Glevel *value);
+void ginqopst(enum Gopst *value);
+void ginqlevelgks(enum Glevel *value);
 void ginqmaxntrannum(Gint *value, Gint *errorStatus);
-void ginqwsmaxnum(Gwsmax *value, Gint *errorStatus);
+void ginqwsmaxnum(struct Gwsmax *value, Gint *errorStatus);
+void ginqcolourfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, struct Gcofac *facil, Gint *errorStatus);
 
-void ginqavailwstypes(Gint bufSize, Gint start, Gstrlist *wsTypes, Gint *numTypes, Gint *errorStatus);
+void ginqavailwstypes(Gint bufSize, Gint start, struct Gstrlist *wsTypes, Gint *numTypes, Gint *errorStatus);
 
 void gerrorhand(Gint errNum, Gint funcName, Gfile *errFile);
 
@@ -84,8 +98,8 @@ void gclosews(Gint wsId);
 
 void gactivatews(Gint wsId);
 void gdeactivatews(Gint wsId);
-void gclearws(Gint wsId, Gclrflag flag);
-void gupdatews(Gint wsId, Gregen flag);
+void gclearws(Gint wsId, enum Gclrflag flag);
+void gupdatews(Gint wsId, enum Gregen flag);
 
 #if defined(__cplusplus)
 }

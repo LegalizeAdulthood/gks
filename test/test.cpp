@@ -4,9 +4,9 @@
 
 #include <cstdio>
 
-inline Gopst getGksOpState()
+inline enum Gopst getGksOpState()
 {
-    Gopst result = static_cast<Gopst>(-1);
+    Gopst result = static_cast<enum Gopst>(-1);
     ginqopst(&result);
     return result;
 }
@@ -203,6 +203,20 @@ TEST_CASE("Maximum workstation numbers", "[gks]")
     REQUIRE(value.open == 1);
     REQUIRE(value.active == 1);
     REQUIRE(value.assoc == 0);
+
+    gclosegks();
+}
+
+TEST_CASE("Inquire workstation color facilities", "[gks]")
+{
+    gopengks(stderr, 0L);
+
+    Gwstype wsType{};
+    Gint buffSize{};
+    Gint facilSize{};
+    Gcofac facil{};
+    Gint status{-1};
+    ginqcolourfacil(wsType, buffSize, &facilSize, &facil, &status);
 
     gclosegks();
 }
