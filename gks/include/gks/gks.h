@@ -14,6 +14,9 @@ typedef float Gfloat;
 typedef long Glong;
 typedef FILE Gfile;
 
+typedef Gchar Gconn;
+typedef Gint Gwstype;
+
 typedef enum Gopst_t
 {
     GGKCL,
@@ -76,7 +79,7 @@ void ginqavailwstypes(Gint bufSize, Gint start, Gstrlist *wsTypes, Gint *numType
 
 void gerrorhand(Gint errNum, Gint funcName, Gfile *errFile);
 
-void gopenws(Gint wsId, const Gchar *connId, Gint wsType);
+void gopenws(Gint wsId, const Gconn *connId, Gwstype wsType);
 void gclosews(Gint wsId);
 
 void gactivatews(Gint wsId);
