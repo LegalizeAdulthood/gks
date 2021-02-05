@@ -7,7 +7,15 @@ static const Gchar *g_wsTypes[] =
     "tek4105",
 };
 
-static struct
+enum
+{
+    MAX_OPEN_WS = 1,
+    MAX_ACTIVE_WS = 1,
+    MAX_SEGMENT_ASSOC = 0,
+    MAX_NUM_TRANSFORMS = 2
+};
+
+typedef struct GGKSDescription_t
 {
     Glevel level;
     Gint numAvailWSTypes;
@@ -16,21 +24,55 @@ static struct
     Gint maxActiveWs;
     Gint maxSegAssoc;
     Gint numTrans;
-}
-g_gksDescription =
+} GGKSDescription;
+
+static GGKSDescription g_gksDescription =
 {
-    GL0A,
+    GLMA,
     sizeof(g_wsTypes)/sizeof(g_wsTypes[0]),
     g_wsTypes,
-    1,
-    1,
-    0,
-    2
+    MAX_OPEN_WS,
+    MAX_ACTIVE_WS,
+    MAX_SEGMENT_ASSOC,
+    MAX_NUM_TRANSFORMS
 };
+
+typedef struct GGKSState_t
+{
+    Gint openWs[MAX_OPEN_WS];
+    Gint activeWs[MAX_ACTIVE_WS];
+    Gint currentTransform;
+    // normalization transformation
+    // polyline
+    // polymarker
+    // text
+    // fill area
+    // segments
+    // input queue
+    // current event report
+} GGKSState;
+
+static GGKSState g_initialGksState =
+{
+    {0},
+    {0},
+    0
+};
+
+static GGKSState g_gksState;
+
+typedef struct GWSState_t
+{
+    const Gchar *type;
+
+} GWSState;
+
+static GWSState g_wsState[1];
 
 void gopengks(Gfile *errfile, Glong memory)
 {
     g_opState = GGKOP;
+    g_gksState = g_initialGksState;
 }
 
 void gclosegks()
@@ -46,6 +88,12 @@ void ginqopst(Gopst *value)
 void ginqlevelgks(Glevel *value)
 {
     *value = g_gksDescription.level;
+}
+
+void ginqmaxntrannum(Gint *numTransforms, Gint *errorStatus)
+{
+    *numTransforms = g_gksDescription.numTrans;
+    *errorStatus = 0;
 }
 
 void ginqavailwstypes(Gint bufSize, Gint start, Gstrlist *wsTypes, Gint *numTypes, Gint *errorStatus)

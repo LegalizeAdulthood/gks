@@ -43,7 +43,7 @@ TEST_CASE("Operating level", "[gks]")
     Glevel level{};
     ginqlevelgks(&level);
 
-    REQUIRE( level == GL0A );
+    REQUIRE( level == GLMA );
 
     gclosegks();
 }
@@ -173,6 +173,20 @@ TEST_CASE("Update", "[ws]")
     gopenws(wsId, connId, wsType);
 
     gupdatews(wsId, GPERFORM);
+
+    gclosegks();
+}
+
+TEST_CASE("Number of normalization transforms", "[gks]")
+{
+    gopengks(stderr, 0L);
+
+    Gint numTransforms{-1};
+    Gint status{0};
+    ginqmaxntrannum(&numTransforms, &status);
+
+    REQUIRE(status == 0);
+    REQUIRE(numTransforms == 2);
 
     gclosegks();
 }

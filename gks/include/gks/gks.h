@@ -62,6 +62,7 @@ void gclosegks();
 
 void ginqopst(Gopst *value);
 void ginqlevelgks(Glevel *value);
+void ginqmaxntrannum(Gint *numTransforms, Gint *errorStatus);
 
 void ginqavailwstypes(Gint bufSize, Gint start, Gstrlist *wsTypes, Gint *numTypes, Gint *errorStatus);
 
