@@ -57,12 +57,20 @@ typedef struct Gstrlist_t
     const Gchar **strings;
 } Gstrlist;
 
+typedef struct Gwsmax_t
+{
+    Gint open;
+    Gint active;
+    Gint assoc;
+} Gwsmax;
+
 void gopengks(Gfile *errfile, Glong memory);
 void gclosegks();
 
 void ginqopst(Gopst *value);
 void ginqlevelgks(Glevel *value);
-void ginqmaxntrannum(Gint *numTransforms, Gint *errorStatus);
+void ginqmaxntrannum(Gint *value, Gint *errorStatus);
+void ginqwsmaxnum(Gwsmax *value, Gint *errorStatus);
 
 void ginqavailwstypes(Gint bufSize, Gint start, Gstrlist *wsTypes, Gint *numTypes, Gint *errorStatus);
 

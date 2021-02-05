@@ -20,9 +20,7 @@ typedef struct GGKSDescription_t
     Glevel level;
     Gint numAvailWSTypes;
     const Gchar **wsTypes;
-    Gint maxOpenWs;
-    Gint maxActiveWs;
-    Gint maxSegAssoc;
+    Gwsmax wsmax;
     Gint numTrans;
 } GGKSDescription;
 
@@ -31,9 +29,7 @@ static GGKSDescription g_gksDescription =
     GLMA,
     sizeof(g_wsTypes)/sizeof(g_wsTypes[0]),
     g_wsTypes,
-    MAX_OPEN_WS,
-    MAX_ACTIVE_WS,
-    MAX_SEGMENT_ASSOC,
+    { MAX_OPEN_WS, MAX_ACTIVE_WS, MAX_SEGMENT_ASSOC },
     MAX_NUM_TRANSFORMS
 };
 
@@ -90,9 +86,15 @@ void ginqlevelgks(Glevel *value)
     *value = g_gksDescription.level;
 }
 
-void ginqmaxntrannum(Gint *numTransforms, Gint *errorStatus)
+void ginqmaxntrannum(Gint *value, Gint *errorStatus)
 {
-    *numTransforms = g_gksDescription.numTrans;
+    *value = g_gksDescription.numTrans;
+    *errorStatus = 0;
+}
+
+void ginqwsmaxnum(Gwsmax *value, Gint *errorStatus)
+{
+    *value = g_gksDescription.wsmax;
     *errorStatus = 0;
 }
 

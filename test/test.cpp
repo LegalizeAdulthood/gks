@@ -190,3 +190,19 @@ TEST_CASE("Number of normalization transforms", "[gks]")
 
     gclosegks();
 }
+
+TEST_CASE("Maximum workstation numbers", "[gks]")
+{
+    gopengks(stderr, 0L);
+
+    Gwsmax value{};
+    Gint status{-1};
+    ginqwsmaxnum(&value, &status);
+
+    REQUIRE(status == 0);
+    REQUIRE(value.open == 1);
+    REQUIRE(value.active == 1);
+    REQUIRE(value.assoc == 0);
+
+    gclosegks();
+}
