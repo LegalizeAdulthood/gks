@@ -263,3 +263,7 @@ void gsetwswindow(Gint wsId, struct Glimit *window)
 {
     g_wsState[0].transform.current.w = *window;
 }
+
+void gpolyline(Gint numPoints, struct Gpoint *points)
+{
+}

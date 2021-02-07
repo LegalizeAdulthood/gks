@@ -128,6 +128,12 @@ struct Gescout
     };
 };
 
+struct Gpoint
+{
+    Gfloat x;
+    Gfloat y;
+};
+
 struct Gstrlist
 {
     Gint n_points;
@@ -186,6 +192,8 @@ void ginqwstran(Gint wsId, struct Gwsti *transform, Gint *errorStatus);
 
 void gsetwsviewport(Gint wsId, struct Glimit *viewport);
 void gsetwswindow(Gint wsId, struct Glimit *window);
+
+void gpolyline(Gint numPoints, struct Gpoint *points);
 
 #if defined(__cplusplus)
 }
