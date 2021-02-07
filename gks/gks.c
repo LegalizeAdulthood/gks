@@ -293,6 +293,10 @@ void gpolyline(Gint numPoints, struct Gpoint *points)
 {
 }
 
+void gpolymarker(Gint numPoints, struct Gpoint *points)
+{
+}
+
 void gsetlinetype(Gint value)
 {
     g_gksState.currentLineType = value;
