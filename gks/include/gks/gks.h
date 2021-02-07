@@ -226,6 +226,7 @@ void gsetwswindow(Gint wsId, struct Glimit *value);
 
 void gpolyline(Gint numPoints, struct Gpoint *points);
 void gpolymarker(Gint numPoints, struct Gpoint *points);
+void gtext(struct Gpoint *start, Gchar *text);
 
 #if defined(__cplusplus)
 }
