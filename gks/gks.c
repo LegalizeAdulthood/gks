@@ -43,6 +43,7 @@ typedef struct GGKSState_t
     enum Gclip clipping;
     // polyline
     Gint currentLineType;
+    Gint currentLineColorIndex;
     // polymarker
     // text
     // fill area
@@ -63,7 +64,8 @@ static GGKSState g_initialGksState =
         }
     },
     GCLIP,
-    GLN_SOLID
+    GLN_SOLID,
+    1
 };
 
 static GGKSState g_gksState;
@@ -166,6 +168,11 @@ void ginqlevelgks(enum Glevel *value)
     *value = g_gksDescription.level;
 }
 
+void ginqlinecolorind(Gint *value)
+{
+    *value = g_gksState.currentLineColorIndex;
+}
+
 void ginqlinetype(Gint *value)
 {
     *value = g_gksState.currentLineType;
@@ -197,6 +204,11 @@ void ginqwsmaxnum(struct Gwsmax *value, Gint *errorStatus)
 void gsetclip(enum Gclip value)
 {
     g_gksState.clipping = value;
+}
+
+void gsetlinecolorind(Gint value)
+{
+    g_gksState.currentLineColorIndex = value;
 }
 
 void gsetviewport(Gint transform, struct Glimit *value)

@@ -454,3 +454,28 @@ TEST_CASE("Set current line type", "[output]")
 
     gclosegks();
 }
+
+TEST_CASE("Initial line color index is one", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    Gint value{};
+    ginqlinecolorind(&value);
+
+    REQUIRE(value == 1);
+
+    gclosegks();
+}
+
+TEST_CASE("Set line color index", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    gsetlinecolorind(GLN_DASHDOT);
+
+    Gint value{};
+    ginqlinecolorind(&value);
+    REQUIRE(value == GLN_DASHDOT);
+
+    gclosegks();
+}
