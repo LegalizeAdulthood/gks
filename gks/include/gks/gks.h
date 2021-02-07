@@ -61,6 +61,12 @@ enum Gregen
     GPERFORM
 };
 
+enum Gwstus
+{
+    GNOTPENDING,
+    GPENDING
+};
+
 
 struct Gcofac
 {
@@ -130,6 +136,13 @@ struct Gwsmax
     Gint assoc;
 };
 
+struct Gwsti
+{
+    enum Gwstus wstus;
+    struct Gtran request;
+    struct Gtran current;
+};
+
 void gerrorhand(Gint errNum, Gint funcName, Gfile *errFile);
 
 void gescape(Gint function, struct Gescin *inData, Gint bufSize, struct Gescout *outData, Gint *escOutSize);
@@ -144,6 +157,7 @@ void ginqmaxntrannum(Gint *value, Gint *errorStatus);
 void ginqntran(Gint num, struct Gtran *tran, Gint *errorStatus);
 void ginqopst(enum Gopst *value);
 void ginqwsmaxnum(struct Gwsmax *value, Gint *errorStatus);
+void ginqwstran(Gint wsId, struct Gwsti *transform, Gint *errorStatus);
 
 void gsetviewport(Gint transform, struct Glimit *viewport);
 void gsetwindow(Gint transform, struct Glimit *window);
@@ -155,6 +169,7 @@ void gactivatews(Gint wsId);
 void gclearws(Gint wsId, enum Gclrflag flag);
 void gdeactivatews(Gint wsId);
 void gupdatews(Gint wsId, enum Gregen flag);
+void gsetwswindow(Gint wsId, struct Glimit *window);
 
 #if defined(__cplusplus)
 }

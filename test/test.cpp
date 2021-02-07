@@ -53,101 +53,6 @@ TEST_CASE("Error handling", "[gks]")
     gerrorhand(1, 1, stderr);
 }
 
-TEST_CASE("Open workstation", "[gks]")
-{
-    gopengks(stderr, 0L);
-
-    Gint wsId{1};
-    const Gchar *connId{"tek4105"};
-    Gint wsType{};
-    gopenws(wsId, connId, wsType);
-
-    Gopst state{};
-    ginqopst(&state);
-    REQUIRE( state == GWSOP );
-
-    gclosews(wsId);
-    gclosegks();
-}
-
-TEST_CASE("Close workstation", "[gks]")
-{
-    gopengks(stderr, 0L);
-    Gint wsId{1};
-    const Gchar *connId{"tek4105"};
-    Gint wsType{};
-    gopenws(wsId, connId, wsType);
-
-    Gopst before{};
-    ginqopst(&before);
-    gclosews(wsId);
-    Gopst after{};
-    ginqopst(&after);
-
-    REQUIRE( before == GWSOP );
-    REQUIRE( after == GGKOP );
-
-    gclosegks();
-}
-
-TEST_CASE("Activate workstation", "[gks]")
-{
-    gopengks(stderr, 0L);
-    Gint wsId{1};
-    const Gchar *connId{"tek4105"};
-    Gint wsType{};
-    gopenws(wsId, connId, wsType);
-
-    Gopst before{};
-    ginqopst(&before);
-    gactivatews(wsId);
-    Gopst after{};
-    ginqopst(&after);
-
-    REQUIRE( before == GWSOP );
-    REQUIRE( after == GWSAC );
-
-    gclosews(wsId);
-    gclosegks();
-}
-
-TEST_CASE("Deactivate workstation", "[gks]")
-{
-    gopengks(stderr, 0L);
-    Gint wsId{1};
-    const Gchar *connId{"tek4105"};
-    Gint wsType{};
-    gopenws(wsId, connId, wsType);
-    gactivatews(wsId);
-
-    Gopst before{};
-    ginqopst(&before);
-    gdeactivatews(wsId);
-    Gopst after{};
-    ginqopst(&after);
-
-    REQUIRE( before == GWSAC );
-    REQUIRE( after == GWSOP );
-
-    gclosews(wsId);
-    gclosegks();
-}
-
-TEST_CASE("Clear workstation", "[gks]")
-{
-    gopengks(stderr, 0L);
-    Gint wsId{1};
-    const Gchar *connId{"tek4105"};
-    Gint wsType{};
-    gopenws(wsId, connId, wsType);
-    gactivatews(wsId);
-
-    gclearws(wsId, GALWAYS);
-
-    gclosews(wsId);
-    gclosegks();
-}
-
 TEST_CASE("Workstation types", "[gks]")
 {
     gopengks(stderr, 0L);
@@ -160,19 +65,6 @@ TEST_CASE("Workstation types", "[gks]")
     ginqavailwstypes(bufSize, start, &wsTypes, &numTypes, &errorStatus);
 
     REQUIRE(numTypes >= 1);
-
-    gclosegks();
-}
-
-TEST_CASE("Update", "[ws]")
-{
-    gopengks(stderr, 0L);
-    Gint wsId{1};
-    const Gchar *connId{"tek4105"};
-    Gint wsType{};
-    gopenws(wsId, connId, wsType);
-
-    gupdatews(wsId, GPERFORM);
 
     gclosegks();
 }
@@ -260,7 +152,6 @@ TEST_CASE("Set window", "[gks]")
     gclosegks();
 }
 
-
 TEST_CASE("Maximum workstation numbers", "[gks]")
 {
     gopengks(stderr, 0L);
@@ -287,6 +178,142 @@ TEST_CASE("Inquire workstation color facilities", "[gks]")
     Gcofac facil{};
     Gint status{-1};
     ginqcolourfacil(wsType, buffSize, &facilSize, &facil, &status);
+
+    gclosegks();
+}
+
+TEST_CASE("Open workstation", "[workstation]")
+{
+    gopengks(stderr, 0L);
+
+    Gint wsId{1};
+    const Gchar *connId{"tek4105"};
+    Gint wsType{};
+    gopenws(wsId, connId, wsType);
+
+    Gopst state{};
+    ginqopst(&state);
+    REQUIRE( state == GWSOP );
+
+    gclosews(wsId);
+    gclosegks();
+}
+
+TEST_CASE("Close workstation", "[workstation]")
+{
+    gopengks(stderr, 0L);
+    Gint wsId{1};
+    const Gchar *connId{"tek4105"};
+    Gint wsType{};
+    gopenws(wsId, connId, wsType);
+
+    Gopst before{};
+    ginqopst(&before);
+    gclosews(wsId);
+    Gopst after{};
+    ginqopst(&after);
+
+    REQUIRE( before == GWSOP );
+    REQUIRE( after == GGKOP );
+
+    gclosegks();
+}
+
+TEST_CASE("Activate workstation", "[workstation]")
+{
+    gopengks(stderr, 0L);
+    Gint wsId{1};
+    const Gchar *connId{"tek4105"};
+    Gint wsType{};
+    gopenws(wsId, connId, wsType);
+
+    Gopst before{};
+    ginqopst(&before);
+    gactivatews(wsId);
+    Gopst after{};
+    ginqopst(&after);
+
+    REQUIRE( before == GWSOP );
+    REQUIRE( after == GWSAC );
+
+    gclosews(wsId);
+    gclosegks();
+}
+
+TEST_CASE("Deactivate workstation", "[workstation]")
+{
+    gopengks(stderr, 0L);
+    Gint wsId{1};
+    const Gchar *connId{"tek4105"};
+    Gint wsType{};
+    gopenws(wsId, connId, wsType);
+    gactivatews(wsId);
+
+    Gopst before{};
+    ginqopst(&before);
+    gdeactivatews(wsId);
+    Gopst after{};
+    ginqopst(&after);
+
+    REQUIRE( before == GWSAC );
+    REQUIRE( after == GWSOP );
+
+    gclosews(wsId);
+    gclosegks();
+}
+
+TEST_CASE("Clear workstation", "[workstation]")
+{
+    gopengks(stderr, 0L);
+    Gint wsId{1};
+    const Gchar *connId{"tek4105"};
+    Gint wsType{};
+    gopenws(wsId, connId, wsType);
+    gactivatews(wsId);
+
+    gclearws(wsId, GALWAYS);
+
+    gclosews(wsId);
+    gclosegks();
+}
+
+TEST_CASE("Update workstation", "[workstation]")
+{
+    gopengks(stderr, 0L);
+    Gint wsId{1};
+    const Gchar *connId{"tek4105"};
+    Gint wsType{};
+    gopenws(wsId, connId, wsType);
+
+    gupdatews(wsId, GPERFORM);
+
+    gclosegks();
+}
+
+TEST_CASE("Set workstation window", "[workstation]")
+{
+    gopengks(stderr, 0L);
+    Gint wsId{1};
+    const Gchar *connId{"tek4105"};
+    Gint wsType{};
+    gopenws(wsId, connId, wsType);
+
+    const Gfloat xmin = 0.2f;
+    const Gfloat xmax = 0.4f;
+    const Gfloat ymin = 0.3f;
+    const Gfloat ymax = 0.5f;
+    struct Glimit window{xmin, xmax, ymin, ymax};
+    gsetwswindow(wsId, &window);
+
+    struct Gwsti transform{};
+    Gint status{};
+    ginqwstran(wsId, &transform, &status);
+
+    REQUIRE(transform.wstus == GNOTPENDING);
+    REQUIRE(transform.current.w.xmin == xmin);
+    REQUIRE(transform.current.w.xmax == xmax);
+    REQUIRE(transform.current.w.ymin == ymin);
+    REQUIRE(transform.current.w.ymax == ymax);
 
     gclosegks();
 }

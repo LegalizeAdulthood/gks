@@ -73,8 +73,33 @@ static GGKSState g_gksState;
 
 typedef struct GWSState_t
 {
-    const Gchar *type;
-
+    Gint id;
+    const Gconn *connId;
+    Gwstype type;
+    //- category OUTPUT, OUTIN, MO, WISS
+    // workstation state
+    // set of stored segments
+    //- category OUTPUT, OUTIN, MO
+    //-- polyline
+    //-- polymarker
+    //-- text
+    //-- fill area
+    //-- color table
+    //-- deferral mode
+    //-- workstation transformation
+    //--- workstation transformation update state
+    //--- requested workstation window
+    //--- requested workstation viewport
+    //--- current workstation window
+    //--- current workstation viewport
+    struct Gwsti transform;
+    //- category INPUT, OUTIN
+    //-- locator
+    //-- stroke
+    //-- valuator
+    //-- choice
+    //-- pick
+    //-- string
 } GWSState;
 
 static GWSState g_wsState[1];
@@ -138,6 +163,12 @@ void ginqwsmaxnum(struct Gwsmax *value, Gint *errorStatus)
     *errorStatus = 0;
 }
 
+void ginqwstran(Gint wsId, struct Gwsti *transform, Gint *errorStatus)
+{
+    *transform = g_wsState[wsId].transform;
+    *errorStatus = 0;
+}
+
 void gsetviewport(Gint transform, struct Glimit *viewport)
 {
     g_gksState.transforms[transform].v = *viewport;
@@ -174,4 +205,10 @@ void gclearws(Gint wsId, enum Gclrflag flag)
 
 void gupdatews(Gint wsId, enum Gregen flag)
 {
+}
+
+void gsetwswindow(Gint wsId, struct Glimit *window)
+{
+    g_wsState[wsId].transform.wstus = GNOTPENDING;
+    g_wsState[wsId].transform.current.w = *window;
 }
