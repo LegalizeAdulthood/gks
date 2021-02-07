@@ -17,6 +17,11 @@ typedef FILE Gfile;
 typedef Gchar Gconn;
 typedef Gint Gwstype;
 
+enum Gclip
+{
+    GNOCLIP,
+    GCLIP
+};
 
 enum Gclrflag
 {
@@ -68,6 +73,20 @@ enum Gwstus
 };
 
 
+struct Glimit
+{
+    Gfloat xmin;
+    Gfloat xmax;
+    Gfloat ymin;
+    Gfloat ymax;
+};
+
+struct Gcliprect
+{
+    enum Gclip ind;
+    struct Glimit rec;
+};
+
 struct Gcofac
 {
     Gint colours;
@@ -109,14 +128,6 @@ struct Gescout
     };
 };
 
-struct Glimit
-{
-    Gfloat xmin;
-    Gfloat xmax;
-    Gfloat ymin;
-    Gfloat ymax;
-};
-
 struct Gstrlist
 {
     Gint n_points;
@@ -151,6 +162,7 @@ void gopengks(Gfile *errfile, Glong memory);
 void gclosegks(void);
 
 void ginqavailwstypes(Gint bufSize, Gint start, struct Gstrlist *wsTypes, Gint *numTypes, Gint *errorStatus);
+void ginqclip(struct Gcliprect *clipping, Gint *errorStatus);
 void ginqcolourfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, struct Gcofac *facil, Gint *errorStatus);
 void ginqlevelgks(enum Glevel *value);
 void ginqmaxntrannum(Gint *value, Gint *errorStatus);
@@ -158,6 +170,7 @@ void ginqntran(Gint num, struct Gtran *tran, Gint *errorStatus);
 void ginqopst(enum Gopst *value);
 void ginqwsmaxnum(struct Gwsmax *value, Gint *errorStatus);
 
+void gsetclip(enum Gclip indicator);
 void gsetviewport(Gint transform, struct Glimit *viewport);
 void gsetwindow(Gint transform, struct Glimit *window);
 

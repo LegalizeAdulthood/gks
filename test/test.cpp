@@ -88,7 +88,7 @@ TEST_CASE("Normalization transform zero is identity", "[gks]")
     gopengks(stderr, 0L);
 
     Gtran transform{};
-    Gint status{};
+    Gint status{-1};
     ginqntran(0, &transform, &status);
 
     REQUIRE(status == 0);
@@ -117,7 +117,7 @@ TEST_CASE("Set viewport", "[gks]")
     gsetviewport(tranId, &viewport);
 
     Gtran transform{};
-    Gint status{};
+    Gint status{-1};
     ginqntran(tranId, &transform, &status);
     REQUIRE(status == 0);
     REQUIRE(transform.v.xmin == xmin);
@@ -141,7 +141,7 @@ TEST_CASE("Set window", "[gks]")
     gsetwindow(tranId, &window);
 
     Gtran transform{};
-    Gint status{};
+    Gint status{-1};
     ginqntran(tranId, &transform, &status);
     REQUIRE(status == 0);
     REQUIRE(transform.w.xmin == xmin);
@@ -178,6 +178,37 @@ TEST_CASE("Inquire workstation color facilities", "[gks]")
     Gcofac facil{};
     Gint status{-1};
     ginqcolourfacil(wsType, buffSize, &facilSize, &facil, &status);
+
+    gclosegks();
+}
+
+TEST_CASE("Initial clipping indicator", "[gks]")
+{
+    gopengks(stderr, 0L);
+
+    Gcliprect clipping{};
+    Gint status{-1};
+    ginqclip(&clipping, &status);
+
+    REQUIRE(clipping.ind == GCLIP);
+    REQUIRE(clipping.rec.xmin == 0.0f);
+    REQUIRE(clipping.rec.xmax == 1.0f);
+    REQUIRE(clipping.rec.ymin == 0.0f);
+    REQUIRE(clipping.rec.ymax == 1.0f);
+
+    gclosegks();
+}
+
+TEST_CASE("Set clipping indicator", "[gks]")
+{
+    gopengks(stderr, 0L);
+
+    gsetclip(GNOCLIP);
+
+    Gcliprect clipping{};
+    Gint status{-1};
+    ginqclip(&clipping, &status);
+    REQUIRE(clipping.ind == GNOCLIP);
 
     gclosegks();
 }
@@ -277,7 +308,7 @@ TEST_CASE("Clear workstation", "[workstation]")
     gclosegks();
 }
 
-TEST_CASE("Initial transformation", "[workstation]")
+TEST_CASE("Initial workstation transformation", "[workstation]")
 {
     gopengks(stderr, 0L);
     Gint wsId{1};
@@ -286,7 +317,7 @@ TEST_CASE("Initial transformation", "[workstation]")
     gopenws(wsId, connId, wsType);
 
     struct Gwsti transform{};
-    Gint status{};
+    Gint status{-1};
     ginqwstran(wsId, &transform, &status);
 
     REQUIRE(transform.wstus == GNOTPENDING);
@@ -339,7 +370,7 @@ TEST_CASE("Set workstation viewport", "[workstation]")
     gsetwsviewport(wsId, &viewport);
 
     struct Gwsti transform{};
-    Gint status{};
+    Gint status{-1};
     ginqwstran(wsId, &transform, &status);
 
     REQUIRE(transform.wstus == GNOTPENDING);
@@ -367,7 +398,7 @@ TEST_CASE("Set workstation window", "[workstation]")
     gsetwswindow(wsId, &window);
 
     struct Gwsti transform{};
-    Gint status{};
+    Gint status{-1};
     ginqwstran(wsId, &transform, &status);
 
     REQUIRE(transform.wstus == GNOTPENDING);

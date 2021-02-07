@@ -40,7 +40,7 @@ typedef struct GGKSState_t
     Gint activeWs[MAX_ACTIVE_WS];
     Gint currentTransform;
     struct Gtran transforms[MAX_NUM_TRANSFORMS];
-    // normalization transformation
+    enum Gclip clipping;
     // polyline
     // polymarker
     // text
@@ -66,7 +66,8 @@ static GGKSState g_initialGksState =
             { 0.0f, 1.0f, 0.0f, 1.0f },
             { 0.0f, 1.0f, 0.0f, 1.0f }
         }
-    }
+    },
+    GCLIP
 };
 
 static GGKSState g_gksState;
@@ -149,6 +150,17 @@ void ginqavailwstypes(Gint bufSize, Gint start, struct Gstrlist *wsTypes, Gint *
     wsTypes->strings = g_gksDescription.wsTypes;
 }
 
+void ginqclip(struct Gcliprect *clipping, Gint *errorStatus)
+{
+    clipping->ind = g_gksState.clipping;
+    const struct Glimit identity =
+    {
+        0.0f, 1.0f, 0.0f, 1.0f
+    };
+    clipping->rec = identity;
+    *errorStatus = 0;
+}
+
 void ginqcolourfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, struct Gcofac *facil, Gint *errorStatus)
 {
 }
@@ -181,6 +193,11 @@ void ginqwsmaxnum(struct Gwsmax *value, Gint *errorStatus)
     *errorStatus = 0;
 }
 
+void gsetclip(enum Gclip indicator)
+{
+    g_gksState.clipping = indicator;
+}
+
 void gsetviewport(Gint transform, struct Glimit *viewport)
 {
     g_gksState.transforms[transform].v = *viewport;
@@ -194,6 +211,8 @@ void gsetwindow(Gint transform, struct Glimit *window)
 void gopenws(Gint wsId, const Gconn *connId, Gwstype wsType)
 {
     g_opState = GWSOP;
+    g_gksState.openWs[0] = wsId;
+
     g_wsState[0] = g_initialWSState;
     g_wsState[0].id = wsId;
     g_wsState[0].connId = connId;
@@ -203,16 +222,22 @@ void gopenws(Gint wsId, const Gconn *connId, Gwstype wsType)
 void gclosews(Gint wsId)
 {
     g_opState = GGKOP;
+
+    g_gksState.openWs[0] = 0;
 }
 
 void gactivatews(Gint wsId)
 {
     g_opState = GWSAC;
+
+    g_gksState.activeWs[0] = wsId;
 }
 
 void gdeactivatews(Gint wsId)
 {
     g_opState = GWSOP;
+
+    g_gksState.activeWs[0] = 0;
 }
 
 void gclearws(Gint wsId, enum Gclrflag flag)
