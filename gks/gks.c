@@ -46,6 +46,10 @@ typedef struct GGKSState_t
     Gint currentLineColorIndex;
     Gint currentLineIndex;
     // polymarker
+    Gint currentMarkerType;
+    Gfloat currentMarkerSize;
+    Gint currentMarkerColorIndex;
+    Gint currentMarkerIndex;
     // text
     // fill area
     // segments
@@ -66,6 +70,10 @@ static GGKSState g_initialGksState =
     },
     GCLIP,
     GLN_SOLID,
+    1,
+    1,
+    GMK_STAR,
+    1.0f,
     1,
     1
 };
@@ -148,6 +156,7 @@ void ginqavailwstypes(Gint bufSize, Gint start, struct Gstrlist *wsTypes, Gint *
     *numTypes = g_gksDescription.numAvailWSTypes;
     wsTypes->n_points = *numTypes;
     wsTypes->strings = g_gksDescription.wsTypes;
+    *errorStatus = 0;
 }
 
 void ginqclip(struct Gcliprect *value, Gint *errorStatus)
@@ -163,26 +172,55 @@ void ginqclip(struct Gcliprect *value, Gint *errorStatus)
 
 void ginqcolourfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, struct Gcofac *facil, Gint *errorStatus)
 {
+    *errorStatus = 0;
 }
 
-void ginqlevelgks(enum Glevel *value)
+void ginqlevelgks(enum Glevel *value, Gint *errorStatus)
 {
     *value = g_gksDescription.level;
+    *errorStatus = 0;
 }
 
-void ginqlinecolorind(Gint *value)
+void ginqlinecolorind(Gint *value, Gint *errorStatus)
 {
     *value = g_gksState.currentLineColorIndex;
+    *errorStatus = 0;
 }
 
-void ginqlineind(Gint *value)
+void ginqlineind(Gint *value, Gint *errorStatus)
 {
     *value = g_gksState.currentLineIndex;
+    *errorStatus = 0;
 }
 
-void ginqlinetype(Gint *value)
+void ginqlinetype(Gint *value, Gint *errorStatus)
 {
     *value = g_gksState.currentLineType;
+    *errorStatus = 0;
+}
+
+void ginqmarkercolorind(Gint *value, Gint *errorStatus)
+{
+    *value = g_gksState.currentMarkerColorIndex;
+    *errorStatus = 0;
+}
+
+void ginqmarkerind(Gint *value, Gint *errorStatus)
+{
+    *value = g_gksState.currentMarkerIndex;
+    *errorStatus = 0;
+}
+
+void ginqmarkersize(Gfloat *value, Gint *errorStatus)
+{
+    *value = g_gksState.currentMarkerSize;
+    *errorStatus = 0;
+}
+
+void ginqmarkertype(Gint *value, Gint *errorStatus)
+{
+    *value = g_gksState.currentMarkerType;
+    *errorStatus = 0;
 }
 
 void ginqmaxntrannum(Gint *value, Gint *errorStatus)
@@ -221,6 +259,31 @@ void gsetlinecolorind(Gint value)
 void gsetlineind(Gint value)
 {
     g_gksState.currentLineIndex = value;
+}
+
+void gsetlinetype(Gint value)
+{
+    g_gksState.currentLineType = value;
+}
+
+void gsetmarkercolorind(Gint value)
+{
+    g_gksState.currentMarkerColorIndex = value;
+}
+
+void gsetmarkerind(Gint value)
+{
+    g_gksState.currentMarkerIndex = value;
+}
+
+void gsetmarkersize(Gfloat value)
+{
+    g_gksState.currentMarkerSize = value;
+}
+
+void gsetmarkertype(Gint value)
+{
+    g_gksState.currentMarkerType = value;
 }
 
 void gsetviewport(Gint transform, struct Glimit *value)
@@ -295,9 +358,4 @@ void gpolyline(Gint numPoints, struct Gpoint *points)
 
 void gpolymarker(Gint numPoints, struct Gpoint *points)
 {
-}
-
-void gsetlinetype(Gint value)
-{
-    g_gksState.currentLineType = value;
 }

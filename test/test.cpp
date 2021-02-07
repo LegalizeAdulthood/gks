@@ -41,9 +41,11 @@ TEST_CASE("Operating level", "[gks]")
     gopengks(stderr, 0L);
 
     Glevel level{};
-    ginqlevelgks(&level);
+    Gint status{-1};
+    ginqlevelgks(&level, &status);
 
-    REQUIRE( level == GLMA );
+    REQUIRE(status == 0);
+    REQUIRE(level == GLMA);
 
     gclosegks();
 }
@@ -61,9 +63,10 @@ TEST_CASE("Workstation types", "[gks]")
     Gint start{};
     Gstrlist wsTypes{};
     Gint numTypes{};
-    Gint errorStatus{};
-    ginqavailwstypes(bufSize, start, &wsTypes, &numTypes, &errorStatus);
+    Gint status{-1};
+    ginqavailwstypes(bufSize, start, &wsTypes, &numTypes, &status);
 
+    REQUIRE(status == 0);
     REQUIRE(numTypes >= 1);
 
     gclosegks();
@@ -178,6 +181,8 @@ TEST_CASE("Inquire workstation color facilities", "[gks]")
     Gcofac facil{};
     Gint status{-1};
     ginqcolourfacil(wsType, buffSize, &facilSize, &facil, &status);
+
+    REQUIRE(status == 0);
 
     gclosegks();
 }
@@ -435,8 +440,10 @@ TEST_CASE("Initial current line type is solid", "[output]")
     gopengks(stderr, 0L);
 
     Gint value{};
-    ginqlinetype(&value);
+    Gint status{-1};
+    ginqlinetype(&value, &status);
 
+    REQUIRE(status == 0);
     REQUIRE(value == GLN_SOLID);
 
     gclosegks();
@@ -449,19 +456,23 @@ TEST_CASE("Set current line type", "[output]")
     gsetlinetype(GLN_DASHED);
 
     Gint value{};
-    ginqlinetype(&value);
+    Gint status{-1};
+    ginqlinetype(&value, &status);
+    REQUIRE(status == 0);
     REQUIRE(value == GLN_DASHED);
 
     gclosegks();
 }
 
-TEST_CASE("Initial line color index is one", "[output]")
+TEST_CASE("Initial line color index is 1", "[output]")
 {
     gopengks(stderr, 0L);
 
     Gint value{};
-    ginqlinecolorind(&value);
+    Gint status{-1};
+    ginqlinecolorind(&value, &status);
 
+    REQUIRE(status == 0);
     REQUIRE(value == 1);
 
     gclosegks();
@@ -474,19 +485,23 @@ TEST_CASE("Set line color index", "[output]")
     gsetlinecolorind(GLN_DASHDOT);
 
     Gint value{};
-    ginqlinecolorind(&value);
+    Gint status{-1};
+    ginqlinecolorind(&value, &status);
+    REQUIRE(status == 0);
     REQUIRE(value == GLN_DASHDOT);
 
     gclosegks();
 }
 
-TEST_CASE("Initial line index is one", "[output]")
+TEST_CASE("Initial line index is 1", "[output]")
 {
     gopengks(stderr, 0L);
 
     Gint value{};
-    ginqlineind(&value);
+    Gint status{-1};
+    ginqlineind(&value, &status);
 
+    REQUIRE(status == 0);
     REQUIRE(value == 1);
 
     gclosegks();
@@ -499,7 +514,9 @@ TEST_CASE("Set line index", "[output]")
     gsetlineind(4);
 
     Gint value{};
-    ginqlineind(&value);
+    Gint status{-1};
+    ginqlineind(&value, &status);
+    REQUIRE(status == 0);
     REQUIRE(value == 4);
 
     gclosegks();
@@ -522,5 +539,124 @@ TEST_CASE("Polymarker", "[output]")
     gpolymarker(sizeof(points)/sizeof(points[0]), points);
 
     gclosews(wsId);
+    gclosegks();
+}
+
+TEST_CASE("Initial current marker type is 3 (star)", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    Gint value{};
+    Gint status{-1};
+    ginqmarkertype(&value, &status);
+
+    REQUIRE(status == 0);
+    REQUIRE(value == GMK_STAR);
+
+    gclosegks();
+}
+
+TEST_CASE("Set current marker type", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    gsetmarkertype(GMK_X);
+
+    Gint value{};
+    Gint status{-1};
+    ginqmarkertype(&value, &status);
+    REQUIRE(status == 0);
+    REQUIRE(value == GMK_X);
+
+    gclosegks();
+}
+
+TEST_CASE("Initial current marker size is 1", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    Gfloat value{};
+    Gint status{-1};
+    ginqmarkersize(&value, &status);
+
+    REQUIRE(status == 0);
+    REQUIRE(value == 1.0f);
+
+    gclosegks();
+}
+
+TEST_CASE("Set current marker size", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    const Gfloat size{2.0f};
+    gsetmarkersize(size);
+
+    Gfloat value{};
+    Gint status{-1};
+    ginqmarkersize(&value, &status);
+    REQUIRE(status == 0);
+    REQUIRE(value == size);
+
+    gclosegks();
+}
+
+TEST_CASE("Initial current marker color index is 1", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    Gint value{};
+    Gint status{-1};
+    ginqmarkercolorind(&value, &status);
+
+    REQUIRE(status == 0);
+    REQUIRE(value == 1);
+
+    gclosegks();
+}
+
+TEST_CASE("Set current marker color index", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    Gint color{4};
+    gsetmarkercolorind(color);
+
+    Gint value{};
+    Gint status{-1};
+    ginqmarkercolorind(&value, &status);
+    REQUIRE(status == 0);
+    REQUIRE(value == color);
+
+    gclosegks();
+}
+
+TEST_CASE("Initial current marker index is 1", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    Gint value{};
+    Gint status{-1};
+    ginqmarkerind(&value, &status);
+
+    REQUIRE(status == 0);
+    REQUIRE(value == 1);
+
+    gclosegks();
+}
+
+TEST_CASE("Set current marker index", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    Gint index{4};
+    gsetmarkerind(index);
+
+    Gint value{};
+    Gint status{-1};
+    ginqmarkerind(&value, &status);
+    REQUIRE(status == 0);
+    REQUIRE(value == index);
+
     gclosegks();
 }

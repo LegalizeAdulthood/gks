@@ -59,6 +59,15 @@ enum Glntype
     GLN_DASHDOT = 4
 };
 
+enum Gmktype
+{
+    GMK_DOT = 1,
+    GMK_PLUS = 2,
+    GMK_STAR = 3,
+    GMK_O = 4,
+    GMK_X = 5
+};
+
 enum Gopst
 {
     GGKCL,
@@ -178,10 +187,14 @@ void gclosegks(void);
 void ginqavailwstypes(Gint bufSize, Gint start, struct Gstrlist *wsTypes, Gint *numTypes, Gint *errorStatus);
 void ginqclip(struct Gcliprect *value, Gint *errorStatus);
 void ginqcolourfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, struct Gcofac *facil, Gint *errorStatus);
-void ginqlevelgks(enum Glevel *value);
-void ginqlinecolorind(Gint *value);
-void ginqlineind(Gint *value);
-void ginqlinetype(Gint *value);
+void ginqlevelgks(enum Glevel *value, Gint *errorStatus);
+void ginqlinecolorind(Gint *value, Gint *errorStatus);
+void ginqlineind(Gint *value, Gint *errorStatus);
+void ginqlinetype(Gint *value, Gint *errorStatus);
+void ginqmarkercolorind(Gint *value, Gint *errorStatus);
+void ginqmarkerind(Gint *value, Gint *errorStatus);
+void ginqmarkersize(Gfloat *value, Gint *errorStatus);
+void ginqmarkertype(Gint *value, Gint *errorStatus);
 void ginqmaxntrannum(Gint *value, Gint *errorStatus);
 void ginqntran(Gint num, struct Gtran *value, Gint *errorStatus);
 void ginqopst(enum Gopst *value);
@@ -191,6 +204,10 @@ void gsetclip(enum Gclip value);
 void gsetlinecolorind(Gint value);
 void gsetlineind(Gint value);
 void gsetlinetype(Gint value);
+void gsetmarkercolorind(Gint value);
+void gsetmarkerind(Gint value);
+void gsetmarkersize(Gfloat value);
+void gsetmarkertype(Gint value);
 void gsetviewport(Gint transform, struct Glimit *value);
 void gsetwindow(Gint transform, struct Glimit *value);
 
