@@ -277,6 +277,39 @@ TEST_CASE("Clear workstation", "[workstation]")
     gclosegks();
 }
 
+TEST_CASE("Initial transformation", "[workstation]")
+{
+    gopengks(stderr, 0L);
+    Gint wsId{1};
+    const Gchar *connId{"tek4105"};
+    Gint wsType{};
+    gopenws(wsId, connId, wsType);
+
+    struct Gwsti transform{};
+    Gint status{};
+    ginqwstran(wsId, &transform, &status);
+
+    REQUIRE(transform.wstus == GNOTPENDING);
+    REQUIRE(transform.request.v.xmin == 0.0f);
+    REQUIRE(transform.request.v.xmax == 1.0f);
+    REQUIRE(transform.request.v.ymin == 0.0f);
+    REQUIRE(transform.request.v.ymax == 1.0f);
+    REQUIRE(transform.request.w.xmin == 0.0f);
+    REQUIRE(transform.request.w.xmax == 1.0f);
+    REQUIRE(transform.request.w.ymin == 0.0f);
+    REQUIRE(transform.request.w.ymax == 1.0f);
+    REQUIRE(transform.current.v.xmin == 0.0f);
+    REQUIRE(transform.current.v.xmax == 1.0f);
+    REQUIRE(transform.current.v.ymin == 0.0f);
+    REQUIRE(transform.current.v.ymax == 1.0f);
+    REQUIRE(transform.current.w.xmin == 0.0f);
+    REQUIRE(transform.current.w.xmax == 1.0f);
+    REQUIRE(transform.current.w.ymin == 0.0f);
+    REQUIRE(transform.current.w.ymax == 1.0f);
+
+    gclosegks();
+}
+
 TEST_CASE("Update workstation", "[workstation]")
 {
     gopengks(stderr, 0L);
@@ -286,6 +319,34 @@ TEST_CASE("Update workstation", "[workstation]")
     gopenws(wsId, connId, wsType);
 
     gupdatews(wsId, GPERFORM);
+
+    gclosegks();
+}
+
+TEST_CASE("Set workstation viewport", "[workstation]")
+{
+    gopengks(stderr, 0L);
+    Gint wsId{1};
+    const Gchar *connId{"tek4105"};
+    Gint wsType{};
+    gopenws(wsId, connId, wsType);
+
+    const Gfloat xmin = 0.2f;
+    const Gfloat xmax = 0.4f;
+    const Gfloat ymin = 0.3f;
+    const Gfloat ymax = 0.5f;
+    struct Glimit viewport{xmin, xmax, ymin, ymax};
+    gsetwsviewport(wsId, &viewport);
+
+    struct Gwsti transform{};
+    Gint status{};
+    ginqwstran(wsId, &transform, &status);
+
+    REQUIRE(transform.wstus == GNOTPENDING);
+    REQUIRE(transform.current.v.xmin == xmin);
+    REQUIRE(transform.current.v.xmax == xmax);
+    REQUIRE(transform.current.v.ymin == ymin);
+    REQUIRE(transform.current.v.ymax == ymax);
 
     gclosegks();
 }

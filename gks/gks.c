@@ -102,6 +102,24 @@ typedef struct GWSState_t
     //-- string
 } GWSState;
 
+static const GWSState g_initialWSState =
+{
+    0,
+    NULL,
+    0,
+    {
+        GNOTPENDING,
+        {
+            { 0.0f, 1.0f, 0.0f, 1.0f },
+            { 0.0f, 1.0f, 0.0f, 1.0f },
+        },
+        {
+            { 0.0f, 1.0f, 0.0f, 1.0f },
+            { 0.0f, 1.0f, 0.0f, 1.0f },
+        }
+    }
+};
+
 static GWSState g_wsState[1];
 
 void gerrorhand(Gint errNum, Gint funcName, Gfile *errFile)
@@ -163,12 +181,6 @@ void ginqwsmaxnum(struct Gwsmax *value, Gint *errorStatus)
     *errorStatus = 0;
 }
 
-void ginqwstran(Gint wsId, struct Gwsti *transform, Gint *errorStatus)
-{
-    *transform = g_wsState[wsId].transform;
-    *errorStatus = 0;
-}
-
 void gsetviewport(Gint transform, struct Glimit *viewport)
 {
     g_gksState.transforms[transform].v = *viewport;
@@ -182,6 +194,10 @@ void gsetwindow(Gint transform, struct Glimit *window)
 void gopenws(Gint wsId, const Gconn *connId, Gwstype wsType)
 {
     g_opState = GWSOP;
+    g_wsState[0] = g_initialWSState;
+    g_wsState[0].id = wsId;
+    g_wsState[0].connId = connId;
+    g_wsState[0].type = wsType;
 }
 
 void gclosews(Gint wsId)
@@ -207,8 +223,18 @@ void gupdatews(Gint wsId, enum Gregen flag)
 {
 }
 
+void ginqwstran(Gint wsId, struct Gwsti *transform, Gint *errorStatus)
+{
+    *transform = g_wsState[0].transform;
+    *errorStatus = 0;
+}
+
+void gsetwsviewport(Gint wsId, struct Glimit *viewport)
+{
+    g_wsState[0].transform.current.v = *viewport;
+}
+
 void gsetwswindow(Gint wsId, struct Glimit *window)
 {
-    g_wsState[wsId].transform.wstus = GNOTPENDING;
-    g_wsState[wsId].transform.current.w = *window;
+    g_wsState[0].transform.current.w = *window;
 }
