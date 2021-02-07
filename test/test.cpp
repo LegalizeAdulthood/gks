@@ -676,3 +676,249 @@ TEST_CASE("Text", "[output]")
     gclosews(wsId);
     gclosegks();
 }
+
+TEST_CASE("Initial current text height is 0.01", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    Gfloat value{};
+    Gint status{-1};
+    ginqcharheight(&value, &status);
+
+    REQUIRE(status == 0);
+    REQUIRE(value == 0.01f);
+
+    gclosegks();
+}
+
+TEST_CASE("Set current char height", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    const Gfloat charHeight{0.5f};
+    gsetcharheight(charHeight);
+
+    Gfloat value{};
+    Gint status{-1};
+    ginqcharheight(&value, &status);
+    REQUIRE(status == 0);
+    REQUIRE(value == charHeight);
+
+    gclosegks();
+}
+
+TEST_CASE("Initial current char up vector is (0,1)", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    Gpoint value{};
+    Gint status{-1};
+    ginqcharup(&value, &status);
+
+    REQUIRE(status == 0);
+    REQUIRE(value.x == 0.0f);
+    REQUIRE(value.y == 1.0f);
+
+    gclosegks();
+}
+
+TEST_CASE("Set current char up vector", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    Gpoint up{1.0f, 0.0f};
+    gsetcharup(&up);
+
+    Gpoint value{};
+    Gint status{-1};
+    ginqcharup(&value, &status);
+    REQUIRE(status == 0);
+    REQUIRE(value.x == up.x);
+    REQUIRE(value.y == up.y);
+
+    gclosegks();
+}
+
+TEST_CASE("Initial text color index is 1", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    Gint value{};
+    Gint status{-1};
+    ginqtextcolorind(&value, &status);
+
+    REQUIRE(status == 0);
+    REQUIRE(value == 1);
+
+    gclosegks();
+}
+
+TEST_CASE("Set text color index is 1", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    const Gint color{3};
+    gsettextcolorind(color);
+
+    Gint value{};
+    Gint status{-1};
+    ginqtextcolorind(&value, &status);
+    REQUIRE(status == 0);
+    REQUIRE(value == color);
+
+    gclosegks();
+}
+
+TEST_CASE("Initial text index is 1", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    Gint value{};
+    Gint status{-1};
+    ginqtextind(&value, &status);
+
+    REQUIRE(status == 0);
+    REQUIRE(value == 1);
+
+    gclosegks();
+}
+
+TEST_CASE("Set text index", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    const Gint index{3};
+    gsettextind(index);
+
+    Gint value{};
+    Gint status{-1};
+    ginqtextind(&value, &status);
+    REQUIRE(status == 0);
+    REQUIRE(value == index);
+
+    gclosegks();
+}
+
+TEST_CASE("Initial text alignment is normal", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    Gtxalign value{};
+    Gint status{-1};
+    ginqtextalign(&value, &status);
+
+    REQUIRE(status == 0);
+    REQUIRE(value.hor == GAH_NORMAL);
+    REQUIRE(value.ver == GAV_NORMAL);
+
+    gclosegks();
+}
+
+TEST_CASE("Set text alignment", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    Gtxalign align{GAH_LEFT, GAV_BOTTOM};
+    gsettextalign(&align);
+
+    Gtxalign value{};
+    Gint status{-1};
+    ginqtextalign(&value, &status);
+    REQUIRE(status == 0);
+    REQUIRE(value.hor == align.hor);
+    REQUIRE(value.ver == align.ver);
+
+    gclosegks();
+}
+
+TEST_CASE("Initial text font and precision is (1, string)", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    Gtxfp value{};
+    Gint status{-1};
+    ginqtextfontprec(&value, &status);
+
+    REQUIRE(status == 0);
+    REQUIRE(value.font == 1);
+    REQUIRE(value.prec == GP_STRING);
+
+    gclosegks();
+}
+
+TEST_CASE("Set text font and precision", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    Gtxfp font{2, GP_STROKE};
+    gsettextfontprec(&font);
+
+    Gtxfp value{};
+    Gint status{-1};
+    ginqtextfontprec(&value, &status);
+    REQUIRE(status == 0);
+    REQUIRE(value.font == font.font);
+    REQUIRE(value.prec == font.prec);
+
+    gclosegks();
+}
+
+TEST_CASE("Initial char expansion factor is 1.0", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    Gfloat value{};
+    Gint status{-1};
+    ginqcharexpan(&value, &status);
+
+    REQUIRE(status == 0);
+    REQUIRE(value == 1.0f);
+
+    gclosegks();
+}
+
+TEST_CASE("Set char expansion factor", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    const Gfloat expan{0.5f};
+    gsetcharexpan(expan);
+
+    Gfloat value{};
+    Gint status{-1};
+    ginqcharexpan(&value, &status);
+    REQUIRE(status == 0);
+    REQUIRE(value == expan);
+
+    gclosegks();
+}
+
+TEST_CASE("Initial char spacing is 0.0", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    Gfloat value{-1.0f};
+    Gint status{-1};
+    ginqcharspace(&value, &status);
+
+    REQUIRE(status == 0);
+    REQUIRE(value == 0.0f);
+
+    gclosegks();
+}
+
+TEST_CASE("Set char spacing", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    const Gfloat space{0.5f};
+    gsetcharspace(space);
+
+    Gfloat value{};
+    Gint status{-1};
+    ginqcharspace(&value, &status);
+    REQUIRE(status == 0);
+    REQUIRE(value == space);
+
+    gclosegks();
+}

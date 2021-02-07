@@ -19,25 +19,25 @@ typedef Gint Gwstype;
 
 enum Gclip
 {
-    GNOCLIP,
+    GNOCLIP = 1,
     GCLIP
 };
 
 enum Gclrflag
 {
-    GCONDITIONALLY,
+    GCONDITIONALLY = 1,
     GALWAYS
 };
 
 enum Gcoavail
 {
-    GCOLOUR,
+    GCOLOUR = 1,
     GMONOCHROME
 };
 
 enum Glevel
 {
-    GLMA,
+    GLMA = 1,
     GLMB,
     GLMC,
     GL0A,
@@ -70,7 +70,7 @@ enum Gmktype
 
 enum Gopst
 {
-    GGKCL,
+    GGKCL = 1,
     GGKOP,
     GWSOP,
     GWSAC,
@@ -79,13 +79,38 @@ enum Gopst
 
 enum Gregen
 {
-    GPOSTPONE,
+    GPOSTPONE = 1,
     GPERFORM
+};
+
+enum Gtxhor
+{
+    GAH_NORMAL = 1,
+    GAH_LEFT,
+    GAH_CENTER,
+    GAH_RIGHT
+};
+
+enum Gtxprec
+{
+    GP_STRING = 1,
+    GP_CHAR,
+    GP_STROKE
+};
+
+enum Gtxver
+{
+    GAV_NORMAL = 1,
+    GAV_TOP,
+    GAV_CAP,
+    GAV_HALF,
+    GAV_BASE,
+    GAV_BOTTOM
 };
 
 enum Gwstus
 {
-    GNOTPENDING,
+    GNOTPENDING = 1,
     GPENDING
 };
 
@@ -163,6 +188,18 @@ struct Gtran
     struct Glimit v;
 };
 
+struct Gtxalign
+{
+    enum Gtxhor hor;
+    enum Gtxver ver;
+};
+
+struct Gtxfp
+{
+    Gint font;
+    enum Gtxprec prec;
+};
+
 struct Gwsmax
 {
     Gint open;
@@ -185,6 +222,10 @@ void gopengks(Gfile *errfile, Glong memory);
 void gclosegks(void);
 
 void ginqavailwstypes(Gint bufSize, Gint start, struct Gstrlist *wsTypes, Gint *numTypes, Gint *errorStatus);
+void ginqcharexpan(Gfloat *value, Gint *errorStatus);
+void ginqcharheight(Gfloat *value, Gint *errorStatus);
+void ginqcharspace(Gfloat *value, Gint *errorStatus);
+void ginqcharup(struct Gpoint *value, Gint *errorStatus);
 void ginqclip(struct Gcliprect *value, Gint *errorStatus);
 void ginqcolourfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, struct Gcofac *facil, Gint *errorStatus);
 void ginqlevelgks(enum Glevel *value, Gint *errorStatus);
@@ -198,8 +239,16 @@ void ginqmarkertype(Gint *value, Gint *errorStatus);
 void ginqmaxntrannum(Gint *value, Gint *errorStatus);
 void ginqntran(Gint num, struct Gtran *value, Gint *errorStatus);
 void ginqopst(enum Gopst *value);
+void ginqtextalign(struct Gtxalign *value, Gint *errorStatus);
+void ginqtextcolorind(Gint *value, Gint *errorStatus);
+void ginqtextfontprec(struct Gtxfp *value, Gint *errorStatus);
+void ginqtextind(Gint *value, Gint *errorStatus);
 void ginqwsmaxnum(struct Gwsmax *value, Gint *errorStatus);
 
+void gsetcharexpan(Gfloat value);
+void gsetcharheight(Gfloat value);
+void gsetcharspace(Gfloat value);
+void gsetcharup(struct Gpoint *value);
 void gsetclip(enum Gclip value);
 void gsetlinecolorind(Gint value);
 void gsetlineind(Gint value);
@@ -208,6 +257,10 @@ void gsetmarkercolorind(Gint value);
 void gsetmarkerind(Gint value);
 void gsetmarkersize(Gfloat value);
 void gsetmarkertype(Gint value);
+void gsettextalign(struct Gtxalign *value);
+void gsettextcolorind(Gint value);
+void gsettextfontprec(struct Gtxfp *fontPrec);
+void gsettextind(Gint value);
 void gsetviewport(Gint transform, struct Glimit *value);
 void gsetwindow(Gint transform, struct Glimit *value);
 

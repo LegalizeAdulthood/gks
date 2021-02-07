@@ -51,6 +51,14 @@ typedef struct GGKSState_t
     Gint currentMarkerColorIndex;
     Gint currentMarkerIndex;
     // text
+    Gfloat currentCharHeight;
+    struct Gpoint currentCharUp;
+    Gint currentTextColorIndex;
+    Gint currentTextIndex;
+    struct Gtxalign currentTextAlign;
+    struct Gtxfp currentTextFontPrec;
+    Gfloat currentCharExpandFactor;
+    Gfloat currentCharSpacing;
     // fill area
     // segments
     // input queue
@@ -69,13 +77,24 @@ static GGKSState g_initialGksState =
         }
     },
     GCLIP,
+    // polyline
     GLN_SOLID,
     1,
     1,
+    // polymarker
     GMK_STAR,
     1.0f,
     1,
-    1
+    1,
+    // text
+    0.01f,
+    { 0.0f, 1.0f },
+    1,
+    1,
+    { GAH_NORMAL, GAV_NORMAL },
+    { 1, GP_STRING },
+    1.0f,
+    0.0f
 };
 
 static GGKSState g_gksState;
@@ -156,6 +175,30 @@ void ginqavailwstypes(Gint bufSize, Gint start, struct Gstrlist *wsTypes, Gint *
     *numTypes = g_gksDescription.numAvailWSTypes;
     wsTypes->n_points = *numTypes;
     wsTypes->strings = g_gksDescription.wsTypes;
+    *errorStatus = 0;
+}
+
+void ginqcharexpan(Gfloat *value, Gint *errorStatus)
+{
+    *value = g_gksState.currentCharExpandFactor;
+    *errorStatus = 0;
+}
+
+void ginqcharheight(Gfloat *value, Gint *errorStatus)
+{
+    *value = g_gksState.currentCharHeight;
+    *errorStatus = 0;
+}
+
+void ginqcharspace(Gfloat *value, Gint *errorStatus)
+{
+    *value = g_gksState.currentCharSpacing;
+    *errorStatus = 0;
+}
+
+void ginqcharup(struct Gpoint *value, Gint *errorStatus)
+{
+    *value = g_gksState.currentCharUp;
     *errorStatus = 0;
 }
 
@@ -240,10 +283,54 @@ void ginqopst(enum Gopst *value)
     *value = g_opState;
 }
 
+void ginqtextalign(struct Gtxalign *value, Gint *errorStatus)
+{
+    *value = g_gksState.currentTextAlign;
+    *errorStatus = 0;
+}
+
+void ginqtextcolorind(Gint *value, Gint *errorStatus)
+{
+    *value = g_gksState.currentTextColorIndex;
+    *errorStatus = 0;
+}
+
+void ginqtextfontprec(struct Gtxfp *value, Gint *errorStatus)
+{
+    *value = g_gksState.currentTextFontPrec;
+    *errorStatus = 0;
+}
+
+void ginqtextind(Gint *value, Gint *errorStatus)
+{
+    *value = g_gksState.currentTextIndex;
+    *errorStatus = 0;
+}
+
 void ginqwsmaxnum(struct Gwsmax *value, Gint *errorStatus)
 {
     *value = g_gksDescription.wsmax;
     *errorStatus = 0;
+}
+
+void gsetcharexpan(Gfloat value)
+{
+    g_gksState.currentCharExpandFactor = value;
+}
+
+void gsetcharheight(Gfloat value)
+{
+    g_gksState.currentCharHeight = value;
+}
+
+void gsetcharspace(Gfloat value)
+{
+    g_gksState.currentCharSpacing = value;
+}
+
+void gsetcharup(struct Gpoint *value)
+{
+    g_gksState.currentCharUp = *value;
 }
 
 void gsetclip(enum Gclip value)
@@ -284,6 +371,26 @@ void gsetmarkersize(Gfloat value)
 void gsetmarkertype(Gint value)
 {
     g_gksState.currentMarkerType = value;
+}
+
+void gsettextalign(struct Gtxalign *value)
+{
+    g_gksState.currentTextAlign = *value;
+}
+
+void gsettextcolorind(Gint value)
+{
+    g_gksState.currentTextColorIndex = value;
+}
+
+void gsettextfontprec(struct Gtxfp *fontPrec)
+{
+    g_gksState.currentTextFontPrec = *fontPrec;
+}
+
+void gsettextind(Gint value)
+{
+    g_gksState.currentTextIndex = value;
 }
 
 void gsetviewport(Gint transform, struct Glimit *value)
