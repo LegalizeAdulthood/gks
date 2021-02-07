@@ -212,6 +212,30 @@ TEST_CASE("Normalization transform zero is identity", "[gks]")
     gclosegks();
 }
 
+TEST_CASE("Set viewport", "[gks]")
+{
+    gopengks(stderr, 0L);
+
+    const Gint tranId = 1;
+    const Gfloat xmin{0.2f};
+    const Gfloat xmax{0.5f};
+    const Gfloat ymin{0.4f};
+    const Gfloat ymax{0.6f};
+    Glimit viewport{xmin, xmax, ymin, ymax};
+    gsetviewport(tranId, &viewport);
+
+    Gtran transform{};
+    Gint status{};
+    ginqntran(tranId, &transform, &status);
+    REQUIRE(status == 0);
+    REQUIRE(transform.v.xmin == xmin);
+    REQUIRE(transform.v.xmax == xmax);
+    REQUIRE(transform.v.ymin == ymin);
+    REQUIRE(transform.v.ymax == ymax);
+
+    gclosegks();
+}
+
 TEST_CASE("Set window", "[gks]")
 {
     gopengks(stderr, 0L);

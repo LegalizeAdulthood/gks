@@ -138,6 +138,11 @@ void ginqwsmaxnum(struct Gwsmax *value, Gint *errorStatus)
     *errorStatus = 0;
 }
 
+void gsetviewport(Gint transform, struct Glimit *viewport)
+{
+    g_gksState.transforms[transform].v = *viewport;
+}
+
 void gsetwindow(Gint transform, struct Glimit *window)
 {
     g_gksState.transforms[transform].w = *window;

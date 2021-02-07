@@ -145,6 +145,7 @@ void ginqntran(Gint num, struct Gtran *tran, Gint *errorStatus);
 void ginqopst(enum Gopst *value);
 void ginqwsmaxnum(struct Gwsmax *value, Gint *errorStatus);
 
+void gsetviewport(Gint transform, struct Glimit *viewport);
 void gsetwindow(Gint transform, struct Glimit *window);
 
 void gopenws(Gint wsId, const Gconn *connId, Gwstype wsType);
