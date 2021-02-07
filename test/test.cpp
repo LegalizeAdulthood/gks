@@ -415,7 +415,7 @@ TEST_CASE("Set workstation window", "[workstation]")
     gclosegks();
 }
 
-TEST_CASE("Polyline", "[output]")
+TEST_CASE("Output primitives", "[output]")
 {
     gopengks(stderr, 0L);
     Gint wsId{1};
@@ -424,523 +424,373 @@ TEST_CASE("Polyline", "[output]")
     gopenws(wsId, connId, wsType);
     gactivatews(wsId);
 
-    Gpoint points[] =
+    SECTION("Polyline")
     {
+        Gpoint points[] =
+        {
         { 0.0f, 0.5f },
         { 0.5f, 0.5f }
-    };
-    gpolyline(sizeof(points)/sizeof(points[0]), points);
-
-    gclosews(wsId);
-    gclosegks();
-}
-
-TEST_CASE("Initial current line type is solid", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    Gint value{};
-    Gint status{-1};
-    ginqlinetype(&value, &status);
-
-    REQUIRE(status == 0);
-    REQUIRE(value == GLN_SOLID);
-
-    gclosegks();
-}
-
-TEST_CASE("Set current line type", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    gsetlinetype(GLN_DASHED);
-
-    Gint value{};
-    Gint status{-1};
-    ginqlinetype(&value, &status);
-    REQUIRE(status == 0);
-    REQUIRE(value == GLN_DASHED);
-
-    gclosegks();
-}
-
-TEST_CASE("Initial line color index is 1", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    Gint value{};
-    Gint status{-1};
-    ginqlinecolorind(&value, &status);
-
-    REQUIRE(status == 0);
-    REQUIRE(value == 1);
-
-    gclosegks();
-}
-
-TEST_CASE("Set line color index", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    gsetlinecolorind(GLN_DASHDOT);
-
-    Gint value{};
-    Gint status{-1};
-    ginqlinecolorind(&value, &status);
-    REQUIRE(status == 0);
-    REQUIRE(value == GLN_DASHDOT);
-
-    gclosegks();
-}
-
-TEST_CASE("Initial line index is 1", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    Gint value{};
-    Gint status{-1};
-    ginqlineind(&value, &status);
-
-    REQUIRE(status == 0);
-    REQUIRE(value == 1);
-
-    gclosegks();
-}
-
-TEST_CASE("Set line index", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    gsetlineind(4);
-
-    Gint value{};
-    Gint status{-1};
-    ginqlineind(&value, &status);
-    REQUIRE(status == 0);
-    REQUIRE(value == 4);
-
-    gclosegks();
-}
-
-TEST_CASE("Polymarker", "[output]")
-{
-    gopengks(stderr, 0L);
-    Gint wsId{1};
-    const Gchar *connId{"tek4105"};
-    Gint wsType{};
-    gopenws(wsId, connId, wsType);
-    gactivatews(wsId);
-
-    Gpoint points[] =
+        };
+        gpolyline(sizeof(points)/sizeof(points[0]), points);
+    }
+    SECTION("Polymarker")
     {
+        Gpoint points[] =
+        {
         { 0.0f, 0.5f },
         { 0.5f, 0.5f }
-    };
-    gpolymarker(sizeof(points)/sizeof(points[0]), points);
-
-    gclosews(wsId);
-    gclosegks();
-}
-
-TEST_CASE("Initial current marker type is 3 (star)", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    Gint value{};
-    Gint status{-1};
-    ginqmarkertype(&value, &status);
-
-    REQUIRE(status == 0);
-    REQUIRE(value == GMK_STAR);
-
-    gclosegks();
-}
-
-TEST_CASE("Set current marker type", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    gsetmarkertype(GMK_X);
-
-    Gint value{};
-    Gint status{-1};
-    ginqmarkertype(&value, &status);
-    REQUIRE(status == 0);
-    REQUIRE(value == GMK_X);
-
-    gclosegks();
-}
-
-TEST_CASE("Initial current marker size is 1", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    Gfloat value{};
-    Gint status{-1};
-    ginqmarkersize(&value, &status);
-
-    REQUIRE(status == 0);
-    REQUIRE(value == 1.0f);
-
-    gclosegks();
-}
-
-TEST_CASE("Set current marker size", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    const Gfloat size{2.0f};
-    gsetmarkersize(size);
-
-    Gfloat value{};
-    Gint status{-1};
-    ginqmarkersize(&value, &status);
-    REQUIRE(status == 0);
-    REQUIRE(value == size);
-
-    gclosegks();
-}
-
-TEST_CASE("Initial current marker color index is 1", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    Gint value{};
-    Gint status{-1};
-    ginqmarkercolorind(&value, &status);
-
-    REQUIRE(status == 0);
-    REQUIRE(value == 1);
-
-    gclosegks();
-}
-
-TEST_CASE("Set current marker color index", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    Gint color{4};
-    gsetmarkercolorind(color);
-
-    Gint value{};
-    Gint status{-1};
-    ginqmarkercolorind(&value, &status);
-    REQUIRE(status == 0);
-    REQUIRE(value == color);
-
-    gclosegks();
-}
-
-TEST_CASE("Initial current marker index is 1", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    Gint value{};
-    Gint status{-1};
-    ginqmarkerind(&value, &status);
-
-    REQUIRE(status == 0);
-    REQUIRE(value == 1);
-
-    gclosegks();
-}
-
-TEST_CASE("Set current marker index", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    Gint index{4};
-    gsetmarkerind(index);
-
-    Gint value{};
-    Gint status{-1};
-    ginqmarkerind(&value, &status);
-    REQUIRE(status == 0);
-    REQUIRE(value == index);
-
-    gclosegks();
-}
-
-TEST_CASE("Text", "[output]")
-{
-    gopengks(stderr, 0L);
-    Gint wsId{1};
-    const Gchar *connId{"tek4105"};
-    Gint wsType{};
-    gopenws(wsId, connId, wsType);
-    gactivatews(wsId);
-
-    Gpoint start{0.0f, 0.5f};
-    gtext(&start, "Hello, world!");
-
-    gclosews(wsId);
-    gclosegks();
-}
-
-TEST_CASE("Initial current text height is 0.01", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    Gfloat value{};
-    Gint status{-1};
-    ginqcharheight(&value, &status);
-
-    REQUIRE(status == 0);
-    REQUIRE(value == 0.01f);
-
-    gclosegks();
-}
-
-TEST_CASE("Set current char height", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    const Gfloat charHeight{0.5f};
-    gsetcharheight(charHeight);
-
-    Gfloat value{};
-    Gint status{-1};
-    ginqcharheight(&value, &status);
-    REQUIRE(status == 0);
-    REQUIRE(value == charHeight);
-
-    gclosegks();
-}
-
-TEST_CASE("Initial current char up vector is (0,1)", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    Gpoint value{};
-    Gint status{-1};
-    ginqcharup(&value, &status);
-
-    REQUIRE(status == 0);
-    REQUIRE(value.x == 0.0f);
-    REQUIRE(value.y == 1.0f);
-
-    gclosegks();
-}
-
-TEST_CASE("Set current char up vector", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    Gpoint up{1.0f, 0.0f};
-    gsetcharup(&up);
-
-    Gpoint value{};
-    Gint status{-1};
-    ginqcharup(&value, &status);
-    REQUIRE(status == 0);
-    REQUIRE(value.x == up.x);
-    REQUIRE(value.y == up.y);
-
-    gclosegks();
-}
-
-TEST_CASE("Initial text color index is 1", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    Gint value{};
-    Gint status{-1};
-    ginqtextcolorind(&value, &status);
-
-    REQUIRE(status == 0);
-    REQUIRE(value == 1);
-
-    gclosegks();
-}
-
-TEST_CASE("Set text color index is 1", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    const Gint color{3};
-    gsettextcolorind(color);
-
-    Gint value{};
-    Gint status{-1};
-    ginqtextcolorind(&value, &status);
-    REQUIRE(status == 0);
-    REQUIRE(value == color);
-
-    gclosegks();
-}
-
-TEST_CASE("Initial text index is 1", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    Gint value{};
-    Gint status{-1};
-    ginqtextind(&value, &status);
-
-    REQUIRE(status == 0);
-    REQUIRE(value == 1);
-
-    gclosegks();
-}
-
-TEST_CASE("Set text index", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    const Gint index{3};
-    gsettextind(index);
-
-    Gint value{};
-    Gint status{-1};
-    ginqtextind(&value, &status);
-    REQUIRE(status == 0);
-    REQUIRE(value == index);
-
-    gclosegks();
-}
-
-TEST_CASE("Initial text alignment is normal", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    Gtxalign value{};
-    Gint status{-1};
-    ginqtextalign(&value, &status);
-
-    REQUIRE(status == 0);
-    REQUIRE(value.hor == GAH_NORMAL);
-    REQUIRE(value.ver == GAV_NORMAL);
-
-    gclosegks();
-}
-
-TEST_CASE("Set text alignment", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    Gtxalign align{GAH_LEFT, GAV_BOTTOM};
-    gsettextalign(&align);
-
-    Gtxalign value{};
-    Gint status{-1};
-    ginqtextalign(&value, &status);
-    REQUIRE(status == 0);
-    REQUIRE(value.hor == align.hor);
-    REQUIRE(value.ver == align.ver);
-
-    gclosegks();
-}
-
-TEST_CASE("Initial text font and precision is (1, string)", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    Gtxfp value{};
-    Gint status{-1};
-    ginqtextfontprec(&value, &status);
-
-    REQUIRE(status == 0);
-    REQUIRE(value.font == 1);
-    REQUIRE(value.prec == GP_STRING);
-
-    gclosegks();
-}
-
-TEST_CASE("Set text font and precision", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    Gtxfp font{2, GP_STROKE};
-    gsettextfontprec(&font);
-
-    Gtxfp value{};
-    Gint status{-1};
-    ginqtextfontprec(&value, &status);
-    REQUIRE(status == 0);
-    REQUIRE(value.font == font.font);
-    REQUIRE(value.prec == font.prec);
-
-    gclosegks();
-}
-
-TEST_CASE("Initial char expansion factor is 1.0", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    Gfloat value{};
-    Gint status{-1};
-    ginqcharexpan(&value, &status);
-
-    REQUIRE(status == 0);
-    REQUIRE(value == 1.0f);
-
-    gclosegks();
-}
-
-TEST_CASE("Set char expansion factor", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    const Gfloat expan{0.5f};
-    gsetcharexpan(expan);
-
-    Gfloat value{};
-    Gint status{-1};
-    ginqcharexpan(&value, &status);
-    REQUIRE(status == 0);
-    REQUIRE(value == expan);
-
-    gclosegks();
-}
-
-TEST_CASE("Initial char spacing is 0.0", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    Gfloat value{-1.0f};
-    Gint status{-1};
-    ginqcharspace(&value, &status);
-
-    REQUIRE(status == 0);
-    REQUIRE(value == 0.0f);
-
-    gclosegks();
-}
-
-TEST_CASE("Set char spacing", "[output]")
-{
-    gopengks(stderr, 0L);
-
-    const Gfloat space{0.5f};
-    gsetcharspace(space);
-
-    Gfloat value{};
-    Gint status{-1};
-    ginqcharspace(&value, &status);
-    REQUIRE(status == 0);
-    REQUIRE(value == space);
-
-    gclosegks();
-}
-
-TEST_CASE("Fill area", "[output]")
-{
-    gopengks(stderr, 0L);
-    Gint wsId{1};
-    const Gchar *connId{"tek4105"};
-    Gint wsType{};
-    gopenws(wsId, connId, wsType);
-    gactivatews(wsId);
-
-    Gpoint points[] = 
+        };
+        gpolymarker(sizeof(points)/sizeof(points[0]), points);
+    }
+    SECTION("Text")
     {
+        Gpoint start{0.0f, 0.5f};
+        gtext(&start, "Hello, world!");
+    }
+    SECTION("Fill Area")
+    {
+        Gpoint points[] = 
+        {
         {0.25f, 0.25f},
         {0.50f, 0.25f},
         {0.50f, 0.50f},
         {0.25f, 0.50f}
-    };
-    gfillarea(sizeof(points)/sizeof(points[0]), points);
+        };
+        gfillarea(sizeof(points)/sizeof(points[0]), points);
+    }
+    SECTION("Cell Array")
+    {
+        struct Grect rect =
+        {
+            {0.25f, 0.75f},
+            {0.75f, 0.25f}
+        };
+        struct Gidim dim =
+        {
+            128, 128
+        };
+        Gint colors[] = { 0, 1 };
+        gcellarray(&rect, &dim, colors);
+    }
 
     gclosews(wsId);
+    gclosegks();
+}
+
+TEST_CASE("Initial global attribute values", "[output]")
+{
+    gopengks(stderr, 0L);
+    Gint value{-1};
+    Gint status{-1};
+
+    SECTION("line type is 1 (solid)")
+    {
+        ginqlinetype(&value, &status);
+
+        REQUIRE(value == GLN_SOLID);
+    }
+    SECTION("line color index is 1")
+    {
+        ginqlinecolorind(&value, &status);
+
+        REQUIRE(value == 1);
+    }
+    SECTION("line index is 1")
+    {
+        ginqlineind(&value, &status);
+
+        REQUIRE(value == 1);
+    }
+    SECTION("marker type is 3 (star)")
+    {
+        ginqmarkertype(&value, &status);
+
+        REQUIRE(value == GMK_STAR);
+    }
+    SECTION("marker size is 1", "[output]")
+    {
+        Gfloat size{};
+        ginqmarkersize(&size, &status);
+
+        REQUIRE(size == 1.0f);
+    }
+    SECTION("marker color index is 1")
+    {
+        ginqmarkercolorind(&value, &status);
+
+        REQUIRE(value == 1);
+    }
+    SECTION("marker index is 1")
+    {
+        ginqmarkerind(&value, &status);
+
+        REQUIRE(value == 1);
+    }
+    SECTION("text height is 0.01", "[output]")
+    {
+        Gfloat height{};
+        ginqcharheight(&height, &status);
+
+        REQUIRE(height == 0.01f);
+    }
+    SECTION("char up vector is (0,1)")
+    {
+        Gpoint up{};
+        ginqcharup(&up, &status);
+
+        REQUIRE(up.x == 0.0f);
+        REQUIRE(up.y == 1.0f);
+    }
+    SECTION("text color index is 1")
+    {
+        ginqtextcolorind(&value, &status);
+
+        REQUIRE(value == 1);
+    }
+    SECTION("text index is 1", "[output]")
+    {
+        ginqtextind(&value, &status);
+
+        REQUIRE(value == 1);
+    }
+    SECTION("text alignment is normal")
+    {
+        Gtxalign align{};
+        ginqtextalign(&align, &status);
+
+        REQUIRE(align.hor == GAH_NORMAL);
+        REQUIRE(align.ver == GAV_NORMAL);
+    }
+    SECTION("text font and precision is (1, string)")
+    {
+        Gtxfp fontPrec{};
+        ginqtextfontprec(&fontPrec, &status);
+
+        REQUIRE(fontPrec.font == 1);
+        REQUIRE(fontPrec.prec == GP_STRING);
+    }
+    SECTION("char expansion factor is 1.0")
+    {
+        Gfloat expandFactor{};
+        ginqcharexpan(&expandFactor, &status);
+
+        REQUIRE(expandFactor == 1.0f);
+    }
+    SECTION("char spacing is 0.0")
+    {
+        Gfloat spacing{-1.0f};
+        ginqcharspace(&spacing, &status);
+
+        REQUIRE(spacing == 0.0f);
+    }
+    SECTION("fill area interior style is HOLLOW")
+    {
+        enum Gflinter style{GSOLID};
+        ginqfillstyle(&style, &status);
+
+        REQUIRE(style == GHOLLOW);
+    }
+    SECTION("fill area interior style index is 1", "[output]")
+    {
+        ginqfillstyleind(&value, &status);
+
+        REQUIRE(value == 1);
+    }
+    SECTION("fill area color index is 1")
+    {
+        ginqfillcolorind(&value, &status);
+
+        REQUIRE(value == 1);
+    }
+    SECTION("fill area index is 1")
+    {
+        ginqfillind(&value, &status);
+
+        REQUIRE(value == 1);
+    }
+    SECTION("pattern size is (1,1)")
+    {
+        Gpoint size{};
+        ginqpatsize(&size, &status);
+
+        REQUIRE(size.x == 1.0f);
+        REQUIRE(size.y == 1.0f);
+    }
+    SECTION("pattern reference point is (0,0)")
+    {
+        Gpoint refPt{1.0f, 1.0f};
+        ginqpatrefpt(&refPt, &status);
+
+        REQUIRE(refPt.x == 0.0f);
+        REQUIRE(refPt.y == 0.0f);
+    }
+
+    REQUIRE(status == 0);
+
+    gclosegks();
+}
+
+TEST_CASE("Set global attribute values", "[output]")
+{
+    gopengks(stderr, 0L);
+    Gint value{-1};
+    Gint status{-1};
+
+    SECTION("line type")
+    {
+        gsetlinetype(GLN_DASHED);
+
+        ginqlinetype(&value, &status);
+        REQUIRE(value == GLN_DASHED);
+    }
+    SECTION("line color index")
+    {
+        gsetlinecolorind(GLN_DASHDOT);
+
+        ginqlinecolorind(&value, &status);
+        REQUIRE(value == GLN_DASHDOT);
+    }
+    SECTION("line index")
+    {
+        gsetlineind(4);
+
+        ginqlineind(&value, &status);
+        REQUIRE(value == 4);
+    }
+    SECTION("marker type")
+    {
+        gsetmarkertype(GMK_X);
+
+        ginqmarkertype(&value, &status);
+        REQUIRE(value == GMK_X);
+    }
+    SECTION("marker size")
+    {
+        gsetmarkersize(2.0f);
+
+        Gfloat size{-1.0f};
+        ginqmarkersize(&size, &status);
+        REQUIRE(size == 2.0f);
+    }
+    SECTION("marker color index")
+    {
+        Gint color{4};
+        gsetmarkercolorind(color);
+
+        ginqmarkercolorind(&value, &status);
+        REQUIRE(value == color);
+    }
+    SECTION("marker index")
+    {
+        Gint index{4};
+        gsetmarkerind(index);
+
+        ginqmarkerind(&value, &status);
+        REQUIRE(value == index);
+    }
+    SECTION("char height")
+    {
+        gsetcharheight(0.5f);
+
+        Gfloat charHeight{-1.0f};
+        ginqcharheight(&charHeight, &status);
+        REQUIRE(charHeight == 0.5f);
+    }
+    SECTION("char up vector")
+    {
+        Gpoint up{1.0f, 0.0f};
+        gsetcharup(&up);
+
+        Gpoint current{};
+        ginqcharup(&current, &status);
+        REQUIRE(current.x == up.x);
+        REQUIRE(current.y == up.y);
+    }
+    SECTION("text color index is 1")
+    {
+        const Gint color{3};
+        gsettextcolorind(color);
+
+        ginqtextcolorind(&value, &status);
+        REQUIRE(value == color);
+    }
+    SECTION("text index")
+    {
+        const Gint index{3};
+        gsettextind(index);
+
+        ginqtextind(&value, &status);
+        REQUIRE(value == index);
+    }
+    SECTION("text alignment")
+    {
+        Gtxalign align{GAH_LEFT, GAV_BOTTOM};
+        gsettextalign(&align);
+
+        Gtxalign current{};
+        ginqtextalign(&current, &status);
+        REQUIRE(current.hor == align.hor);
+        REQUIRE(current.ver == align.ver);
+    }
+    SECTION("text font and precision")
+    {
+        Gtxfp font{2, GP_STROKE};
+        gsettextfontprec(&font);
+
+        Gtxfp current{};
+        ginqtextfontprec(&current, &status);
+        REQUIRE(current.font == font.font);
+        REQUIRE(current.prec == font.prec);
+    }
+    SECTION("char expansion factor")
+    {
+        const Gfloat expan{0.5f};
+        gsetcharexpan(expan);
+
+        Gfloat current{};
+        ginqcharexpan(&current, &status);
+        REQUIRE(current == expan);
+    }
+    SECTION("char spacing")
+    {
+        const Gfloat space{0.5f};
+        gsetcharspace(space);
+
+        Gfloat current{};
+        ginqcharspace(&current, &status);
+        REQUIRE(current == space);
+    }
+    SECTION("fill area interior style")
+    {
+        gsetfillstyle(GSOLID);
+
+        enum Gflinter current{};
+        ginqfillstyle(&current, &status);
+        REQUIRE(current == GSOLID);
+    }
+    SECTION("fill area interior style index")
+    {
+        gsetfillstyleind(2);
+
+        ginqfillstyleind(&value, &status);
+        REQUIRE(value == 2);
+    }
+    SECTION("fill area color index")
+    {
+        gsetfillcolorind(2);
+
+        ginqfillcolorind(&value, &status);
+        REQUIRE(value == 2);
+    }
+    SECTION("fill area index")
+    {
+        gsetfillind(2);
+
+        ginqfillind(&value, &status);
+        REQUIRE(value == 2);
+    }
+
+    REQUIRE(status == 0);
+
     gclosegks();
 }

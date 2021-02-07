@@ -60,6 +60,12 @@ typedef struct GGKSState_t
     Gfloat currentCharExpandFactor;
     Gfloat currentCharSpacing;
     // fill area
+    enum Gflinter currentFillStyle;
+    Gint currentFillStyleIndex;
+    Gint currentFillColorIndex;
+    Gint currentFillIndex;
+    struct Gpoint currentPatternSize;
+    struct Gpoint currentPatternRef;
     // segments
     // input queue
     // current event report
@@ -94,7 +100,14 @@ static GGKSState g_initialGksState =
     { GAH_NORMAL, GAV_NORMAL },
     { 1, GP_STRING },
     1.0f,
-    0.0f
+    0.0f,
+    // fill area
+    GHOLLOW,
+    1,
+    1,
+    1,
+    {1.0f, 1.0f},
+    {0.0f, 0.0f}
 };
 
 static GGKSState g_gksState;
@@ -218,6 +231,30 @@ void ginqcolourfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, struct Gcof
     *errorStatus = 0;
 }
 
+void ginqfillcolorind(Gint *value, Gint *errorStatus)
+{
+    *value = g_gksState.currentFillColorIndex;
+    *errorStatus = 0;
+}
+
+void ginqfillind(Gint *value, Gint *errorStatus)
+{
+    *value = g_gksState.currentFillIndex;
+    *errorStatus = 0;
+}
+
+void ginqfillstyle(enum Gflinter *value, Gint *errorStatus)
+{
+    *value = g_gksState.currentFillStyle;
+    *errorStatus = 0;
+}
+
+void ginqfillstyleind(Gint *value, Gint *errorStatus)
+{
+    *value = g_gksState.currentFillStyleIndex;
+    *errorStatus = 0;
+}
+
 void ginqlevelgks(enum Glevel *value, Gint *errorStatus)
 {
     *value = g_gksDescription.level;
@@ -283,6 +320,18 @@ void ginqopst(enum Gopst *value)
     *value = g_opState;
 }
 
+void ginqpatrefpt(struct Gpoint *value, Gint *errorStatus)
+{
+    *value = g_gksState.currentPatternRef;
+    *errorStatus = 0;
+}
+
+void ginqpatsize(struct Gpoint *value, Gint *errorStatus)
+{
+    *value = g_gksState.currentPatternSize;
+    *errorStatus = 0;
+}
+
 void ginqtextalign(struct Gtxalign *value, Gint *errorStatus)
 {
     *value = g_gksState.currentTextAlign;
@@ -336,6 +385,26 @@ void gsetcharup(struct Gpoint *value)
 void gsetclip(enum Gclip value)
 {
     g_gksState.clipping = value;
+}
+
+void gsetfillcolorind(Gint value)
+{
+    g_gksState.currentFillColorIndex = value;
+}
+
+void gsetfillind(Gint value)
+{
+    g_gksState.currentFillIndex = value;
+}
+
+void gsetfillstyle(enum Gflinter value)
+{
+    g_gksState.currentFillStyle = value;
+}
+
+void gsetfillstyleind(Gint value)
+{
+    g_gksState.currentFillStyleIndex = value;
 }
 
 void gsetlinecolorind(Gint value)
@@ -457,6 +526,10 @@ void gsetwsviewport(Gint wsId, struct Glimit *value)
 void gsetwswindow(Gint wsId, struct Glimit *value)
 {
     g_wsState[0].transform.current.w = *value;
+}
+
+void gcellarray(struct Grect *rect, struct Gidim *dims, Gint *colors)
+{
 }
 
 void gfillarea(Gint numPoints, struct Gpoint *points)

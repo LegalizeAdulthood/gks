@@ -10,6 +10,7 @@ extern "C"
 
 typedef char Gchar;
 typedef int Gint;
+typedef unsigned int Guint;
 typedef float Gfloat;
 typedef long Glong;
 typedef FILE Gfile;
@@ -33,6 +34,14 @@ enum Gcoavail
 {
     GCOLOUR = 1,
     GMONOCHROME
+};
+
+enum Gflinter
+{
+    GHOLLOW = 1,
+    GSOLID,
+    GPATTERN,
+    GHATCH
 };
 
 enum Glevel
@@ -115,6 +124,12 @@ enum Gwstus
 };
 
 
+struct Gidim
+{
+    Guint x_dim;
+    Guint y_dim;
+};
+
 struct Glimit
 {
     Gfloat xmin;
@@ -176,6 +191,12 @@ struct Gpoint
     Gfloat y;
 };
 
+struct Grect
+{
+    struct Gpoint ul;
+    struct Gpoint lr;
+};
+
 struct Gstrlist
 {
     Gint n_points;
@@ -228,6 +249,10 @@ void ginqcharspace(Gfloat *value, Gint *errorStatus);
 void ginqcharup(struct Gpoint *value, Gint *errorStatus);
 void ginqclip(struct Gcliprect *value, Gint *errorStatus);
 void ginqcolourfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, struct Gcofac *facil, Gint *errorStatus);
+void ginqfillcolorind(Gint *value, Gint *errorStatus);
+void ginqfillind(Gint *value, Gint *errorStatus);
+void ginqfillstyle(enum Gflinter *value, Gint *errorStatus);
+void ginqfillstyleind(Gint *value, Gint *errorStatus);
 void ginqlevelgks(enum Glevel *value, Gint *errorStatus);
 void ginqlinecolorind(Gint *value, Gint *errorStatus);
 void ginqlineind(Gint *value, Gint *errorStatus);
@@ -239,6 +264,8 @@ void ginqmarkertype(Gint *value, Gint *errorStatus);
 void ginqmaxntrannum(Gint *value, Gint *errorStatus);
 void ginqntran(Gint num, struct Gtran *value, Gint *errorStatus);
 void ginqopst(enum Gopst *value);
+void ginqpatrefpt(struct Gpoint *value, Gint *errorStatus);
+void ginqpatsize(struct Gpoint *value, Gint *errorStatus);
 void ginqtextalign(struct Gtxalign *value, Gint *errorStatus);
 void ginqtextcolorind(Gint *value, Gint *errorStatus);
 void ginqtextfontprec(struct Gtxfp *value, Gint *errorStatus);
@@ -250,6 +277,10 @@ void gsetcharheight(Gfloat value);
 void gsetcharspace(Gfloat value);
 void gsetcharup(struct Gpoint *value);
 void gsetclip(enum Gclip value);
+void gsetfillcolorind(Gint value);
+void gsetfillind(Gint value);
+void gsetfillstyle(enum Gflinter value);
+void gsetfillstyleind(Gint value);
 void gsetlinecolorind(Gint value);
 void gsetlineind(Gint value);
 void gsetlinetype(Gint value);
@@ -277,6 +308,7 @@ void ginqwstran(Gint wsId, struct Gwsti *value, Gint *errorStatus);
 void gsetwsviewport(Gint wsId, struct Glimit *value);
 void gsetwswindow(Gint wsId, struct Glimit *value);
 
+void gcellarray(struct Grect *rect, struct Gidim *dims, Gint *colors);
 void gfillarea(Gint numPoints, struct Gpoint *points);
 void gpolyline(Gint numPoints, struct Gpoint *points);
 void gpolymarker(Gint numPoints, struct Gpoint *points);
