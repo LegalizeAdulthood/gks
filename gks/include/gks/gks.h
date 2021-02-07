@@ -180,6 +180,7 @@ void ginqclip(struct Gcliprect *value, Gint *errorStatus);
 void ginqcolourfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, struct Gcofac *facil, Gint *errorStatus);
 void ginqlevelgks(enum Glevel *value);
 void ginqlinecolorind(Gint *value);
+void ginqlineind(Gint *value);
 void ginqlinetype(Gint *value);
 void ginqmaxntrannum(Gint *value, Gint *errorStatus);
 void ginqntran(Gint num, struct Gtran *value, Gint *errorStatus);
@@ -188,6 +189,7 @@ void ginqwsmaxnum(struct Gwsmax *value, Gint *errorStatus);
 
 void gsetclip(enum Gclip value);
 void gsetlinecolorind(Gint value);
+void gsetlineind(Gint value);
 void gsetlinetype(Gint value);
 void gsetviewport(Gint transform, struct Glimit *value);
 void gsetwindow(Gint transform, struct Glimit *value);

@@ -44,6 +44,7 @@ typedef struct GGKSState_t
     // polyline
     Gint currentLineType;
     Gint currentLineColorIndex;
+    Gint currentLineIndex;
     // polymarker
     // text
     // fill area
@@ -65,6 +66,7 @@ static GGKSState g_initialGksState =
     },
     GCLIP,
     GLN_SOLID,
+    1,
     1
 };
 
@@ -173,6 +175,11 @@ void ginqlinecolorind(Gint *value)
     *value = g_gksState.currentLineColorIndex;
 }
 
+void ginqlineind(Gint *value)
+{
+    *value = g_gksState.currentLineIndex;
+}
+
 void ginqlinetype(Gint *value)
 {
     *value = g_gksState.currentLineType;
@@ -209,6 +216,11 @@ void gsetclip(enum Gclip value)
 void gsetlinecolorind(Gint value)
 {
     g_gksState.currentLineColorIndex = value;
+}
+
+void gsetlineind(Gint value)
+{
+    g_gksState.currentLineIndex = value;
 }
 
 void gsetviewport(Gint transform, struct Glimit *value)

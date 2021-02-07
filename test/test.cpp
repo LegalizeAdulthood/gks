@@ -479,3 +479,28 @@ TEST_CASE("Set line color index", "[output]")
 
     gclosegks();
 }
+
+TEST_CASE("Initial line index is one", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    Gint value{};
+    ginqlineind(&value);
+
+    REQUIRE(value == 1);
+
+    gclosegks();
+}
+
+TEST_CASE("Set line index", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    gsetlineind(4);
+
+    Gint value{};
+    ginqlineind(&value);
+    REQUIRE(value == 4);
+
+    gclosegks();
+}
