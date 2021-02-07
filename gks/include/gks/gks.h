@@ -67,6 +67,40 @@ struct Gcofac
     Gint predefined;
 };
 
+struct Gescin
+{
+    union
+    {
+        struct Guesc_idatarec
+        {
+            Gint number_integer;
+            Gint number_float;
+            Gint number_strings;
+            Gint *list_integers;
+            Gfloat *list_floats;
+            Gint *list_string_lengths;
+            Gchar **list_strings;
+        } esc_idatarec;
+    };
+};
+
+struct Gescout
+{
+    union
+    {
+        struct Guesc_odatarec
+        {
+            Gint number_integer;
+            Gint number_float;
+            Gint number_strings;
+            Gint *list_integers;
+            Gfloat *list_floats;
+            Gint *list_string_lengths;
+            Gchar **list_strings;
+        } esc_odatarec;
+    };
+};
+
 struct Gstrlist
 {
     Gint n_points;
@@ -80,25 +114,26 @@ struct Gwsmax
     Gint assoc;
 };
 
+void gerrorhand(Gint errNum, Gint funcName, Gfile *errFile);
+
+void gescape(Gint function, struct Gescin *indata, Gint bufsize, struct Gescout *outdata, Gint *escoutSize);
+
 void gopengks(Gfile *errfile, Glong memory);
 void gclosegks();
 
-void ginqopst(enum Gopst *value);
+void ginqavailwstypes(Gint bufSize, Gint start, struct Gstrlist *wsTypes, Gint *numTypes, Gint *errorStatus);
+void ginqcolourfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, struct Gcofac *facil, Gint *errorStatus);
 void ginqlevelgks(enum Glevel *value);
 void ginqmaxntrannum(Gint *value, Gint *errorStatus);
+void ginqopst(enum Gopst *value);
 void ginqwsmaxnum(struct Gwsmax *value, Gint *errorStatus);
-void ginqcolourfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, struct Gcofac *facil, Gint *errorStatus);
-
-void ginqavailwstypes(Gint bufSize, Gint start, struct Gstrlist *wsTypes, Gint *numTypes, Gint *errorStatus);
-
-void gerrorhand(Gint errNum, Gint funcName, Gfile *errFile);
 
 void gopenws(Gint wsId, const Gconn *connId, Gwstype wsType);
 void gclosews(Gint wsId);
 
 void gactivatews(Gint wsId);
-void gdeactivatews(Gint wsId);
 void gclearws(Gint wsId, enum Gclrflag flag);
+void gdeactivatews(Gint wsId);
 void gupdatews(Gint wsId, enum Gregen flag);
 
 #if defined(__cplusplus)

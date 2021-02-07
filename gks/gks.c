@@ -65,6 +65,15 @@ typedef struct GWSState_t
 
 static GWSState g_wsState[1];
 
+void gerrorhand(Gint errNum, Gint funcName, Gfile *errFile)
+{
+    fprintf(errFile, "GKS error %d in function %d\n", errNum, funcName);
+}
+
+void gescape(Gint function, struct Gescin *indata, Gint bufsize, struct Gescout *outdata, Gint *escoutSize)
+{
+}
+
 void gopengks(Gfile *errfile, Glong memory)
 {
     g_opState = GGKOP;
@@ -76,9 +85,15 @@ void gclosegks()
     g_opState = GGKCL;
 }
 
-void ginqopst(enum Gopst *value)
+void ginqavailwstypes(Gint bufSize, Gint start, struct Gstrlist *wsTypes, Gint *numTypes, Gint *errorStatus)
 {
-    *value = g_opState;
+    *numTypes = g_gksDescription.numAvailWSTypes;
+    wsTypes->n_points = *numTypes;
+    wsTypes->strings = g_gksDescription.wsTypes;
+}
+
+void ginqcolourfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, struct Gcofac *facil, Gint *errorStatus)
+{
 }
 
 void ginqlevelgks(enum Glevel *value)
@@ -92,26 +107,15 @@ void ginqmaxntrannum(Gint *value, Gint *errorStatus)
     *errorStatus = 0;
 }
 
+void ginqopst(enum Gopst *value)
+{
+    *value = g_opState;
+}
+
 void ginqwsmaxnum(struct Gwsmax *value, Gint *errorStatus)
 {
     *value = g_gksDescription.wsmax;
     *errorStatus = 0;
-}
-
-void ginqcolourfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, struct Gcofac *facil, Gint *errorStatus)
-{
-}
-
-void ginqavailwstypes(Gint bufSize, Gint start, struct Gstrlist *wsTypes, Gint *numTypes, Gint *errorStatus)
-{
-    *numTypes = g_gksDescription.numAvailWSTypes;
-    wsTypes->n_points = *numTypes;
-    wsTypes->strings = g_gksDescription.wsTypes;
-}
-
-void gerrorhand(Gint errNum, Gint funcName, Gfile *errFile)
-{
-    fprintf(errFile, "GKS error %d in function %d\n", errNum, funcName);
 }
 
 void gopenws(Gint wsId, const Gchar *connId, Gint wsType)
