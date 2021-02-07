@@ -51,6 +51,14 @@ enum Glevel
     GL2C
 };
 
+enum Glntype
+{
+    GLN_SOLID = 1,
+    GLN_DASHED = 2,
+    GLN_DOTTED = 3,
+    GLN_DASHDOT = 4
+};
+
 enum Gopst
 {
     GGKCL,
@@ -168,17 +176,19 @@ void gopengks(Gfile *errfile, Glong memory);
 void gclosegks(void);
 
 void ginqavailwstypes(Gint bufSize, Gint start, struct Gstrlist *wsTypes, Gint *numTypes, Gint *errorStatus);
-void ginqclip(struct Gcliprect *clipping, Gint *errorStatus);
+void ginqclip(struct Gcliprect *value, Gint *errorStatus);
 void ginqcolourfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, struct Gcofac *facil, Gint *errorStatus);
 void ginqlevelgks(enum Glevel *value);
+void ginqlinetype(Gint *value);
 void ginqmaxntrannum(Gint *value, Gint *errorStatus);
-void ginqntran(Gint num, struct Gtran *tran, Gint *errorStatus);
+void ginqntran(Gint num, struct Gtran *value, Gint *errorStatus);
 void ginqopst(enum Gopst *value);
 void ginqwsmaxnum(struct Gwsmax *value, Gint *errorStatus);
 
-void gsetclip(enum Gclip indicator);
-void gsetviewport(Gint transform, struct Glimit *viewport);
-void gsetwindow(Gint transform, struct Glimit *window);
+void gsetclip(enum Gclip value);
+void gsetlinetype(Gint value);
+void gsetviewport(Gint transform, struct Glimit *value);
+void gsetwindow(Gint transform, struct Glimit *value);
 
 void gopenws(Gint wsId, const Gconn *connId, Gwstype wsType);
 void gclosews(Gint wsId);
@@ -188,10 +198,10 @@ void gclearws(Gint wsId, enum Gclrflag flag);
 void gdeactivatews(Gint wsId);
 void gupdatews(Gint wsId, enum Gregen flag);
 
-void ginqwstran(Gint wsId, struct Gwsti *transform, Gint *errorStatus);
+void ginqwstran(Gint wsId, struct Gwsti *value, Gint *errorStatus);
 
-void gsetwsviewport(Gint wsId, struct Glimit *viewport);
-void gsetwswindow(Gint wsId, struct Glimit *window);
+void gsetwsviewport(Gint wsId, struct Glimit *value);
+void gsetwswindow(Gint wsId, struct Glimit *value);
 
 void gpolyline(Gint numPoints, struct Gpoint *points);
 

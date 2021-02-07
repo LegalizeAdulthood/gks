@@ -42,6 +42,7 @@ typedef struct GGKSState_t
     struct Gtran transforms[MAX_NUM_TRANSFORMS];
     enum Gclip clipping;
     // polyline
+    Gint currentLineType;
     // polymarker
     // text
     // fill area
@@ -49,12 +50,6 @@ typedef struct GGKSState_t
     // input queue
     // current event report
 } GGKSState;
-
-static const struct Gtran identity =
-{
-    { 0.0f, 1.0f, 0.0f, 1.0f },
-    { 0.0f, 1.0f, 0.0f, 1.0f }
-};
 
 static GGKSState g_initialGksState =
 {
@@ -67,7 +62,8 @@ static GGKSState g_initialGksState =
             { 0.0f, 1.0f, 0.0f, 1.0f }
         }
     },
-    GCLIP
+    GCLIP,
+    GLN_SOLID
 };
 
 static GGKSState g_gksState;
@@ -150,14 +146,14 @@ void ginqavailwstypes(Gint bufSize, Gint start, struct Gstrlist *wsTypes, Gint *
     wsTypes->strings = g_gksDescription.wsTypes;
 }
 
-void ginqclip(struct Gcliprect *clipping, Gint *errorStatus)
+void ginqclip(struct Gcliprect *value, Gint *errorStatus)
 {
-    clipping->ind = g_gksState.clipping;
+    value->ind = g_gksState.clipping;
     const struct Glimit identity =
     {
         0.0f, 1.0f, 0.0f, 1.0f
     };
-    clipping->rec = identity;
+    value->rec = identity;
     *errorStatus = 0;
 }
 
@@ -170,15 +166,20 @@ void ginqlevelgks(enum Glevel *value)
     *value = g_gksDescription.level;
 }
 
+void ginqlinetype(Gint *value)
+{
+    *value = g_gksState.currentLineType;
+}
+
 void ginqmaxntrannum(Gint *value, Gint *errorStatus)
 {
     *value = g_gksDescription.numTrans;
     *errorStatus = 0;
 }
 
-void ginqntran(Gint num, struct Gtran *tran, Gint *errorStatus)
+void ginqntran(Gint num, struct Gtran *value, Gint *errorStatus)
 {
-    *tran = g_gksState.transforms[num];
+    *value = g_gksState.transforms[num];
     *errorStatus = 0;
 }
 
@@ -193,19 +194,19 @@ void ginqwsmaxnum(struct Gwsmax *value, Gint *errorStatus)
     *errorStatus = 0;
 }
 
-void gsetclip(enum Gclip indicator)
+void gsetclip(enum Gclip value)
 {
-    g_gksState.clipping = indicator;
+    g_gksState.clipping = value;
 }
 
-void gsetviewport(Gint transform, struct Glimit *viewport)
+void gsetviewport(Gint transform, struct Glimit *value)
 {
-    g_gksState.transforms[transform].v = *viewport;
+    g_gksState.transforms[transform].v = *value;
 }
 
-void gsetwindow(Gint transform, struct Glimit *window)
+void gsetwindow(Gint transform, struct Glimit *value)
 {
-    g_gksState.transforms[transform].w = *window;
+    g_gksState.transforms[transform].w = *value;
 }
 
 void gopenws(Gint wsId, const Gconn *connId, Gwstype wsType)
@@ -248,22 +249,27 @@ void gupdatews(Gint wsId, enum Gregen flag)
 {
 }
 
-void ginqwstran(Gint wsId, struct Gwsti *transform, Gint *errorStatus)
+void ginqwstran(Gint wsId, struct Gwsti *value, Gint *errorStatus)
 {
-    *transform = g_wsState[0].transform;
+    *value = g_wsState[0].transform;
     *errorStatus = 0;
 }
 
-void gsetwsviewport(Gint wsId, struct Glimit *viewport)
+void gsetwsviewport(Gint wsId, struct Glimit *value)
 {
-    g_wsState[0].transform.current.v = *viewport;
+    g_wsState[0].transform.current.v = *value;
 }
 
-void gsetwswindow(Gint wsId, struct Glimit *window)
+void gsetwswindow(Gint wsId, struct Glimit *value)
 {
-    g_wsState[0].transform.current.w = *window;
+    g_wsState[0].transform.current.w = *value;
 }
 
 void gpolyline(Gint numPoints, struct Gpoint *points)
 {
+}
+
+void gsetlinetype(Gint value)
+{
+    g_gksState.currentLineType = value;
 }

@@ -429,3 +429,28 @@ TEST_CASE("Polyline", "[output]")
     gclosews(wsId);
     gclosegks();
 }
+
+TEST_CASE("Initial current line type is solid", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    Gint value{};
+    ginqlinetype(&value);
+
+    REQUIRE(value == GLN_SOLID);
+
+    gclosegks();
+}
+
+TEST_CASE("Set current line type", "[output]")
+{
+    gopengks(stderr, 0L);
+
+    gsetlinetype(GLN_DASHED);
+
+    Gint value{};
+    ginqlinetype(&value);
+    REQUIRE(value == GLN_DASHED);
+
+    gclosegks();
+}
