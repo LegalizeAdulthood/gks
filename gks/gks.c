@@ -536,6 +536,10 @@ void gfillarea(Gint numPoints, struct Gpoint *points)
 {
 }
 
+void ggdp(Gint numPoints, struct Gpoint *points, Gint gdpId, struct Ggdprec *data)
+{
+}
+
 void gpolyline(Gint numPoints, struct Gpoint *points)
 {
 }

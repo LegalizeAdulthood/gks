@@ -185,6 +185,25 @@ struct Gescout
     };
 };
 
+struct Ggdp_datarec
+{
+    Gint number_integer;
+    Gint number_float;
+    Gint number_strings;
+    Gint *list_integers;
+    Gfloat *list_floats;
+    Gint *list_string_lengths;
+    Gchar **list_strings;
+};
+
+struct Ggdprec
+{
+    union
+    {
+        struct Ggdp_datarec gugdp_datarec;
+    };
+};
+
 struct Gpoint
 {
     Gfloat x;
@@ -310,6 +329,7 @@ void gsetwswindow(Gint wsId, struct Glimit *value);
 
 void gcellarray(struct Grect *rect, struct Gidim *dims, Gint *colors);
 void gfillarea(Gint numPoints, struct Gpoint *points);
+void ggdp(Gint numPoints, struct Gpoint *points, Gint gdpId, struct Ggdprec *data);
 void gpolyline(Gint numPoints, struct Gpoint *points);
 void gpolymarker(Gint numPoints, struct Gpoint *points);
 void gtext(struct Gpoint *start, const Gchar *text);

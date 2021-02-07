@@ -472,6 +472,17 @@ TEST_CASE("Output primitives", "[output]")
         Gint colors[] = { 0, 1 };
         gcellarray(&rect, &dim, colors);
     }
+    SECTION("Generalized Drawing Primitive")
+    {
+        struct Gpoint points[] =
+        {
+            {0.1f, 0.1f},
+            {0.2f, 0.2f}
+        };
+        Gint gdpId = 1;
+        Ggdprec data{};
+        ggdp(sizeof(points)/sizeof(points[0]), points, gdpId, &data);
+    }
 
     gclosews(wsId);
     gclosegks();
