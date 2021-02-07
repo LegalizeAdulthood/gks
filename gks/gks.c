@@ -33,11 +33,13 @@ static GGKSDescription g_gksDescription =
     MAX_NUM_TRANSFORMS
 };
 
+
 typedef struct GGKSState_t
 {
     Gint openWs[MAX_OPEN_WS];
     Gint activeWs[MAX_ACTIVE_WS];
     Gint currentTransform;
+    struct Gtran transforms[MAX_NUM_TRANSFORMS];
     // normalization transformation
     // polyline
     // polymarker
@@ -48,11 +50,23 @@ typedef struct GGKSState_t
     // current event report
 } GGKSState;
 
+static const struct Gtran identity =
+{
+    { 0.0f, 1.0f, 0.0f, 1.0f },
+    { 0.0f, 1.0f, 0.0f, 1.0f }
+};
+
 static GGKSState g_initialGksState =
 {
     {0},
     {0},
-    0
+    0,
+    {
+        {
+            { 0.0f, 1.0f, 0.0f, 1.0f },
+            { 0.0f, 1.0f, 0.0f, 1.0f }
+        }
+    }
 };
 
 static GGKSState g_gksState;
@@ -80,7 +94,7 @@ void gopengks(Gfile *errfile, Glong memory)
     g_gksState = g_initialGksState;
 }
 
-void gclosegks()
+void gclosegks(void)
 {
     g_opState = GGKCL;
 }
@@ -107,6 +121,12 @@ void ginqmaxntrannum(Gint *value, Gint *errorStatus)
     *errorStatus = 0;
 }
 
+void ginqntran(Gint num, struct Gtran *tran, Gint *errorStatus)
+{
+    *tran = g_gksState.transforms[num];
+    *errorStatus = 0;
+}
+
 void ginqopst(enum Gopst *value)
 {
     *value = g_opState;
@@ -118,7 +138,12 @@ void ginqwsmaxnum(struct Gwsmax *value, Gint *errorStatus)
     *errorStatus = 0;
 }
 
-void gopenws(Gint wsId, const Gchar *connId, Gint wsType)
+void gsetwindow(Gint transform, struct Glimit *window)
+{
+    g_gksState.transforms[transform].w = *window;
+}
+
+void gopenws(Gint wsId, const Gconn *connId, Gwstype wsType)
 {
     g_opState = GWSOP;
 }

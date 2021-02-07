@@ -17,6 +17,7 @@ typedef FILE Gfile;
 typedef Gchar Gconn;
 typedef Gint Gwstype;
 
+
 enum Gclrflag
 {
     GCONDITIONALLY,
@@ -60,6 +61,7 @@ enum Gregen
     GPERFORM
 };
 
+
 struct Gcofac
 {
     Gint colours;
@@ -101,10 +103,24 @@ struct Gescout
     };
 };
 
+struct Glimit
+{
+    Gfloat xmin;
+    Gfloat xmax;
+    Gfloat ymin;
+    Gfloat ymax;
+};
+
 struct Gstrlist
 {
     Gint n_points;
     const Gchar **strings;
+};
+
+struct Gtran
+{
+    struct Glimit w;
+    struct Glimit v;
 };
 
 struct Gwsmax
@@ -116,17 +132,20 @@ struct Gwsmax
 
 void gerrorhand(Gint errNum, Gint funcName, Gfile *errFile);
 
-void gescape(Gint function, struct Gescin *indata, Gint bufsize, struct Gescout *outdata, Gint *escoutSize);
+void gescape(Gint function, struct Gescin *inData, Gint bufSize, struct Gescout *outData, Gint *escOutSize);
 
 void gopengks(Gfile *errfile, Glong memory);
-void gclosegks();
+void gclosegks(void);
 
 void ginqavailwstypes(Gint bufSize, Gint start, struct Gstrlist *wsTypes, Gint *numTypes, Gint *errorStatus);
 void ginqcolourfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, struct Gcofac *facil, Gint *errorStatus);
 void ginqlevelgks(enum Glevel *value);
 void ginqmaxntrannum(Gint *value, Gint *errorStatus);
+void ginqntran(Gint num, struct Gtran *tran, Gint *errorStatus);
 void ginqopst(enum Gopst *value);
 void ginqwsmaxnum(struct Gwsmax *value, Gint *errorStatus);
+
+void gsetwindow(Gint transform, struct Glimit *window);
 
 void gopenws(Gint wsId, const Gconn *connId, Gwstype wsType);
 void gclosews(Gint wsId);

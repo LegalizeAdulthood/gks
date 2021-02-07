@@ -191,6 +191,52 @@ TEST_CASE("Number of normalization transforms", "[gks]")
     gclosegks();
 }
 
+TEST_CASE("Normalization transform zero is identity", "[gks]")
+{
+    gopengks(stderr, 0L);
+
+    Gtran transform{};
+    Gint status{};
+    ginqntran(0, &transform, &status);
+
+    REQUIRE(status == 0);
+    REQUIRE(transform.w.xmin == 0.0f);
+    REQUIRE(transform.w.xmax == 1.0f);
+    REQUIRE(transform.w.ymin == 0.0f);
+    REQUIRE(transform.w.ymax == 1.0f);
+    REQUIRE(transform.v.xmin == 0.0f);
+    REQUIRE(transform.v.xmax == 1.0f);
+    REQUIRE(transform.v.ymin == 0.0f);
+    REQUIRE(transform.v.ymax == 1.0f);
+
+    gclosegks();
+}
+
+TEST_CASE("Set window", "[gks]")
+{
+    gopengks(stderr, 0L);
+
+    const Gint tranId = 1;
+    const Gfloat xmin{0.2f};
+    const Gfloat xmax{0.5f};
+    const Gfloat ymin{0.4f};
+    const Gfloat ymax{0.6f};
+    Glimit window{xmin, xmax, ymin, ymax};
+    gsetwindow(tranId, &window);
+
+    Gtran transform{};
+    Gint status{};
+    ginqntran(tranId, &transform, &status);
+    REQUIRE(status == 0);
+    REQUIRE(transform.w.xmin == xmin);
+    REQUIRE(transform.w.xmax == xmax);
+    REQUIRE(transform.w.ymin == ymin);
+    REQUIRE(transform.w.ymax == ymax);
+
+    gclosegks();
+}
+
+
 TEST_CASE("Maximum workstation numbers", "[gks]")
 {
     gopengks(stderr, 0L);
