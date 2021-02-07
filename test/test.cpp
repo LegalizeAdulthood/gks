@@ -922,3 +922,25 @@ TEST_CASE("Set char spacing", "[output]")
 
     gclosegks();
 }
+
+TEST_CASE("Fill area", "[output]")
+{
+    gopengks(stderr, 0L);
+    Gint wsId{1};
+    const Gchar *connId{"tek4105"};
+    Gint wsType{};
+    gopenws(wsId, connId, wsType);
+    gactivatews(wsId);
+
+    Gpoint points[] = 
+    {
+        {0.25f, 0.25f},
+        {0.50f, 0.25f},
+        {0.50f, 0.50f},
+        {0.25f, 0.50f}
+    };
+    gfillarea(sizeof(points)/sizeof(points[0]), points);
+
+    gclosews(wsId);
+    gclosegks();
+}

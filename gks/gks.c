@@ -459,6 +459,10 @@ void gsetwswindow(Gint wsId, struct Glimit *value)
     g_wsState[0].transform.current.w = *value;
 }
 
+void gfillarea(Gint numPoints, struct Gpoint *points)
+{
+}
+
 void gpolyline(Gint numPoints, struct Gpoint *points)
 {
 }
@@ -467,6 +471,6 @@ void gpolymarker(Gint numPoints, struct Gpoint *points)
 {
 }
 
-void gtext(struct Gpoint *start, Gchar *text)
+void gtext(struct Gpoint *start, const Gchar *text)
 {
 }
