@@ -18,6 +18,12 @@ typedef FILE Gfile;
 typedef Gchar Gconn;
 typedef Gint Gwstype;
 
+enum Gasf
+{
+    GBUNDLED = 1,
+    GINDIVIDUAL
+};
+
 enum Gclip
 {
     GNOCLIP = 1,
@@ -124,6 +130,23 @@ enum Gwstus
 };
 
 
+struct Gasfs
+{
+    enum Gasf ln_type;
+    enum Gasf ln_width;
+    enum Gasf ln_color;
+    enum Gasf mk_type;
+    enum Gasf mk_size;
+    enum Gasf mk_color;
+    enum Gasf tx_fp;
+    enum Gasf tx_exp;
+    enum Gasf tx_space;
+    enum Gasf tx_color;
+    enum Gasf fl_inter;
+    enum Gasf fl_style;
+    enum Gasf fl_color;
+};
+
 struct Gidim
 {
     Guint x_dim;
@@ -142,6 +165,13 @@ struct Gcliprect
 {
     enum Gclip ind;
     struct Glimit rec;
+};
+
+struct Gcobundl
+{
+    Gfloat red;
+    Gfloat green;
+    Gfloat blue;
 };
 
 struct Gcofac
@@ -204,6 +234,12 @@ struct Ggdprec
     };
 };
 
+struct Gintlist
+{
+    Gint number;
+    Gint *integers;
+};
+
 struct Gpoint
 {
     Gfloat x;
@@ -219,7 +255,7 @@ struct Grect
 struct Gstrlist
 {
     Gint n_points;
-    const Gchar **strings;
+    Gchar **strings;
 };
 
 struct Gtran
@@ -261,6 +297,7 @@ void gescape(Gint function, struct Gescin *inData, Gint bufSize, struct Gescout 
 void gopengks(Gfile *errfile, Glong memory);
 void gclosegks(void);
 
+void ginqasf(struct Gasfs *value, Gint *errorStatus);
 void ginqavailwstypes(Gint bufSize, Gint start, struct Gstrlist *wsTypes, Gint *numTypes, Gint *errorStatus);
 void ginqcharexpan(Gfloat *value, Gint *errorStatus);
 void ginqcharheight(Gfloat *value, Gint *errorStatus);
@@ -282,6 +319,7 @@ void ginqmarkersize(Gfloat *value, Gint *errorStatus);
 void ginqmarkertype(Gint *value, Gint *errorStatus);
 void ginqmaxntrannum(Gint *value, Gint *errorStatus);
 void ginqntran(Gint num, struct Gtran *value, Gint *errorStatus);
+void ginqopenws(Gint maxIds, Gint start, struct Gintlist *wsids, Gint *actualIds, Gint *errorStatus);
 void ginqopst(enum Gopst *value);
 void ginqpatrefpt(struct Gpoint *value, Gint *errorStatus);
 void ginqpatsize(struct Gpoint *value, Gint *errorStatus);
@@ -291,6 +329,7 @@ void ginqtextfontprec(struct Gtxfp *value, Gint *errorStatus);
 void ginqtextind(Gint *value, Gint *errorStatus);
 void ginqwsmaxnum(struct Gwsmax *value, Gint *errorStatus);
 
+void gsetasf(struct Gasfs *value);
 void gsetcharexpan(Gfloat value);
 void gsetcharheight(Gfloat value);
 void gsetcharspace(Gfloat value);
@@ -322,8 +361,10 @@ void gclearws(Gint wsId, enum Gclrflag flag);
 void gdeactivatews(Gint wsId);
 void gupdatews(Gint wsId, enum Gregen flag);
 
+void ginqcolorrep(Gint wsId, Gint index, struct Gcobundl *value);
 void ginqwstran(Gint wsId, struct Gwsti *value, Gint *errorStatus);
 
+void gsetcolorrep(Gint wsId, Gint index, struct Gcobundl *value);
 void gsetwsviewport(Gint wsId, struct Glimit *value);
 void gsetwswindow(Gint wsId, struct Glimit *value);
 

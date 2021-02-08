@@ -3,6 +3,7 @@
 #include <catch2/catch.hpp>
 
 #include <cstdio>
+#include <string>
 
 inline enum Gopst getGksOpState()
 {
@@ -20,7 +21,7 @@ TEST_CASE("Opened", "[gks]")
 {
     gopengks(stderr, 0L);
 
-    REQUIRE( getGksOpState() == GGKOP );
+    REQUIRE(getGksOpState() == GGKOP);
 
     gclosegks();
 }
@@ -28,15 +29,13 @@ TEST_CASE("Opened", "[gks]")
 TEST_CASE("Opened and closed", "[gks]")
 {
     gopengks(stderr, 0L);
-    const Gopst opened = getGksOpState();
-    gclosegks();
-    const Gopst closed = getGksOpState();
 
-    REQUIRE( opened == GGKOP );
-    REQUIRE( closed == GGKCL );
+    gclosegks();
+
+    REQUIRE(getGksOpState() == GGKCL);
 }
 
-TEST_CASE("Operating level", "[gks]")
+TEST_CASE("Operating level is Ma", "[gks]")
 {
     gopengks(stderr, 0L);
 
@@ -55,151 +54,125 @@ TEST_CASE("Error handling", "[gks]")
     gerrorhand(1, 1, stderr);
 }
 
-TEST_CASE("Workstation types", "[gks]")
+TEST_CASE("GKS state list", "[gks]")
 {
     gopengks(stderr, 0L);
-
-    Gint bufSize{};
-    Gint start{};
-    Gstrlist wsTypes{};
-    Gint numTypes{};
     Gint status{-1};
-    ginqavailwstypes(bufSize, start, &wsTypes, &numTypes, &status);
+
+    SECTION("Availale workstation types")
+    {
+        using namespace std::string_literals;
+        const Gint numWsTypes{10};
+        char buffer[numWsTypes*80]{};
+        Gint bufSize{sizeof(buffer)};
+        Gint start{};
+        char *wsTypeStrings[numWsTypes]{};
+        for (int i = 0; i < numWsTypes; ++i)
+        {
+            wsTypeStrings[i] = &buffer[i*80];
+        }
+        Gstrlist wsTypes{numWsTypes, wsTypeStrings};
+        Gint numAvailTypes{};
+        ginqavailwstypes(bufSize, start, &wsTypes, &numAvailTypes, &status);
+
+        REQUIRE(numAvailTypes == 1);
+        REQUIRE(wsTypes.strings[0] == "tek4105"s);
+    }
+    SECTION("Number of normalization transforms")
+    {
+        Gint numTransforms{-1};
+        ginqmaxntrannum(&numTransforms, &status);
+
+        REQUIRE(numTransforms == 2);
+    }
+    SECTION("Normalization transform zero is identity")
+    {
+        Gtran transform{};
+        ginqntran(0, &transform, &status);
+
+        REQUIRE(transform.w.xmin == 0.0f);
+        REQUIRE(transform.w.xmax == 1.0f);
+        REQUIRE(transform.w.ymin == 0.0f);
+        REQUIRE(transform.w.ymax == 1.0f);
+        REQUIRE(transform.v.xmin == 0.0f);
+        REQUIRE(transform.v.xmax == 1.0f);
+        REQUIRE(transform.v.ymin == 0.0f);
+        REQUIRE(transform.v.ymax == 1.0f);
+    }
+    SECTION("Set viewport")
+    {
+        const Gint tranId = 1;
+        const Gfloat xmin{0.2f};
+        const Gfloat xmax{0.5f};
+        const Gfloat ymin{0.4f};
+        const Gfloat ymax{0.6f};
+        Glimit viewport{xmin, xmax, ymin, ymax};
+        gsetviewport(tranId, &viewport);
+
+        Gtran transform{};
+        ginqntran(tranId, &transform, &status);
+        REQUIRE(transform.v.xmin == xmin);
+        REQUIRE(transform.v.xmax == xmax);
+        REQUIRE(transform.v.ymin == ymin);
+        REQUIRE(transform.v.ymax == ymax);
+    }
+    SECTION("Set window")
+    {
+        const Gint tranId = 1;
+        const Gfloat xmin{0.2f};
+        const Gfloat xmax{0.5f};
+        const Gfloat ymin{0.4f};
+        const Gfloat ymax{0.6f};
+        Glimit window{xmin, xmax, ymin, ymax};
+        gsetwindow(tranId, &window);
+
+        Gtran transform{};
+        ginqntran(tranId, &transform, &status);
+        REQUIRE(transform.w.xmin == xmin);
+        REQUIRE(transform.w.xmax == xmax);
+        REQUIRE(transform.w.ymin == ymin);
+        REQUIRE(transform.w.ymax == ymax);
+    }
+    SECTION("Maximum workstation numbers")
+    {
+        Gwsmax value{};
+        ginqwsmaxnum(&value, &status);
+
+        REQUIRE(value.open == 1);
+        REQUIRE(value.active == 1);
+        REQUIRE(value.assoc == 0);
+    }
+    SECTION("Initial clipping indicator")
+    {
+        Gcliprect clipping{};
+        ginqclip(&clipping, &status);
+
+        REQUIRE(clipping.ind == GCLIP);
+        REQUIRE(clipping.rec.xmin == 0.0f);
+        REQUIRE(clipping.rec.xmax == 1.0f);
+        REQUIRE(clipping.rec.ymin == 0.0f);
+        REQUIRE(clipping.rec.ymax == 1.0f);
+    }
+    SECTION("Workstation color facilities")
+    {
+        Gwstype wsType{};
+        Gint buffSize{};
+        Gint facilSize{};
+        Gcofac facil{};
+        ginqcolourfacil(wsType, buffSize, &facilSize, &facil, &status);
+    }
+    SECTION("Set of open workstations")
+    {
+        const Gint numBuffIds = 10;
+        Gint ids[numBuffIds]{};
+        Gintlist idList{numBuffIds, ids};
+        Gint numIds{-1};
+        ginqopenws(numBuffIds, 0, &idList, &numIds, &status);
+
+        REQUIRE(numIds == 0);
+    }
 
     REQUIRE(status == 0);
-    REQUIRE(numTypes >= 1);
-
-    gclosegks();
-}
-
-TEST_CASE("Number of normalization transforms", "[gks]")
-{
-    gopengks(stderr, 0L);
-
-    Gint numTransforms{-1};
-    Gint status{0};
-    ginqmaxntrannum(&numTransforms, &status);
-
-    REQUIRE(status == 0);
-    REQUIRE(numTransforms == 2);
-
-    gclosegks();
-}
-
-TEST_CASE("Normalization transform zero is identity", "[gks]")
-{
-    gopengks(stderr, 0L);
-
-    Gtran transform{};
-    Gint status{-1};
-    ginqntran(0, &transform, &status);
-
-    REQUIRE(status == 0);
-    REQUIRE(transform.w.xmin == 0.0f);
-    REQUIRE(transform.w.xmax == 1.0f);
-    REQUIRE(transform.w.ymin == 0.0f);
-    REQUIRE(transform.w.ymax == 1.0f);
-    REQUIRE(transform.v.xmin == 0.0f);
-    REQUIRE(transform.v.xmax == 1.0f);
-    REQUIRE(transform.v.ymin == 0.0f);
-    REQUIRE(transform.v.ymax == 1.0f);
-
-    gclosegks();
-}
-
-TEST_CASE("Set viewport", "[gks]")
-{
-    gopengks(stderr, 0L);
-
-    const Gint tranId = 1;
-    const Gfloat xmin{0.2f};
-    const Gfloat xmax{0.5f};
-    const Gfloat ymin{0.4f};
-    const Gfloat ymax{0.6f};
-    Glimit viewport{xmin, xmax, ymin, ymax};
-    gsetviewport(tranId, &viewport);
-
-    Gtran transform{};
-    Gint status{-1};
-    ginqntran(tranId, &transform, &status);
-    REQUIRE(status == 0);
-    REQUIRE(transform.v.xmin == xmin);
-    REQUIRE(transform.v.xmax == xmax);
-    REQUIRE(transform.v.ymin == ymin);
-    REQUIRE(transform.v.ymax == ymax);
-
-    gclosegks();
-}
-
-TEST_CASE("Set window", "[gks]")
-{
-    gopengks(stderr, 0L);
-
-    const Gint tranId = 1;
-    const Gfloat xmin{0.2f};
-    const Gfloat xmax{0.5f};
-    const Gfloat ymin{0.4f};
-    const Gfloat ymax{0.6f};
-    Glimit window{xmin, xmax, ymin, ymax};
-    gsetwindow(tranId, &window);
-
-    Gtran transform{};
-    Gint status{-1};
-    ginqntran(tranId, &transform, &status);
-    REQUIRE(status == 0);
-    REQUIRE(transform.w.xmin == xmin);
-    REQUIRE(transform.w.xmax == xmax);
-    REQUIRE(transform.w.ymin == ymin);
-    REQUIRE(transform.w.ymax == ymax);
-
-    gclosegks();
-}
-
-TEST_CASE("Maximum workstation numbers", "[gks]")
-{
-    gopengks(stderr, 0L);
-
-    Gwsmax value{};
-    Gint status{-1};
-    ginqwsmaxnum(&value, &status);
-
-    REQUIRE(status == 0);
-    REQUIRE(value.open == 1);
-    REQUIRE(value.active == 1);
-    REQUIRE(value.assoc == 0);
-
-    gclosegks();
-}
-
-TEST_CASE("Inquire workstation color facilities", "[gks]")
-{
-    gopengks(stderr, 0L);
-
-    Gwstype wsType{};
-    Gint buffSize{};
-    Gint facilSize{};
-    Gcofac facil{};
-    Gint status{-1};
-    ginqcolourfacil(wsType, buffSize, &facilSize, &facil, &status);
-
-    REQUIRE(status == 0);
-
-    gclosegks();
-}
-
-TEST_CASE("Initial clipping indicator", "[gks]")
-{
-    gopengks(stderr, 0L);
-
-    Gcliprect clipping{};
-    Gint status{-1};
-    ginqclip(&clipping, &status);
-
-    REQUIRE(clipping.ind == GCLIP);
-    REQUIRE(clipping.rec.xmin == 0.0f);
-    REQUIRE(clipping.rec.xmax == 1.0f);
-    REQUIRE(clipping.rec.ymin == 0.0f);
-    REQUIRE(clipping.rec.ymax == 1.0f);
 
     gclosegks();
 }
@@ -462,12 +435,12 @@ TEST_CASE("Output primitives", "[output]")
     {
         struct Grect rect =
         {
-            {0.25f, 0.75f},
-            {0.75f, 0.25f}
+        {0.25f, 0.75f},
+        {0.75f, 0.25f}
         };
         struct Gidim dim =
         {
-            128, 128
+        128, 128
         };
         Gint colors[] = { 0, 1 };
         gcellarray(&rect, &dim, colors);
@@ -476,14 +449,15 @@ TEST_CASE("Output primitives", "[output]")
     {
         struct Gpoint points[] =
         {
-            {0.1f, 0.1f},
-            {0.2f, 0.2f}
+        {0.1f, 0.1f},
+        {0.2f, 0.2f}
         };
         Gint gdpId = 1;
         Ggdprec data{};
         ggdp(sizeof(points)/sizeof(points[0]), points, gdpId, &data);
     }
 
+    gdeactivatews(wsId);
     gclosews(wsId);
     gclosegks();
 }
@@ -634,6 +608,25 @@ TEST_CASE("Initial global attribute values", "[output]")
 
         REQUIRE(refPt.x == 0.0f);
         REQUIRE(refPt.y == 0.0f);
+    }
+    SECTION("attribute source flags")
+    {
+        Gasfs asfs{};
+        ginqasf(&asfs, &status);
+
+        REQUIRE(asfs.ln_type == GINDIVIDUAL);
+        REQUIRE(asfs.ln_width == GINDIVIDUAL);
+        REQUIRE(asfs.ln_color == GINDIVIDUAL);
+        REQUIRE(asfs.mk_type == GINDIVIDUAL);
+        REQUIRE(asfs.mk_size == GINDIVIDUAL);
+        REQUIRE(asfs.mk_color == GINDIVIDUAL);
+        REQUIRE(asfs.tx_fp == GINDIVIDUAL);
+        REQUIRE(asfs.tx_exp == GINDIVIDUAL);
+        REQUIRE(asfs.tx_space == GINDIVIDUAL);
+        REQUIRE(asfs.tx_color == GINDIVIDUAL);
+        REQUIRE(asfs.fl_inter == GINDIVIDUAL);
+        REQUIRE(asfs.fl_style == GINDIVIDUAL);
+        REQUIRE(asfs.fl_color == GINDIVIDUAL);
     }
 
     REQUIRE(status == 0);
@@ -800,8 +793,68 @@ TEST_CASE("Set global attribute values", "[output]")
         ginqfillind(&value, &status);
         REQUIRE(value == 2);
     }
+    SECTION("aspect source flags")
+    {
+        struct Gasfs asfs =
+        {
+            GBUNDLED,
+            GINDIVIDUAL,
+            GBUNDLED,
+            GINDIVIDUAL,
+            GBUNDLED,
+            GINDIVIDUAL,
+            GBUNDLED,
+            GINDIVIDUAL,
+            GBUNDLED,
+            GINDIVIDUAL,
+            GBUNDLED,
+            GINDIVIDUAL,
+            GBUNDLED,
+        };
+        gsetasf(&asfs);
+
+        struct Gasfs current{};
+        ginqasf(&current, &status);
+        REQUIRE(current.ln_type == asfs.ln_type);
+        REQUIRE(current.ln_width == asfs.ln_width);
+        REQUIRE(current.ln_color == asfs.ln_color);
+        REQUIRE(current.mk_type == asfs.mk_type);
+        REQUIRE(current.mk_size == asfs.mk_size);
+        REQUIRE(current.mk_color == asfs.mk_color);
+        REQUIRE(current.tx_fp == asfs.tx_fp);
+        REQUIRE(current.tx_exp == asfs.tx_exp);
+        REQUIRE(current.tx_space == asfs.tx_space);
+        REQUIRE(current.tx_color == asfs.tx_color);
+        REQUIRE(current.fl_inter == asfs.fl_inter);
+        REQUIRE(current.fl_style == asfs.fl_style);
+        REQUIRE(current.fl_color == asfs.fl_color);
+    }
 
     REQUIRE(status == 0);
 
+    gclosegks();
+}
+
+TEST_CASE("Workstation dependent attribute values", "[output]")
+{
+    gopengks(stderr, 0L);
+    Gint wsId{1};
+    const Gchar *connId{"tek4105"};
+    Gint wsType{};
+    gopenws(wsId, connId, wsType);
+
+    SECTION("color representation")
+    {
+        struct Gcobundl rep{0.5f, 0.5f, 0.5f};
+        gsetcolorrep(wsId, 0, &rep);
+
+        struct Gcobundl current{};
+        ginqcolorrep(wsId, 0, &current);
+        REQUIRE(current.red == rep.red);
+        REQUIRE(current.green == rep.green);
+        REQUIRE(current.blue == rep.blue);
+    }
+
+    gclosews(wsId);
     gclosegks();
 }

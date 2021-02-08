@@ -1,5 +1,7 @@
 #include <gks/gks.h>
 
+#include <string.h>
+
 static enum Gopst g_opState = GGKCL;
 
 static const Gchar *g_wsTypes[] =
@@ -12,7 +14,8 @@ enum
     MAX_OPEN_WS = 1,
     MAX_ACTIVE_WS = 1,
     MAX_SEGMENT_ASSOC = 0,
-    MAX_NUM_TRANSFORMS = 2
+    MAX_NUM_TRANSFORMS = 2,
+    MAX_NUM_COLORS = 64
 };
 
 typedef struct GGKSDescription_t
@@ -66,6 +69,8 @@ typedef struct GGKSState_t
     Gint currentFillIndex;
     struct Gpoint currentPatternSize;
     struct Gpoint currentPatternRef;
+    // attribute source flags
+    struct Gasfs asfs;
     // segments
     // input queue
     // current event report
@@ -107,7 +112,23 @@ static GGKSState g_initialGksState =
     1,
     1,
     {1.0f, 1.0f},
-    {0.0f, 0.0f}
+    {0.0f, 0.0f},
+    // aspect source flags
+    {
+        GINDIVIDUAL,
+        GINDIVIDUAL,
+        GINDIVIDUAL,
+        GINDIVIDUAL,
+        GINDIVIDUAL,
+        GINDIVIDUAL,
+        GINDIVIDUAL,
+        GINDIVIDUAL,
+        GINDIVIDUAL,
+        GINDIVIDUAL,
+        GINDIVIDUAL,
+        GINDIVIDUAL,
+        GINDIVIDUAL
+    }
 };
 
 static GGKSState g_gksState;
@@ -126,13 +147,8 @@ typedef struct GWSState_t
     //-- text
     //-- fill area
     //-- color table
+    struct Gcobundl colorTable[MAX_NUM_COLORS];
     //-- deferral mode
-    //-- workstation transformation
-    //--- workstation transformation update state
-    //--- requested workstation window
-    //--- requested workstation viewport
-    //--- current workstation window
-    //--- current workstation viewport
     struct Gwsti transform;
     //- category INPUT, OUTIN
     //-- locator
@@ -148,6 +164,9 @@ static const GWSState g_initialWSState =
     0,
     NULL,
     0,
+    {
+        0
+    },
     {
         GNOTPENDING,
         {
@@ -183,11 +202,19 @@ void gclosegks(void)
     g_opState = GGKCL;
 }
 
+void ginqasf(struct Gasfs *value, Gint *errorStatus)
+{
+    *value = g_gksState.asfs;
+    *errorStatus = 0;
+}
+
 void ginqavailwstypes(Gint bufSize, Gint start, struct Gstrlist *wsTypes, Gint *numTypes, Gint *errorStatus)
 {
     *numTypes = g_gksDescription.numAvailWSTypes;
-    wsTypes->n_points = *numTypes;
-    wsTypes->strings = g_gksDescription.wsTypes;
+    for (int i = 0; i < g_gksDescription.numAvailWSTypes; ++i)
+    {
+        strcpy(wsTypes->strings[i], g_gksDescription.wsTypes[i]);
+    }
     *errorStatus = 0;
 }
 
@@ -315,6 +342,12 @@ void ginqntran(Gint num, struct Gtran *value, Gint *errorStatus)
     *errorStatus = 0;
 }
 
+void ginqopenws(Gint maxIds, Gint start, struct Gintlist *wsids, Gint *actualIds, Gint *errorStatus)
+{
+    *actualIds = 0;
+    *errorStatus = 0;
+}
+
 void ginqopst(enum Gopst *value)
 {
     *value = g_opState;
@@ -360,6 +393,11 @@ void ginqwsmaxnum(struct Gwsmax *value, Gint *errorStatus)
 {
     *value = g_gksDescription.wsmax;
     *errorStatus = 0;
+}
+
+void gsetasf(struct Gasfs *value)
+{
+    g_gksState.asfs = *value;
 }
 
 void gsetcharexpan(Gfloat value)
@@ -487,7 +525,7 @@ void gclosews(Gint wsId)
 {
     g_opState = GGKOP;
 
-    g_gksState.openWs[0] = 0;
+    g_gksState.openWs[0] = -1;
 }
 
 void gactivatews(Gint wsId)
@@ -501,7 +539,7 @@ void gdeactivatews(Gint wsId)
 {
     g_opState = GWSOP;
 
-    g_gksState.activeWs[0] = 0;
+    g_gksState.activeWs[0] = -1;
 }
 
 void gclearws(Gint wsId, enum Gclrflag flag)
@@ -512,10 +550,20 @@ void gupdatews(Gint wsId, enum Gregen flag)
 {
 }
 
+void ginqcolorrep(Gint wsId, Gint index, struct Gcobundl *value)
+{
+    *value = g_wsState[0].colorTable[index];
+}
+
 void ginqwstran(Gint wsId, struct Gwsti *value, Gint *errorStatus)
 {
     *value = g_wsState[0].transform;
     *errorStatus = 0;
+}
+
+void gsetcolorrep(Gint wsId, Gint index, struct Gcobundl *value)
+{
+    g_wsState[0].colorTable[index] = *value;
 }
 
 void gsetwsviewport(Gint wsId, struct Glimit *value)
