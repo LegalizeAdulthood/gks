@@ -159,9 +159,9 @@ TEST_CASE("GKS state list", "[gks]")
         Gint buffSize{};
         Gint facilSize{};
         Gcofac facil{};
-        ginqcolourfacil(wsType, buffSize, &facilSize, &facil, &status);
+        ginqcolorfacil(wsType, buffSize, &facilSize, &facil, &status);
     }
-    SECTION("Set of open workstations")
+    SECTION("Initial set of open workstations is empty")
     {
         const Gint numBuffIds = 10;
         Gint ids[numBuffIds]{};
@@ -194,21 +194,122 @@ TEST_CASE("Set clipping indicator", "[gks]")
 TEST_CASE("Open workstation", "[workstation]")
 {
     gopengks(stderr, 0L);
-
     Gint wsId{1};
     const Gchar *connId{"tek4105"};
     Gint wsType{};
     gopenws(wsId, connId, wsType);
 
-    Gopst state{};
-    ginqopst(&state);
-    REQUIRE( state == GWSOP );
+    SECTION("operating state is GSOP")
+    {
+        REQUIRE(getGksOpState() == GWSOP);
+    }
+    SECTION("after activate workstation state is GWSAC")
+    {
+        gactivatews(wsId);
+
+        REQUIRE(getGksOpState() == GWSAC);
+
+        gdeactivatews(wsId);
+    }
+    SECTION("deactivate last activated workstation state is GWSOP")
+    {
+        gactivatews(wsId);
+
+        gdeactivatews(wsId);
+
+        REQUIRE(getGksOpState() == GWSOP);
+    }
+    SECTION("clear workstation")
+    {
+        gactivatews(wsId);
+
+        gclearws(wsId, GALWAYS);
+
+        gdeactivatews(wsId);
+    }
+    SECTION("initial workstation transformation is identity")
+    {
+        struct Gwsti transform{};
+        Gint status{-1};
+        ginqwstran(wsId, &transform, &status);
+
+        REQUIRE(transform.wstus == GNOTPENDING);
+        REQUIRE(transform.request.v.xmin == 0.0f);
+        REQUIRE(transform.request.v.xmax == 1.0f);
+        REQUIRE(transform.request.v.ymin == 0.0f);
+        REQUIRE(transform.request.v.ymax == 1.0f);
+        REQUIRE(transform.request.w.xmin == 0.0f);
+        REQUIRE(transform.request.w.xmax == 1.0f);
+        REQUIRE(transform.request.w.ymin == 0.0f);
+        REQUIRE(transform.request.w.ymax == 1.0f);
+        REQUIRE(transform.current.v.xmin == 0.0f);
+        REQUIRE(transform.current.v.xmax == 1.0f);
+        REQUIRE(transform.current.v.ymin == 0.0f);
+        REQUIRE(transform.current.v.ymax == 1.0f);
+        REQUIRE(transform.current.w.xmin == 0.0f);
+        REQUIRE(transform.current.w.xmax == 1.0f);
+        REQUIRE(transform.current.w.ymin == 0.0f);
+        REQUIRE(transform.current.w.ymax == 1.0f);
+    }
+    SECTION("update workstation")
+    {
+        gupdatews(wsId, GPERFORM);
+    }
+    SECTION("set workstation viewport")
+    {
+        const Gfloat xmin = 0.2f;
+        const Gfloat xmax = 0.4f;
+        const Gfloat ymin = 0.3f;
+        const Gfloat ymax = 0.5f;
+        struct Glimit viewport{xmin, xmax, ymin, ymax};
+        gsetwsviewport(wsId, &viewport);
+
+        struct Gwsti transform{};
+        Gint status{-1};
+        ginqwstran(wsId, &transform, &status);
+
+        REQUIRE(transform.wstus == GNOTPENDING);
+        REQUIRE(transform.current.v.xmin == xmin);
+        REQUIRE(transform.current.v.xmax == xmax);
+        REQUIRE(transform.current.v.ymin == ymin);
+        REQUIRE(transform.current.v.ymax == ymax);
+    }
+    SECTION("set workstation window")
+    {
+        const Gfloat xmin = 0.2f;
+        const Gfloat xmax = 0.4f;
+        const Gfloat ymin = 0.3f;
+        const Gfloat ymax = 0.5f;
+        struct Glimit window{xmin, xmax, ymin, ymax};
+        gsetwswindow(wsId, &window);
+
+        struct Gwsti transform{};
+        Gint status{-1};
+        ginqwstran(wsId, &transform, &status);
+
+        REQUIRE(transform.wstus == GNOTPENDING);
+        REQUIRE(transform.current.w.xmin == xmin);
+        REQUIRE(transform.current.w.xmax == xmax);
+        REQUIRE(transform.current.w.ymin == ymin);
+        REQUIRE(transform.current.w.ymax == ymax);
+    }
+    SECTION("display space size")
+    {
+        Gdspsize size{};
+        Gint status{-1};
+        ginqdisplaysize(wsType, &size, &status);
+
+        REQUIRE(status == 0);
+        REQUIRE(size.units == GDC_OTHER);
+        REQUIRE(size.raster.x == 640);
+        REQUIRE(size.raster.y == 480);
+    }
 
     gclosews(wsId);
     gclosegks();
 }
 
-TEST_CASE("Close workstation", "[workstation]")
+TEST_CASE("Close last workstation enters GGKOP state", "[workstation]")
 {
     gopengks(stderr, 0L);
     Gint wsId{1};
@@ -222,168 +323,8 @@ TEST_CASE("Close workstation", "[workstation]")
     Gopst after{};
     ginqopst(&after);
 
-    REQUIRE( before == GWSOP );
-    REQUIRE( after == GGKOP );
-
-    gclosegks();
-}
-
-TEST_CASE("Activate workstation", "[workstation]")
-{
-    gopengks(stderr, 0L);
-    Gint wsId{1};
-    const Gchar *connId{"tek4105"};
-    Gint wsType{};
-    gopenws(wsId, connId, wsType);
-
-    Gopst before{};
-    ginqopst(&before);
-    gactivatews(wsId);
-    Gopst after{};
-    ginqopst(&after);
-
-    REQUIRE( before == GWSOP );
-    REQUIRE( after == GWSAC );
-
-    gclosews(wsId);
-    gclosegks();
-}
-
-TEST_CASE("Deactivate workstation", "[workstation]")
-{
-    gopengks(stderr, 0L);
-    Gint wsId{1};
-    const Gchar *connId{"tek4105"};
-    Gint wsType{};
-    gopenws(wsId, connId, wsType);
-    gactivatews(wsId);
-
-    Gopst before{};
-    ginqopst(&before);
-    gdeactivatews(wsId);
-    Gopst after{};
-    ginqopst(&after);
-
-    REQUIRE( before == GWSAC );
-    REQUIRE( after == GWSOP );
-
-    gclosews(wsId);
-    gclosegks();
-}
-
-TEST_CASE("Clear workstation", "[workstation]")
-{
-    gopengks(stderr, 0L);
-    Gint wsId{1};
-    const Gchar *connId{"tek4105"};
-    Gint wsType{};
-    gopenws(wsId, connId, wsType);
-    gactivatews(wsId);
-
-    gclearws(wsId, GALWAYS);
-
-    gclosews(wsId);
-    gclosegks();
-}
-
-TEST_CASE("Initial workstation transformation", "[workstation]")
-{
-    gopengks(stderr, 0L);
-    Gint wsId{1};
-    const Gchar *connId{"tek4105"};
-    Gint wsType{};
-    gopenws(wsId, connId, wsType);
-
-    struct Gwsti transform{};
-    Gint status{-1};
-    ginqwstran(wsId, &transform, &status);
-
-    REQUIRE(transform.wstus == GNOTPENDING);
-    REQUIRE(transform.request.v.xmin == 0.0f);
-    REQUIRE(transform.request.v.xmax == 1.0f);
-    REQUIRE(transform.request.v.ymin == 0.0f);
-    REQUIRE(transform.request.v.ymax == 1.0f);
-    REQUIRE(transform.request.w.xmin == 0.0f);
-    REQUIRE(transform.request.w.xmax == 1.0f);
-    REQUIRE(transform.request.w.ymin == 0.0f);
-    REQUIRE(transform.request.w.ymax == 1.0f);
-    REQUIRE(transform.current.v.xmin == 0.0f);
-    REQUIRE(transform.current.v.xmax == 1.0f);
-    REQUIRE(transform.current.v.ymin == 0.0f);
-    REQUIRE(transform.current.v.ymax == 1.0f);
-    REQUIRE(transform.current.w.xmin == 0.0f);
-    REQUIRE(transform.current.w.xmax == 1.0f);
-    REQUIRE(transform.current.w.ymin == 0.0f);
-    REQUIRE(transform.current.w.ymax == 1.0f);
-
-    gclosegks();
-}
-
-TEST_CASE("Update workstation", "[workstation]")
-{
-    gopengks(stderr, 0L);
-    Gint wsId{1};
-    const Gchar *connId{"tek4105"};
-    Gint wsType{};
-    gopenws(wsId, connId, wsType);
-
-    gupdatews(wsId, GPERFORM);
-
-    gclosegks();
-}
-
-TEST_CASE("Set workstation viewport", "[workstation]")
-{
-    gopengks(stderr, 0L);
-    Gint wsId{1};
-    const Gchar *connId{"tek4105"};
-    Gint wsType{};
-    gopenws(wsId, connId, wsType);
-
-    const Gfloat xmin = 0.2f;
-    const Gfloat xmax = 0.4f;
-    const Gfloat ymin = 0.3f;
-    const Gfloat ymax = 0.5f;
-    struct Glimit viewport{xmin, xmax, ymin, ymax};
-    gsetwsviewport(wsId, &viewport);
-
-    struct Gwsti transform{};
-    Gint status{-1};
-    ginqwstran(wsId, &transform, &status);
-
-    REQUIRE(transform.wstus == GNOTPENDING);
-    REQUIRE(transform.current.v.xmin == xmin);
-    REQUIRE(transform.current.v.xmax == xmax);
-    REQUIRE(transform.current.v.ymin == ymin);
-    REQUIRE(transform.current.v.ymax == ymax);
-
-    gclosegks();
-}
-
-TEST_CASE("Set workstation window", "[workstation]")
-{
-    gopengks(stderr, 0L);
-    Gint wsId{1};
-    const Gchar *connId{"tek4105"};
-    Gint wsType{};
-    gopenws(wsId, connId, wsType);
-
-    const Gfloat xmin = 0.2f;
-    const Gfloat xmax = 0.4f;
-    const Gfloat ymin = 0.3f;
-    const Gfloat ymax = 0.5f;
-    struct Glimit window{xmin, xmax, ymin, ymax};
-    gsetwswindow(wsId, &window);
-
-    struct Gwsti transform{};
-    Gint status{-1};
-    ginqwstran(wsId, &transform, &status);
-
-    REQUIRE(transform.wstus == GNOTPENDING);
-    REQUIRE(transform.current.w.xmin == xmin);
-    REQUIRE(transform.current.w.xmax == xmax);
-    REQUIRE(transform.current.w.ymin == ymin);
-    REQUIRE(transform.current.w.ymax == ymax);
+    REQUIRE(before == GWSOP);
+    REQUIRE(after == GGKOP);
 
     gclosegks();
 }
@@ -663,10 +604,10 @@ TEST_CASE("Set global attribute values", "[output]")
     }
     SECTION("marker type")
     {
-        gsetmarkertype(GMK_X);
+        gsetmarkertype(GMK_DIAGONAL_CROSS);
 
         ginqmarkertype(&value, &status);
-        REQUIRE(value == GMK_X);
+        REQUIRE(value == GMK_DIAGONAL_CROSS);
     }
     SECTION("marker size")
     {

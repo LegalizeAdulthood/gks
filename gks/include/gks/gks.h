@@ -55,6 +55,12 @@ enum Gcoavail
     GMONOCHROME
 };
 
+enum Gdevunits
+{
+    GDC_METERS,
+    GDC_OTHER
+};
+
 enum Gflinter
 {
     GHOLLOW = 1,
@@ -172,7 +178,7 @@ struct Gcobundl
 
 struct Gcofac
 {
-    Gint colours;
+    Gint colors;
     enum Gcoavail coavail;
     Gint predefined;
 };
@@ -230,16 +236,29 @@ struct Ggdprec
     };
 };
 
-struct Gintlist
-{
-    Gint number;
-    Gint *integers;
-};
-
 struct Gpoint
 {
     Gfloat x;
     Gfloat y;
+};
+
+struct Gipoint
+{
+    Gint x;
+    Gint y;
+};
+
+struct Gdspsize
+{
+    enum Gdevunits units;
+    struct Gpoint device;
+    struct Gipoint raster;
+};
+
+struct Gintlist
+{
+    Gint number;
+    Gint *integers;
 };
 
 struct Grect
@@ -300,7 +319,8 @@ void ginqcharheight(Gfloat *value, Gint *errorStatus);
 void ginqcharspace(Gfloat *value, Gint *errorStatus);
 void ginqcharup(struct Gpoint *value, Gint *errorStatus);
 void ginqclip(struct Gcliprect *value, Gint *errorStatus);
-void ginqcolourfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, struct Gcofac *facil, Gint *errorStatus);
+void ginqcolorfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, struct Gcofac *facil, Gint *errorStatus);
+void ginqdisplaysize(Gwstype wsType, struct Gdspsize *size, Gint *errorStatus);
 void ginqfillcolorind(Gint *value, Gint *errorStatus);
 void ginqfillind(Gint *value, Gint *errorStatus);
 void ginqfillstyle(enum Gflinter *value, Gint *errorStatus);

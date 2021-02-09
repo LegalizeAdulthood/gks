@@ -150,6 +150,7 @@ typedef struct GWSState_t
     struct Gcobundl colorTable[MAX_NUM_COLORS];
     //-- deferral mode
     struct Gwsti transform;
+    struct Gdspsize displaySize;
     //- category INPUT, OUTIN
     //-- locator
     //-- stroke
@@ -159,7 +160,7 @@ typedef struct GWSState_t
     //-- string
 } GWSState;
 
-static const GWSState g_initialWSState =
+static const GWSState g_initialWsState =
 {
     0,
     NULL,
@@ -177,6 +178,11 @@ static const GWSState g_initialWSState =
             { 0.0f, 1.0f, 0.0f, 1.0f },
             { 0.0f, 1.0f, 0.0f, 1.0f },
         }
+    },
+    {
+        GDC_OTHER,
+        { 0.0f, 1.0f },
+        { 640, 480 }
     }
 };
 
@@ -253,8 +259,14 @@ void ginqclip(struct Gcliprect *value, Gint *errorStatus)
     *errorStatus = 0;
 }
 
-void ginqcolourfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, struct Gcofac *facil, Gint *errorStatus)
+void ginqcolorfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, struct Gcofac *facil, Gint *errorStatus)
 {
+    *errorStatus = 0;
+}
+
+void ginqdisplaysize(Gwstype wsType, struct Gdspsize *size, Gint *errorStatus)
+{
+    *size = g_wsState[0].displaySize;
     *errorStatus = 0;
 }
 
@@ -515,7 +527,7 @@ void gopenws(Gint wsId, const Gconn *connId, Gwstype wsType)
     g_opState = GWSOP;
     g_gksState.openWs[0] = wsId;
 
-    g_wsState[0] = g_initialWSState;
+    g_wsState[0] = g_initialWsState;
     g_wsState[0].id = wsId;
     g_wsState[0].connId = connId;
     g_wsState[0].type = wsType;
