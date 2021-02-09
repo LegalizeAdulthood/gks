@@ -18,6 +18,19 @@ typedef FILE Gfile;
 typedef Gchar Gconn;
 typedef Gint Gwstype;
 
+// Predefined line types
+#define GLN_SOLID 1
+#define GLN_DASHED 2
+#define GLN_DOTTED 3
+#define GLN_DASHDOT 4
+
+// Predefined marker types
+#define GMK_DOT 1
+#define GMK_PLUS 2
+#define GMK_STAR 3
+#define GMK_CIRCLE 4
+#define GMK_DIAGONAL_CROSS 5
+
 enum Gasf
 {
     GBUNDLED = 1,
@@ -64,23 +77,6 @@ enum Glevel
     GL2A,
     GL2B,
     GL2C
-};
-
-enum Glntype
-{
-    GLN_SOLID = 1,
-    GLN_DASHED = 2,
-    GLN_DOTTED = 3,
-    GLN_DASHDOT = 4
-};
-
-enum Gmktype
-{
-    GMK_DOT = 1,
-    GMK_PLUS = 2,
-    GMK_STAR = 3,
-    GMK_O = 4,
-    GMK_X = 5
 };
 
 enum Gopst
