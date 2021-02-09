@@ -1,0 +1,83 @@
+Level ma
+========
+[X] Escape
+
+[X] Open GKS
+[X] Close GKS
+
+[ ] Inquire Character Base Vector
+[ ] Inquire Character Expansion Factor
+[ ] Inquire Character Height
+[ ] Inquire Character Spacing
+[ ] Inquire Character Up Vector
+[ ] Inquire Character Width
+[X] Inquire Clipping
+[ ] Inquire Color Facilities
+[X] Inquire Current Normalization Transformation Number
+[X] Inquire Display Space Size
+[X] Inquire Fill Area Color Index
+[ ] Inquire Fill Area Facilities
+[X] Inquire Fill Area Index
+[X] Inquire Fill Area Interior Style
+[X] Inquire Fill Area Style Index
+[X] Inquire Level of GKS
+[X] Inquire Line Color Index  
+[ ] Inquire Line Facilities
+[X] Inquire Line Index
+[X] Inquire Line Type
+[X] Inquire Line Width Scale Factor
+[X] Inquire List of Aspect Source Flags
+[X] Inquire Marker Color Index  
+[ ] Inquire Marker Facilities
+[X] Inquire Marker Index
+[X] Inquire Marker Size Scale Factor
+[X] Inquire Marker Type
+[ ] Inquire Maximum Length of Workstation State Tables
+[X] Inquire Normalization Transform
+[ ] Inquire Pattern Height Vector
+[ ] Inquire Pattern Reference Point
+[ ] Inquire Patterh Width Vector
+[X] Inquire Text Alignment
+[X] Inquire Text Color Index
+[ ] Inquire Text Facilities
+[X] Inquire Text Font and Precision
+[X] Inquire Text Index
+[X] Inquire Text Path
+
+[X] Select Normalization Transform
+[X] Set Character Height
+[X] Set Character Up Vector
+[X] Set Clipping Indicator
+[X] Set Fill Area Color Index
+[X] Set Fill Area Interior Style
+[X] Set Line Type
+[X] Set Marker Type
+[X] Set Polyline Color Index
+[X] Set Polymarker Color Index
+[X] Set Text Alignment
+[X] Set Text Color Index
+[X] Set Viewport
+[X] Set Window
+
+[X] Open Workstation
+[X] Close Workstation
+
+[X] Activate Workstation
+[X] Clear Workstation
+[X] Deactivate Workstation
+[X] Update Workstation
+
+[ ] Inquire Color Representation
+[ ] Inquire List of Color Indices
+[ ] Inquire Text Extent
+[ ] Inquire Workstation Connection and Type
+[ ] Inquire Workstation Transformation
+
+[ ] Set Color Representation
+[X] Set Workstation Viewport
+[X] Set Workstation Window
+
+[X] Fill Area
+[X] Polyline
+[X] Polymarker
+[X] Text
