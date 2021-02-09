@@ -31,45 +31,45 @@ typedef Gint Gwstype;
 #define GMK_CIRCLE 4
 #define GMK_DIAGONAL_CROSS 5
 
-enum Gasf
+typedef enum Gasf
 {
     GBUNDLED = 1,
     GINDIVIDUAL
-};
+} Gasf;
 
-enum Gclip
+typedef enum Gclip
 {
     GNOCLIP = 1,
     GCLIP
-};
+} Gclip;
 
-enum Gclrflag
+typedef enum Gclrflag
 {
     GCONDITIONALLY = 1,
     GALWAYS
-};
+} Gclrflag;
 
-enum Gcoavail
+typedef enum Gcoavail
 {
     GCOLOUR = 1,
     GMONOCHROME
-};
+} Gcoavail;
 
-enum Gdevunits
+typedef enum Gdevunits
 {
     GDC_METERS,
     GDC_OTHER
-};
+} Gdevunits;
 
-enum Gflinter
+typedef enum Gflinter
 {
     GHOLLOW = 1,
     GSOLID,
     GPATTERN,
     GHATCH
-};
+} Gflinter;
 
-enum Glevel
+typedef enum Glevel
 {
     GLMA = 1,
     GLMB,
@@ -83,39 +83,39 @@ enum Glevel
     GL2A,
     GL2B,
     GL2C
-};
+} Glevel;
 
-enum Gopst
+typedef enum Gopst
 {
     GGKCL = 1,
     GGKOP,
     GWSOP,
     GWSAC,
     GSGOP
-};
+} Gopst;
 
-enum Gregen
+typedef enum Gregen
 {
     GPOSTPONE = 1,
     GPERFORM
-};
+} Gregen;
 
-enum Gtxhor
+typedef enum Gtxhor
 {
     GAH_NORMAL = 1,
     GAH_LEFT,
     GAH_CENTER,
     GAH_RIGHT
-};
+} Gtxhor;
 
-enum Gtxprec
+typedef enum Gtxprec
 {
     GP_STRING = 1,
     GP_CHAR,
     GP_STROKE
-};
+} Gtxprec;
 
-enum Gtxver
+typedef enum Gtxver
 {
     GAV_NORMAL = 1,
     GAV_TOP,
@@ -123,101 +123,67 @@ enum Gtxver
     GAV_HALF,
     GAV_BASE,
     GAV_BOTTOM
-};
+} Gtxver;
 
-enum Gwstus
+typedef enum Gwstus
 {
     GNOTPENDING = 1,
     GPENDING
-};
+} Gwstus;
 
 
-struct Gasfs
+typedef struct Gasfs
 {
-    enum Gasf ln_type;
-    enum Gasf ln_width;
-    enum Gasf ln_color;
-    enum Gasf mk_type;
-    enum Gasf mk_size;
-    enum Gasf mk_color;
-    enum Gasf tx_fp;
-    enum Gasf tx_exp;
-    enum Gasf tx_space;
-    enum Gasf tx_color;
-    enum Gasf fl_inter;
-    enum Gasf fl_style;
-    enum Gasf fl_color;
-};
+    Gasf ln_type;
+    Gasf ln_width;
+    Gasf ln_color;
+    Gasf mk_type;
+    Gasf mk_size;
+    Gasf mk_color;
+    Gasf tx_fp;
+    Gasf tx_exp;
+    Gasf tx_space;
+    Gasf tx_color;
+    Gasf fl_inter;
+    Gasf fl_style;
+    Gasf fl_color;
+} Gasfs;
 
-struct Gidim
+typedef struct Gidim
 {
     Guint x_dim;
     Guint y_dim;
-};
+} Gidim;
 
-struct Glimit
+typedef struct Glimit
 {
     Gfloat xmin;
     Gfloat xmax;
     Gfloat ymin;
     Gfloat ymax;
-};
+} Glimit;
 
-struct Gcliprect
+typedef struct Gcliprect
 {
-    enum Gclip ind;
-    struct Glimit rec;
-};
+    Gclip ind;
+    Glimit rec;
+} Gcliprect;
 
-struct Gcobundl
+typedef struct Gcobundl
 {
     Gfloat red;
     Gfloat green;
     Gfloat blue;
-};
+} Gcobundl;
 
-struct Gcofac
+typedef struct Gcofac
 {
     Gint colors;
-    enum Gcoavail coavail;
+    Gcoavail coavail;
     Gint predefined;
-};
+} Gcofac;
 
-struct Gescin
-{
-    union
-    {
-        struct Guesc_idatarec
-        {
-            Gint number_integer;
-            Gint number_float;
-            Gint number_strings;
-            Gint *list_integers;
-            Gfloat *list_floats;
-            Gint *list_string_lengths;
-            Gchar **list_strings;
-        } esc_idatarec;
-    };
-};
-
-struct Gescout
-{
-    union
-    {
-        struct Guesc_odatarec
-        {
-            Gint number_integer;
-            Gint number_float;
-            Gint number_strings;
-            Gint *list_integers;
-            Gfloat *list_floats;
-            Gint *list_string_lengths;
-            Gchar **list_strings;
-        } esc_odatarec;
-    };
-};
-
-struct Ggdp_datarec
+typedef struct Guesc_idatarec
 {
     Gint number_integer;
     Gint number_float;
@@ -226,106 +192,135 @@ struct Ggdp_datarec
     Gfloat *list_floats;
     Gint *list_string_lengths;
     Gchar **list_strings;
-};
+} Guesc_idatarec;
 
-struct Ggdprec
+typedef union Gescin
 {
-    union
-    {
-        struct Ggdp_datarec gugdp_datarec;
-    };
-};
+    Guesc_idatarec esc_idatarec;
+} Gescin;
 
-struct Gpoint
+typedef struct Guesc_odatarec
+{
+    Gint number_integer;
+    Gint number_float;
+    Gint number_strings;
+    Gint *list_integers;
+    Gfloat *list_floats;
+    Gint *list_string_lengths;
+    Gchar **list_strings;
+} Guesc_odatarec;
+
+typedef union Gescout
+{
+    Guesc_odatarec esc_odatarec;
+} Gescout;
+
+typedef struct Ggdp_datarec
+{
+    Gint number_integer;
+    Gint number_float;
+    Gint number_strings;
+    Gint *list_integers;
+    Gfloat *list_floats;
+    Gint *list_string_lengths;
+    Gchar **list_strings;
+} Ggdp_datarec;
+
+typedef union Ggdprec
+{
+    Ggdp_datarec gugdp_datarec;
+} Ggdprec;
+
+typedef struct Gpoint
 {
     Gfloat x;
     Gfloat y;
-};
+} Gpoint;
 
-struct Gipoint
+typedef struct Gipoint
 {
     Gint x;
     Gint y;
-};
+} Gipoint;
 
-struct Gdspsize
+typedef struct Gdspsize
 {
-    enum Gdevunits units;
-    struct Gpoint device;
-    struct Gipoint raster;
-};
+    Gdevunits units;
+    Gpoint device;
+    Gipoint raster;
+} Gdspsize;
 
-struct Gintlist
+typedef struct Gintlist
 {
     Gint number;
     Gint *integers;
-};
+} Gintlist;
 
-struct Grect
+typedef struct Grect
 {
-    struct Gpoint ul;
-    struct Gpoint lr;
-};
+    Gpoint ul;
+    Gpoint lr;
+} Grect;
 
-struct Gstrlist
+typedef struct Gstrlist
 {
     Gint n_points;
     Gchar **strings;
-};
+} Gstrlist;
 
-struct Gtran
+typedef struct Gtran
 {
-    struct Glimit w;
-    struct Glimit v;
-};
+    Glimit w;
+    Glimit v;
+} Gtran;
 
-struct Gtxalign
+typedef struct Gtxalign
 {
-    enum Gtxhor hor;
-    enum Gtxver ver;
-};
+    Gtxhor hor;
+    Gtxver ver;
+} Gtxalign;
 
-struct Gtxfp
+typedef struct Gtxfp
 {
     Gint font;
-    enum Gtxprec prec;
-};
+    Gtxprec prec;
+} Gtxfp;
 
-struct Gwsmax
+typedef struct Gwsmax
 {
     Gint open;
     Gint active;
     Gint assoc;
-};
+} Gwsmax;
 
-struct Gwsti
+typedef struct Gwsti
 {
-    enum Gwstus wstus;
-    struct Gtran request;
-    struct Gtran current;
-};
+    Gwstus wstus;
+    Gtran request;
+    Gtran current;
+} Gwsti;
 
 void gerrorhand(Gint errNum, Gint funcName, Gfile *errFile);
 
-void gescape(Gint function, struct Gescin *inData, Gint bufSize, struct Gescout *outData, Gint *escOutSize);
+void gescape(Gint function, Gescin *inData, Gint bufSize, Gescout *outData, Gint *escOutSize);
 
 void gopengks(Gfile *errfile, Glong memory);
 void gclosegks(void);
 
-void ginqasf(struct Gasfs *value, Gint *errorStatus);
-void ginqavailwstypes(Gint bufSize, Gint start, struct Gstrlist *wsTypes, Gint *numTypes, Gint *errorStatus);
+void ginqasf(Gasfs *value, Gint *errorStatus);
+void ginqavailwstypes(Gint bufSize, Gint start, Gstrlist *wsTypes, Gint *numTypes, Gint *errorStatus);
 void ginqcharexpan(Gfloat *value, Gint *errorStatus);
 void ginqcharheight(Gfloat *value, Gint *errorStatus);
 void ginqcharspace(Gfloat *value, Gint *errorStatus);
-void ginqcharup(struct Gpoint *value, Gint *errorStatus);
-void ginqclip(struct Gcliprect *value, Gint *errorStatus);
-void ginqcolorfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, struct Gcofac *facil, Gint *errorStatus);
-void ginqdisplaysize(Gwstype wsType, struct Gdspsize *size, Gint *errorStatus);
+void ginqcharup(Gpoint *value, Gint *errorStatus);
+void ginqclip(Gcliprect *value, Gint *errorStatus);
+void ginqcolorfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gcofac *facil, Gint *errorStatus);
+void ginqdisplaysize(Gwstype wsType, Gdspsize *size, Gint *errorStatus);
 void ginqfillcolorind(Gint *value, Gint *errorStatus);
 void ginqfillind(Gint *value, Gint *errorStatus);
-void ginqfillstyle(enum Gflinter *value, Gint *errorStatus);
+void ginqfillstyle(Gflinter *value, Gint *errorStatus);
 void ginqfillstyleind(Gint *value, Gint *errorStatus);
-void ginqlevelgks(enum Glevel *value, Gint *errorStatus);
+void ginqlevelgks(Glevel *value, Gint *errorStatus);
 void ginqlinecolorind(Gint *value, Gint *errorStatus);
 void ginqlineind(Gint *value, Gint *errorStatus);
 void ginqlinetype(Gint *value, Gint *errorStatus);
@@ -334,26 +329,26 @@ void ginqmarkerind(Gint *value, Gint *errorStatus);
 void ginqmarkersize(Gfloat *value, Gint *errorStatus);
 void ginqmarkertype(Gint *value, Gint *errorStatus);
 void ginqmaxntrannum(Gint *value, Gint *errorStatus);
-void ginqntran(Gint num, struct Gtran *value, Gint *errorStatus);
-void ginqopenws(Gint maxIds, Gint start, struct Gintlist *wsids, Gint *actualIds, Gint *errorStatus);
-void ginqopst(enum Gopst *value);
-void ginqpatrefpt(struct Gpoint *value, Gint *errorStatus);
-void ginqpatsize(struct Gpoint *value, Gint *errorStatus);
-void ginqtextalign(struct Gtxalign *value, Gint *errorStatus);
+void ginqntran(Gint num, Gtran *value, Gint *errorStatus);
+void ginqopenws(Gint maxIds, Gint start, Gintlist *wsids, Gint *actualIds, Gint *errorStatus);
+void ginqopst(Gopst *value);
+void ginqpatrefpt(Gpoint *value, Gint *errorStatus);
+void ginqpatsize(Gpoint *value, Gint *errorStatus);
+void ginqtextalign(Gtxalign *value, Gint *errorStatus);
 void ginqtextcolorind(Gint *value, Gint *errorStatus);
-void ginqtextfontprec(struct Gtxfp *value, Gint *errorStatus);
+void ginqtextfontprec(Gtxfp *value, Gint *errorStatus);
 void ginqtextind(Gint *value, Gint *errorStatus);
-void ginqwsmaxnum(struct Gwsmax *value, Gint *errorStatus);
+void ginqwsmaxnum(Gwsmax *value, Gint *errorStatus);
 
-void gsetasf(struct Gasfs *value);
+void gsetasf(Gasfs *value);
 void gsetcharexpan(Gfloat value);
 void gsetcharheight(Gfloat value);
 void gsetcharspace(Gfloat value);
-void gsetcharup(struct Gpoint *value);
-void gsetclip(enum Gclip value);
+void gsetcharup(Gpoint *value);
+void gsetclip(Gclip value);
 void gsetfillcolorind(Gint value);
 void gsetfillind(Gint value);
-void gsetfillstyle(enum Gflinter value);
+void gsetfillstyle(Gflinter value);
 void gsetfillstyleind(Gint value);
 void gsetlinecolorind(Gint value);
 void gsetlineind(Gint value);
@@ -362,34 +357,34 @@ void gsetmarkercolorind(Gint value);
 void gsetmarkerind(Gint value);
 void gsetmarkersize(Gfloat value);
 void gsetmarkertype(Gint value);
-void gsettextalign(struct Gtxalign *value);
+void gsettextalign(Gtxalign *value);
 void gsettextcolorind(Gint value);
-void gsettextfontprec(struct Gtxfp *fontPrec);
+void gsettextfontprec(Gtxfp *fontPrec);
 void gsettextind(Gint value);
-void gsetviewport(Gint transform, struct Glimit *value);
-void gsetwindow(Gint transform, struct Glimit *value);
+void gsetviewport(Gint transform, Glimit *value);
+void gsetwindow(Gint transform, Glimit *value);
 
 void gopenws(Gint wsId, const Gconn *connId, Gwstype wsType);
 void gclosews(Gint wsId);
 
 void gactivatews(Gint wsId);
-void gclearws(Gint wsId, enum Gclrflag flag);
+void gclearws(Gint wsId, Gclrflag flag);
 void gdeactivatews(Gint wsId);
-void gupdatews(Gint wsId, enum Gregen flag);
+void gupdatews(Gint wsId, Gregen flag);
 
-void ginqcolorrep(Gint wsId, Gint index, struct Gcobundl *value);
-void ginqwstran(Gint wsId, struct Gwsti *value, Gint *errorStatus);
+void ginqcolorrep(Gint wsId, Gint index, Gcobundl *value);
+void ginqwstran(Gint wsId, Gwsti *value, Gint *errorStatus);
 
-void gsetcolorrep(Gint wsId, Gint index, struct Gcobundl *value);
-void gsetwsviewport(Gint wsId, struct Glimit *value);
-void gsetwswindow(Gint wsId, struct Glimit *value);
+void gsetcolorrep(Gint wsId, Gint index, Gcobundl *value);
+void gsetwsviewport(Gint wsId, Glimit *value);
+void gsetwswindow(Gint wsId, Glimit *value);
 
-void gcellarray(struct Grect *rect, struct Gidim *dims, Gint *colors);
-void gfillarea(Gint numPoints, struct Gpoint *points);
-void ggdp(Gint numPoints, struct Gpoint *points, Gint gdpId, struct Ggdprec *data);
-void gpolyline(Gint numPoints, struct Gpoint *points);
-void gpolymarker(Gint numPoints, struct Gpoint *points);
-void gtext(struct Gpoint *start, const Gchar *text);
+void gcellarray(Grect *rect, Gidim *dims, Gint *colors);
+void gfillarea(Gint numPoints, Gpoint *points);
+void ggdp(Gint numPoints, Gpoint *points, Gint gdpId, Ggdprec *data);
+void gpolyline(Gint numPoints, Gpoint *points);
+void gpolymarker(Gint numPoints, Gpoint *points);
+void gtext(Gpoint *start, const Gchar *text);
 
 #if defined(__cplusplus)
 }

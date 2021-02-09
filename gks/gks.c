@@ -2,7 +2,7 @@
 
 #include <string.h>
 
-static enum Gopst g_opState = GGKCL;
+static Gopst g_opState = GGKCL;
 
 static const Gchar *g_wsTypes[] =
 {
@@ -20,10 +20,10 @@ enum
 
 typedef struct GGKSDescription_t
 {
-    enum Glevel level;
+    Glevel level;
     Gint numAvailWSTypes;
     const Gchar **wsTypes;
-    struct Gwsmax wsmax;
+    Gwsmax wsmax;
     Gint numTrans;
 } GGKSDescription;
 
@@ -42,8 +42,8 @@ typedef struct GGKSState_t
     Gint openWs[MAX_OPEN_WS];
     Gint activeWs[MAX_ACTIVE_WS];
     Gint currentTransform;
-    struct Gtran transforms[MAX_NUM_TRANSFORMS];
-    enum Gclip clipping;
+    Gtran transforms[MAX_NUM_TRANSFORMS];
+    Gclip clipping;
     // polyline
     Gint currentLineType;
     Gint currentLineColorIndex;
@@ -55,22 +55,22 @@ typedef struct GGKSState_t
     Gint currentMarkerIndex;
     // text
     Gfloat currentCharHeight;
-    struct Gpoint currentCharUp;
+    Gpoint currentCharUp;
     Gint currentTextColorIndex;
     Gint currentTextIndex;
-    struct Gtxalign currentTextAlign;
-    struct Gtxfp currentTextFontPrec;
+    Gtxalign currentTextAlign;
+    Gtxfp currentTextFontPrec;
     Gfloat currentCharExpandFactor;
     Gfloat currentCharSpacing;
     // fill area
-    enum Gflinter currentFillStyle;
+    Gflinter currentFillStyle;
     Gint currentFillStyleIndex;
     Gint currentFillColorIndex;
     Gint currentFillIndex;
-    struct Gpoint currentPatternSize;
-    struct Gpoint currentPatternRef;
+    Gpoint currentPatternSize;
+    Gpoint currentPatternRef;
     // attribute source flags
-    struct Gasfs asfs;
+    Gasfs asfs;
     // segments
     // input queue
     // current event report
@@ -147,10 +147,10 @@ typedef struct GWSState_t
     //-- text
     //-- fill area
     //-- color table
-    struct Gcobundl colorTable[MAX_NUM_COLORS];
+    Gcobundl colorTable[MAX_NUM_COLORS];
     //-- deferral mode
-    struct Gwsti transform;
-    struct Gdspsize displaySize;
+    Gwsti transform;
+    Gdspsize displaySize;
     //- category INPUT, OUTIN
     //-- locator
     //-- stroke
@@ -193,7 +193,7 @@ void gerrorhand(Gint errNum, Gint funcName, Gfile *errFile)
     fprintf(errFile, "GKS error %d in function %d\n", errNum, funcName);
 }
 
-void gescape(Gint function, struct Gescin *indata, Gint bufsize, struct Gescout *outdata, Gint *escoutSize)
+void gescape(Gint function, Gescin *indata, Gint bufsize, Gescout *outdata, Gint *escoutSize)
 {
 }
 
@@ -208,13 +208,13 @@ void gclosegks(void)
     g_opState = GGKCL;
 }
 
-void ginqasf(struct Gasfs *value, Gint *errorStatus)
+void ginqasf(Gasfs *value, Gint *errorStatus)
 {
     *value = g_gksState.asfs;
     *errorStatus = 0;
 }
 
-void ginqavailwstypes(Gint bufSize, Gint start, struct Gstrlist *wsTypes, Gint *numTypes, Gint *errorStatus)
+void ginqavailwstypes(Gint bufSize, Gint start, Gstrlist *wsTypes, Gint *numTypes, Gint *errorStatus)
 {
     *numTypes = g_gksDescription.numAvailWSTypes;
     for (int i = 0; i < g_gksDescription.numAvailWSTypes; ++i)
@@ -242,16 +242,16 @@ void ginqcharspace(Gfloat *value, Gint *errorStatus)
     *errorStatus = 0;
 }
 
-void ginqcharup(struct Gpoint *value, Gint *errorStatus)
+void ginqcharup(Gpoint *value, Gint *errorStatus)
 {
     *value = g_gksState.currentCharUp;
     *errorStatus = 0;
 }
 
-void ginqclip(struct Gcliprect *value, Gint *errorStatus)
+void ginqclip(Gcliprect *value, Gint *errorStatus)
 {
     value->ind = g_gksState.clipping;
-    const struct Glimit identity =
+    const Glimit identity =
     {
         0.0f, 1.0f, 0.0f, 1.0f
     };
@@ -259,12 +259,12 @@ void ginqclip(struct Gcliprect *value, Gint *errorStatus)
     *errorStatus = 0;
 }
 
-void ginqcolorfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, struct Gcofac *facil, Gint *errorStatus)
+void ginqcolorfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gcofac *facil, Gint *errorStatus)
 {
     *errorStatus = 0;
 }
 
-void ginqdisplaysize(Gwstype wsType, struct Gdspsize *size, Gint *errorStatus)
+void ginqdisplaysize(Gwstype wsType, Gdspsize *size, Gint *errorStatus)
 {
     *size = g_wsState[0].displaySize;
     *errorStatus = 0;
@@ -282,7 +282,7 @@ void ginqfillind(Gint *value, Gint *errorStatus)
     *errorStatus = 0;
 }
 
-void ginqfillstyle(enum Gflinter *value, Gint *errorStatus)
+void ginqfillstyle(Gflinter *value, Gint *errorStatus)
 {
     *value = g_gksState.currentFillStyle;
     *errorStatus = 0;
@@ -294,7 +294,7 @@ void ginqfillstyleind(Gint *value, Gint *errorStatus)
     *errorStatus = 0;
 }
 
-void ginqlevelgks(enum Glevel *value, Gint *errorStatus)
+void ginqlevelgks(Glevel *value, Gint *errorStatus)
 {
     *value = g_gksDescription.level;
     *errorStatus = 0;
@@ -348,36 +348,36 @@ void ginqmaxntrannum(Gint *value, Gint *errorStatus)
     *errorStatus = 0;
 }
 
-void ginqntran(Gint num, struct Gtran *value, Gint *errorStatus)
+void ginqntran(Gint num, Gtran *value, Gint *errorStatus)
 {
     *value = g_gksState.transforms[num];
     *errorStatus = 0;
 }
 
-void ginqopenws(Gint maxIds, Gint start, struct Gintlist *wsids, Gint *actualIds, Gint *errorStatus)
+void ginqopenws(Gint maxIds, Gint start, Gintlist *wsids, Gint *actualIds, Gint *errorStatus)
 {
     *actualIds = 0;
     *errorStatus = 0;
 }
 
-void ginqopst(enum Gopst *value)
+void ginqopst(Gopst *value)
 {
     *value = g_opState;
 }
 
-void ginqpatrefpt(struct Gpoint *value, Gint *errorStatus)
+void ginqpatrefpt(Gpoint *value, Gint *errorStatus)
 {
     *value = g_gksState.currentPatternRef;
     *errorStatus = 0;
 }
 
-void ginqpatsize(struct Gpoint *value, Gint *errorStatus)
+void ginqpatsize(Gpoint *value, Gint *errorStatus)
 {
     *value = g_gksState.currentPatternSize;
     *errorStatus = 0;
 }
 
-void ginqtextalign(struct Gtxalign *value, Gint *errorStatus)
+void ginqtextalign(Gtxalign *value, Gint *errorStatus)
 {
     *value = g_gksState.currentTextAlign;
     *errorStatus = 0;
@@ -389,7 +389,7 @@ void ginqtextcolorind(Gint *value, Gint *errorStatus)
     *errorStatus = 0;
 }
 
-void ginqtextfontprec(struct Gtxfp *value, Gint *errorStatus)
+void ginqtextfontprec(Gtxfp *value, Gint *errorStatus)
 {
     *value = g_gksState.currentTextFontPrec;
     *errorStatus = 0;
@@ -401,13 +401,13 @@ void ginqtextind(Gint *value, Gint *errorStatus)
     *errorStatus = 0;
 }
 
-void ginqwsmaxnum(struct Gwsmax *value, Gint *errorStatus)
+void ginqwsmaxnum(Gwsmax *value, Gint *errorStatus)
 {
     *value = g_gksDescription.wsmax;
     *errorStatus = 0;
 }
 
-void gsetasf(struct Gasfs *value)
+void gsetasf(Gasfs *value)
 {
     g_gksState.asfs = *value;
 }
@@ -427,12 +427,12 @@ void gsetcharspace(Gfloat value)
     g_gksState.currentCharSpacing = value;
 }
 
-void gsetcharup(struct Gpoint *value)
+void gsetcharup(Gpoint *value)
 {
     g_gksState.currentCharUp = *value;
 }
 
-void gsetclip(enum Gclip value)
+void gsetclip(Gclip value)
 {
     g_gksState.clipping = value;
 }
@@ -447,7 +447,7 @@ void gsetfillind(Gint value)
     g_gksState.currentFillIndex = value;
 }
 
-void gsetfillstyle(enum Gflinter value)
+void gsetfillstyle(Gflinter value)
 {
     g_gksState.currentFillStyle = value;
 }
@@ -492,7 +492,7 @@ void gsetmarkertype(Gint value)
     g_gksState.currentMarkerType = value;
 }
 
-void gsettextalign(struct Gtxalign *value)
+void gsettextalign(Gtxalign *value)
 {
     g_gksState.currentTextAlign = *value;
 }
@@ -502,7 +502,7 @@ void gsettextcolorind(Gint value)
     g_gksState.currentTextColorIndex = value;
 }
 
-void gsettextfontprec(struct Gtxfp *fontPrec)
+void gsettextfontprec(Gtxfp *fontPrec)
 {
     g_gksState.currentTextFontPrec = *fontPrec;
 }
@@ -512,12 +512,12 @@ void gsettextind(Gint value)
     g_gksState.currentTextIndex = value;
 }
 
-void gsetviewport(Gint transform, struct Glimit *value)
+void gsetviewport(Gint transform, Glimit *value)
 {
     g_gksState.transforms[transform].v = *value;
 }
 
-void gsetwindow(Gint transform, struct Glimit *value)
+void gsetwindow(Gint transform, Glimit *value)
 {
     g_gksState.transforms[transform].w = *value;
 }
@@ -547,6 +547,10 @@ void gactivatews(Gint wsId)
     g_gksState.activeWs[0] = wsId;
 }
 
+void gclearws(Gint wsId, Gclrflag flag)
+{
+}
+
 void gdeactivatews(Gint wsId)
 {
     g_opState = GWSOP;
@@ -554,60 +558,56 @@ void gdeactivatews(Gint wsId)
     g_gksState.activeWs[0] = -1;
 }
 
-void gclearws(Gint wsId, enum Gclrflag flag)
+void gupdatews(Gint wsId, Gregen flag)
 {
 }
 
-void gupdatews(Gint wsId, enum Gregen flag)
-{
-}
-
-void ginqcolorrep(Gint wsId, Gint index, struct Gcobundl *value)
+void ginqcolorrep(Gint wsId, Gint index, Gcobundl *value)
 {
     *value = g_wsState[0].colorTable[index];
 }
 
-void ginqwstran(Gint wsId, struct Gwsti *value, Gint *errorStatus)
+void ginqwstran(Gint wsId, Gwsti *value, Gint *errorStatus)
 {
     *value = g_wsState[0].transform;
     *errorStatus = 0;
 }
 
-void gsetcolorrep(Gint wsId, Gint index, struct Gcobundl *value)
+void gsetcolorrep(Gint wsId, Gint index, Gcobundl *value)
 {
     g_wsState[0].colorTable[index] = *value;
 }
 
-void gsetwsviewport(Gint wsId, struct Glimit *value)
+void gsetwsviewport(Gint wsId, Glimit *value)
 {
     g_wsState[0].transform.current.v = *value;
 }
 
-void gsetwswindow(Gint wsId, struct Glimit *value)
+void gsetwswindow(Gint wsId, Glimit *value)
 {
     g_wsState[0].transform.current.w = *value;
 }
 
-void gcellarray(struct Grect *rect, struct Gidim *dims, Gint *colors)
+void gcellarray(Grect *rect, Gidim *dims, Gint *colors)
 {
 }
 
-void gfillarea(Gint numPoints, struct Gpoint *points)
+void gfillarea(Gint numPoints, Gpoint *points)
 {
 }
 
-void ggdp(Gint numPoints, struct Gpoint *points, Gint gdpId, struct Ggdprec *data)
+void ggdp(Gint numPoints, Gpoint *points, Gint gdpId, Ggdprec *data)
 {
 }
 
-void gpolyline(Gint numPoints, struct Gpoint *points)
+void gpolyline(Gint numPoints, Gpoint *points)
 {
 }
 
-void gpolymarker(Gint numPoints, struct Gpoint *points)
+void gpolymarker(Gint numPoints, Gpoint *points)
 {
 }
 
-void gtext(struct Gpoint *start, const Gchar *text)
+void gtext(Gpoint *start, const Gchar *text)
 {
 }

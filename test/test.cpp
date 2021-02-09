@@ -511,7 +511,7 @@ TEST_CASE("Initial global attribute values", "[output]")
     }
     SECTION("fill area interior style is HOLLOW")
     {
-        enum Gflinter style{GSOLID};
+        Gflinter style{GSOLID};
         ginqfillstyle(&style, &status);
 
         REQUIRE(style == GHOLLOW);
