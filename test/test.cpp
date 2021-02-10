@@ -152,19 +152,6 @@ TEST_CASE("GKS state list", "[gks]")
         REQUIRE(clipping.rec.ymin == 0.0f);
         REQUIRE(clipping.rec.ymax == 1.0f);
     }
-    SECTION("Workstation color facilities")
-    {
-        Gwstype wsType{};
-        Gint buffSize{};
-        Gint facilSize{};
-        Gcofac facil{};
-        ginqcolorfacil(wsType, buffSize, &facilSize, &facil, &status);
-
-        REQUIRE(status == 0);
-        REQUIRE(facil.colors == 16);
-        REQUIRE(facil.coavail == GCOLOR);
-        REQUIRE(facil.predefined == 16);
-    }
     SECTION("Initial set of open workstations is empty")
     {
         const Gint numBuffIds = 10;
@@ -174,6 +161,35 @@ TEST_CASE("GKS state list", "[gks]")
         ginqopenws(numBuffIds, 0, &idList, &numIds, &status);
 
         REQUIRE(numIds == 0);
+    }
+
+    REQUIRE(status == 0);
+
+    gclosegks();
+}
+
+TEST_CASE("Workstation description table", "[workstation]")
+{
+    gopengks(stderr, 0L);
+    Gint status{-1};
+
+    SECTION("color facilities")
+    {
+        Gcofac facil{};
+        ginqcolorfacil(GWSTYPE_TEK4105, 0, NULL, &facil, &status);
+
+        REQUIRE(facil.colors == 16);
+        REQUIRE(facil.coavail == GCOLOR);
+        REQUIRE(facil.predefined == 16);
+    }
+    SECTION("display space size")
+    {
+        Gdspsize size{};
+        ginqdisplaysize(GWSTYPE_TEK4105, &size, &status);
+
+        REQUIRE(size.units == GDC_OTHER);
+        REQUIRE(size.raster.x == 640);
+        REQUIRE(size.raster.y == 480);
     }
 
     REQUIRE(status == 0);
@@ -296,17 +312,6 @@ TEST_CASE("Open workstation", "[workstation]")
         REQUIRE(transform.current.w.xmax == xmax);
         REQUIRE(transform.current.w.ymin == ymin);
         REQUIRE(transform.current.w.ymax == ymax);
-    }
-    SECTION("display space size")
-    {
-        Gdspsize size{};
-        Gint status{-1};
-        ginqdisplaysize(wsType, &size, &status);
-
-        REQUIRE(status == 0);
-        REQUIRE(size.units == GDC_OTHER);
-        REQUIRE(size.raster.x == 640);
-        REQUIRE(size.raster.y == 480);
     }
 
     gclosews(wsId);

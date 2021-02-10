@@ -139,6 +139,123 @@ static GGKSState g_initialGksState =
 
 static GGKSState g_gksState;
 
+typedef struct GWSDesc_t
+{
+    // type
+    // category
+    // device coordinate units
+    Gdspsize displaySpaceSize;
+    // raster or vector display
+    // dynamic modifications accepted for
+    //-line rep
+    //-marker rep
+    //-text rep
+    //-fill area rep
+    //-pattern rep
+    //-color rep
+    //-workstation transformation
+    // default deferral mode
+    // default implicit regeneration mode
+    // num available line types
+    // list of available line types
+    // num available line widths
+    // nominal line width
+    // minimum line width
+    // maximum line width
+    // num line bundles
+    // line bundles
+    //  - line type
+    //  - line width scale factor
+    //  - line color index
+    // num available marker types
+    // list of available marker types
+    // num available marker sizes
+    // nominal marker size
+    // minimum marker size
+    // maximum marker size
+    // num predefined marker bundles
+    // marker bundles
+    //  - marker type
+    //  - marker size scale factor
+    //  - marker color index
+    // num text font/prec pairs
+    // list of text font/prec pairs
+    // num available character expansion factors
+    // minimum character expansion factor
+    // maximum character expansion factor
+    // num available character heights
+    // minimum character height
+    // maximum character height
+    // num predefined text bundles
+    // text bundles
+    //  - text font/prec
+    //  - character expansion factor
+    //  - character spacing
+    //  - text color index
+    // num available fill area interior styles
+    // list of available fill area interior styles
+    // num available hatch styles
+    // list of available hatch styles
+    // num predefined fill area bundles
+    // fill area bundle
+    //  - fill area interior style
+    //  - fill area style index
+    //  - fill area color index
+    // num predefined pattern representations
+    // pattern representation
+    //  - pattern array dimensions
+    //  - pattern array
+    // num available colors
+
+    // color available
+    // num predefined color represetnations
+    // color representations
+    Gcofac colorFacilities;
+
+    //  - red
+    //  - green
+    //  - blue
+    // num available gdp
+    // gdp description:
+    //  - gdp id
+    //  - number of sets of attributes used
+    //  - list of sets of attributes used
+    // max num line bundle table entries
+    // max num marker bundle table entries
+    // max num text bundle table entries
+    // max num fill area table entries
+    // max num pattern indices
+    // max num color indices
+    // num of segment priorities supported
+    // dynamic modification accepted for:
+    //  - segment transformation
+    //  - visibility (visible -> invisible)
+    //  - visibility (invisible -> visible)
+    //  - highlighting
+    //  - segment priority
+    //  - adding primitives to open segment overlapping segment w/higher priority
+    //  - delete segment
+    // LOCATOR
+    // STROKE
+    // VALUATOR
+    // CHOICE
+    // PICK
+    // STRING
+} GWSDesc;
+
+static const GWSDesc g_wsDesc[MAX_WS_TYPES] =
+{
+    // Tektronix 4105
+    {
+        {
+            GDC_OTHER,
+            { 0.0f, 1.0f },
+            { 640, 480 }
+        },
+        { 16, GCOLOR, 16 }
+    }
+};
+
 typedef struct GWSState_t
 {
     Gint id;
@@ -156,7 +273,6 @@ typedef struct GWSState_t
     Gcobundl colorTable[MAX_NUM_COLORS];
     //-- deferral mode
     Gwsti transform;
-    Gdspsize displaySize;
     //- category INPUT, OUTIN
     //-- locator
     //-- stroke
@@ -184,28 +300,10 @@ static const GWSState g_initialWsState =
             { 0.0f, 1.0f, 0.0f, 1.0f },
             { 0.0f, 1.0f, 0.0f, 1.0f },
         }
-    },
-    {
-        GDC_OTHER,
-        { 0.0f, 1.0f },
-        { 640, 480 }
     }
 };
 
 static GWSState g_wsState[1];
-
-typedef struct GWSDesc_t
-{
-    Gcofac colorFacilities;
-} GWSDesc;
-
-static const GWSDesc g_wsDesc[MAX_WS_TYPES] =
-{
-    // Tektronix 4105
-    {
-        { 16, GCOLOR, 16 }
-    }
-};
 
 void gerrorhand(Gint errNum, Gint funcName, Gfile *errFile)
 {
@@ -293,13 +391,13 @@ void ginqclip(Gcliprect *value, Gint *errorStatus)
 
 void ginqcolorfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gcofac *value, Gint *errorStatus)
 {
-    *value = g_wsDesc[wsType].colorFacilities;
+    *value = g_wsDesc[wsType-1].colorFacilities;
     *errorStatus = 0;
 }
 
 void ginqdisplaysize(Gwstype wsType, Gdspsize *size, Gint *errorStatus)
 {
-    *size = g_wsState[0].displaySize;
+    *size = g_wsDesc[wsType-1].displaySpaceSize;
     *errorStatus = 0;
 }
 
