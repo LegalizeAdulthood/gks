@@ -18,6 +18,9 @@ typedef FILE Gfile;
 typedef Gchar Gconn;
 typedef Gint Gwstype;
 
+// Predefined workstation types
+#define GWSTYPE_TEK4105 1
+
 // Predefined line types
 #define GLN_SOLID 1
 #define GLN_DASHED 2
@@ -51,7 +54,7 @@ typedef enum Gclrflag
 
 typedef enum Gcoavail
 {
-    GCOLOUR = 1,
+    GCOLOR = 1,
     GMONOCHROME
 } Gcoavail;
 
@@ -308,14 +311,13 @@ void gopengks(Gfile *errfile, Glong memory);
 void gclosegks(void);
 
 void ginqasf(Gasfs *value, Gint *errorStatus);
-void ginqavailwstypes(Gint bufSize, Gint start, Gstrlist *wsTypes, Gint *numTypes, Gint *errorStatus);
+void ginqavailwstypes(Gint bufSize, Gint start, Gintlist *wsTypes, Gint *numTypes, Gint *errorStatus);
 void ginqcharexpan(Gfloat *value, Gint *errorStatus);
+void ginqcharbase(Gpoint *value, Gint *errorStatus);
 void ginqcharheight(Gfloat *value, Gint *errorStatus);
 void ginqcharspace(Gfloat *value, Gint *errorStatus);
 void ginqcharup(Gpoint *value, Gint *errorStatus);
 void ginqclip(Gcliprect *value, Gint *errorStatus);
-void ginqcolorfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gcofac *facil, Gint *errorStatus);
-void ginqdisplaysize(Gwstype wsType, Gdspsize *size, Gint *errorStatus);
 void ginqfillcolorind(Gint *value, Gint *errorStatus);
 void ginqfillind(Gint *value, Gint *errorStatus);
 void ginqfillstyle(Gflinter *value, Gint *errorStatus);
@@ -339,6 +341,9 @@ void ginqtextcolorind(Gint *value, Gint *errorStatus);
 void ginqtextfontprec(Gtxfp *value, Gint *errorStatus);
 void ginqtextind(Gint *value, Gint *errorStatus);
 void ginqwsmaxnum(Gwsmax *value, Gint *errorStatus);
+
+void ginqcolorfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gcofac *facil, Gint *errorStatus);
+void ginqdisplaysize(Gwstype wsType, Gdspsize *size, Gint *errorStatus);
 
 void gsetasf(Gasfs *value);
 void gsetcharexpan(Gfloat value);

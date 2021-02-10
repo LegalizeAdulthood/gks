@@ -63,20 +63,19 @@ TEST_CASE("GKS state list", "[gks]")
     {
         using namespace std::string_literals;
         const Gint numWsTypes{10};
-        char buffer[numWsTypes*80]{};
-        Gint bufSize{sizeof(buffer)};
         Gint start{};
-        char *wsTypeStrings[numWsTypes]{};
-        for (int i = 0; i < numWsTypes; ++i)
+        int wsTypeValues[numWsTypes];
+        for (int &wsTypeValue : wsTypeValues)
         {
-            wsTypeStrings[i] = &buffer[i*80];
+            wsTypeValue = -1;
         }
-        Gstrlist wsTypes{numWsTypes, wsTypeStrings};
+        Gintlist wsTypes{0, wsTypeValues};
         Gint numAvailTypes{};
-        ginqavailwstypes(bufSize, start, &wsTypes, &numAvailTypes, &status);
+        ginqavailwstypes(numWsTypes, start, &wsTypes, &numAvailTypes, &status);
 
         REQUIRE(numAvailTypes == 1);
-        REQUIRE(wsTypes.strings[0] == "tek4105"s);
+        REQUIRE(wsTypes.number == 1);
+        REQUIRE(wsTypes.integers[0] == GWSTYPE_TEK4105);
     }
     SECTION("Number of normalization transforms")
     {
@@ -160,6 +159,11 @@ TEST_CASE("GKS state list", "[gks]")
         Gint facilSize{};
         Gcofac facil{};
         ginqcolorfacil(wsType, buffSize, &facilSize, &facil, &status);
+
+        REQUIRE(status == 0);
+        REQUIRE(facil.colors == 16);
+        REQUIRE(facil.coavail == GCOLOR);
+        REQUIRE(facil.predefined == 16);
     }
     SECTION("Initial set of open workstations is empty")
     {

@@ -6,13 +6,14 @@ Level ma
 [X] Close GKS
 
 [ ] Inquire Character Base Vector
-[ ] Inquire Character Expansion Factor
-[ ] Inquire Character Height
-[ ] Inquire Character Spacing
-[ ] Inquire Character Up Vector
+[X] Inquire Character Expansion Factor
+[X] Inquire Character Height
+[X] Inquire Character Spacing
+[X] Inquire Character Up Vector
 [ ] Inquire Character Width
+    void ginqcharwidth(Gfloat *value, Gint *errorStatus);
 [X] Inquire Clipping
-[ ] Inquire Color Facilities
+[X] Inquire Color Facilities
 [X] Inquire Current Normalization Transformation Number
 [X] Inquire Display Space Size
 [X] Inquire Fill Area Color Index
@@ -32,9 +33,9 @@ Level ma
 [X] Inquire Marker Index
 [X] Inquire Marker Size Scale Factor
 [X] Inquire Marker Type
-[ ] Inquire Maximum Length of Workstation State Tables
 [X] Inquire Normalization Transform
 [ ] Inquire Pattern Height Vector
+    void ginqpatheight(Gpoint *value, Gint *errorStatus);
 [ ] Inquire Pattern Reference Point
 [ ] Inquire Patterh Width Vector
 [X] Inquire Text Alignment
@@ -69,6 +70,7 @@ Level ma
 
 [ ] Inquire Color Representation
 [ ] Inquire List of Color Indices
+[ ] Inquire Maximum Length of Workstation State Tables
 [ ] Inquire Text Extent
 [ ] Inquire Workstation Connection and Type
 [ ] Inquire Workstation Transformation

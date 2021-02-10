@@ -2,12 +2,9 @@
 
 #include <string.h>
 
-static Gopst g_opState = GGKCL;
+#define NUM_OF(ary_) (sizeof(ary_)/sizeof((ary_)[0]))
 
-static const Gchar *g_wsTypes[] =
-{
-    "tek4105",
-};
+static Gopst g_opState = GGKCL;
 
 enum
 {
@@ -15,27 +12,32 @@ enum
     MAX_ACTIVE_WS = 1,
     MAX_SEGMENT_ASSOC = 0,
     MAX_NUM_TRANSFORMS = 2,
-    MAX_NUM_COLORS = 64
+    MAX_NUM_COLORS = 64,
+    MAX_WS_TYPES = 1
 };
 
 typedef struct GGKSDescription_t
 {
     Glevel level;
-    Gint numAvailWSTypes;
-    const Gchar **wsTypes;
+    Gint numWsTypes;
+    const Gwstype *wsTypes;
     Gwsmax wsmax;
     Gint numTrans;
 } GGKSDescription;
 
+static const Gwstype g_wsTypes[MAX_WS_TYPES] =
+{
+    GWSTYPE_TEK4105
+};
+
 static GGKSDescription g_gksDescription =
 {
     GLMA,
-    sizeof(g_wsTypes)/sizeof(g_wsTypes[0]),
+    NUM_OF(g_wsTypes),
     g_wsTypes,
     { MAX_OPEN_WS, MAX_ACTIVE_WS, MAX_SEGMENT_ASSOC },
     MAX_NUM_TRANSFORMS
 };
-
 
 typedef struct GGKSState_t
 {
@@ -55,6 +57,7 @@ typedef struct GGKSState_t
     Gint currentMarkerIndex;
     // text
     Gfloat currentCharHeight;
+    Gpoint currentCharBase;
     Gpoint currentCharUp;
     Gint currentTextColorIndex;
     Gint currentTextIndex;
@@ -99,6 +102,7 @@ static GGKSState g_initialGksState =
     1,
     // text
     0.01f,
+    { 1.0f, 0.0f },
     { 0.0f, 1.0f },
     1,
     1,
@@ -188,6 +192,19 @@ static const GWSState g_initialWsState =
 
 static GWSState g_wsState[1];
 
+typedef struct GWSDesc_t
+{
+    Gcofac colorFacilities;
+} GWSDesc;
+
+static const GWSDesc g_wsDesc[MAX_WS_TYPES] =
+{
+    // Tektronix 4105
+    {
+        { 16, GCOLOR, 16 }
+    }
+};
+
 void gerrorhand(Gint errNum, Gint funcName, Gfile *errFile)
 {
     fprintf(errFile, "GKS error %d in function %d\n", errNum, funcName);
@@ -214,12 +231,13 @@ void ginqasf(Gasfs *value, Gint *errorStatus)
     *errorStatus = 0;
 }
 
-void ginqavailwstypes(Gint bufSize, Gint start, Gstrlist *wsTypes, Gint *numTypes, Gint *errorStatus)
+void ginqavailwstypes(Gint bufSize, Gint start, Gintlist *wsTypes, Gint *numTypes, Gint *errorStatus)
 {
-    *numTypes = g_gksDescription.numAvailWSTypes;
-    for (int i = 0; i < g_gksDescription.numAvailWSTypes; ++i)
+    *numTypes = g_gksDescription.numWsTypes;
+    wsTypes->number = *numTypes;
+    for (int i = 0; i < g_gksDescription.numWsTypes; ++i)
     {
-        strcpy(wsTypes->strings[i], g_gksDescription.wsTypes[i]);
+        wsTypes->integers[i] = g_gksDescription.wsTypes[i];
     }
     *errorStatus = 0;
 }
@@ -228,6 +246,11 @@ void ginqcharexpan(Gfloat *value, Gint *errorStatus)
 {
     *value = g_gksState.currentCharExpandFactor;
     *errorStatus = 0;
+}
+
+void ginqcharbase(Gpoint *value, Gint *errorStatus)
+{
+    *value = g_gksState.currentCharBase;
 }
 
 void ginqcharheight(Gfloat *value, Gint *errorStatus)
@@ -259,8 +282,9 @@ void ginqclip(Gcliprect *value, Gint *errorStatus)
     *errorStatus = 0;
 }
 
-void ginqcolorfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gcofac *facil, Gint *errorStatus)
+void ginqcolorfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gcofac *value, Gint *errorStatus)
 {
+    *value = g_wsDesc[wsType].colorFacilities;
     *errorStatus = 0;
 }
 
