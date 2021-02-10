@@ -10,8 +10,7 @@ Level ma
 [X] Inquire Character Height
 [X] Inquire Character Spacing
 [X] Inquire Character Up Vector
-[ ] Inquire Character Width
-    void ginqcharwidth(Gfloat *value, Gint *errorStatus);
+[X] Inquire Character Width
 [X] Inquire Clipping
 [X] Inquire Color Facilities
 [X] Inquire Current Normalization Transformation Number

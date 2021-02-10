@@ -479,6 +479,13 @@ TEST_CASE("Initial global attribute values", "[output]")
         REQUIRE(up.x == 0.0f);
         REQUIRE(up.y == 1.0f);
     }
+    SECTION("character width is 0.01")
+    {
+        Gfloat width{-1.0f};
+        ginqcharwidth(&width, &status);
+
+        REQUIRE(width == 0.01f);
+    }
     SECTION("text color index is 1")
     {
         ginqtextcolorind(&value, &status);

@@ -65,6 +65,7 @@ typedef struct GGKSState_t
     Gtxfp currentTextFontPrec;
     Gfloat currentCharExpandFactor;
     Gfloat currentCharSpacing;
+    Gfloat currentCharWidth;
     // fill area
     Gflinter currentFillStyle;
     Gint currentFillStyleIndex;
@@ -110,6 +111,7 @@ static GGKSState g_initialGksState =
     { 1, GP_STRING },
     1.0f,
     0.0f,
+    0.01f,
     // fill area
     GHOLLOW,
     1,
@@ -263,6 +265,12 @@ void ginqcharheight(Gfloat *value, Gint *errorStatus)
 void ginqcharspace(Gfloat *value, Gint *errorStatus)
 {
     *value = g_gksState.currentCharSpacing;
+    *errorStatus = 0;
+}
+
+void ginqcharwidth(Gfloat *value, Gint *errorStatus)
+{
+    *value = g_gksState.currentCharWidth;
     *errorStatus = 0;
 }
 

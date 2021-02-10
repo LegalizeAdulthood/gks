@@ -316,6 +316,7 @@ void ginqcharexpan(Gfloat *value, Gint *errorStatus);
 void ginqcharbase(Gpoint *value, Gint *errorStatus);
 void ginqcharheight(Gfloat *value, Gint *errorStatus);
 void ginqcharspace(Gfloat *value, Gint *errorStatus);
+void ginqcharwidth(Gfloat *value, Gint *errorStatus);
 void ginqcharup(Gpoint *value, Gint *errorStatus);
 void ginqclip(Gcliprect *value, Gint *errorStatus);
 void ginqfillcolorind(Gint *value, Gint *errorStatus);
