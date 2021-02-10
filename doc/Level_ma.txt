@@ -12,23 +12,19 @@ Level ma
 [X] Inquire Character Up Vector
 [X] Inquire Character Width
 [X] Inquire Clipping
-[X] Inquire Color Facilities
 [X] Inquire Current Normalization Transformation Number
 [X] Inquire Display Space Size
 [X] Inquire Fill Area Color Index
-[ ] Inquire Fill Area Facilities
 [X] Inquire Fill Area Index
 [X] Inquire Fill Area Interior Style
 [X] Inquire Fill Area Style Index
 [X] Inquire Level of GKS
 [X] Inquire Line Color Index  
-[ ] Inquire Line Facilities
 [X] Inquire Line Index
 [X] Inquire Line Type
 [X] Inquire Line Width Scale Factor
 [X] Inquire List of Aspect Source Flags
 [X] Inquire Marker Color Index  
-[ ] Inquire Marker Facilities
 [X] Inquire Marker Index
 [X] Inquire Marker Size Scale Factor
 [X] Inquire Marker Type
@@ -39,7 +35,6 @@ Level ma
 [ ] Inquire Patterh Width Vector
 [X] Inquire Text Alignment
 [X] Inquire Text Color Index
-[ ] Inquire Text Facilities
 [X] Inquire Text Font and Precision
 [X] Inquire Text Index
 [X] Inquire Text Path
@@ -67,10 +62,15 @@ Level ma
 [X] Deactivate Workstation
 [X] Update Workstation
 
+[X] Inquire Color Facilities
 [ ] Inquire Color Representation
+[ ] Inquire Fill Area Facilities
+[ ] Inquire Line Facilities
 [ ] Inquire List of Color Indices
+[ ] Inquire Marker Facilities
 [ ] Inquire Maximum Length of Workstation State Tables
 [ ] Inquire Text Extent
+[ ] Inquire Text Facilities
 [ ] Inquire Workstation Connection and Type
 [ ] Inquire Workstation Transformation
 
