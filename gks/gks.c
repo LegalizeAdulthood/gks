@@ -158,6 +158,7 @@ typedef struct GWSDesc_t
     //-workstation transformation
     // default deferral mode
     // default implicit regeneration mode
+
     // num available line types
     // list of available line types
     // num available line widths
@@ -165,6 +166,8 @@ typedef struct GWSDesc_t
     // minimum line width
     // maximum line width
     // num line bundles
+    Glnfac lineFacilities;
+
     // line bundles
     //  - line type
     //  - line width scale factor
@@ -256,6 +259,11 @@ static const Gflinter g_availFillAreaIntStyles[] =
     GHOLLOW
 };
 
+static Gint g_availLineTypes[] =
+{
+    GLN_SOLID
+};
+
 static const GWSDesc g_wsDesc[MAX_WS_TYPES] =
 {
     // Tektronix 4105
@@ -264,6 +272,14 @@ static const GWSDesc g_wsDesc[MAX_WS_TYPES] =
             GDC_OTHER,
             { 0.0f, 1.0f },
             { 640, 480 }
+        },
+        {
+            { NUM_OF(g_availLineTypes), g_availLineTypes },
+            1,
+            1.0f,
+            1.0f,
+            1.0f,
+            1
         },
         NUM_OF(g_availFillAreaIntStyles), g_availFillAreaIntStyles,
         { 0, NULL },
@@ -431,6 +447,22 @@ void ginqfillfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gflfac *value
         value->hatches[i] = desc->availFillAreaHatchStyles.integers[i];
     }
     value->predefined = desc->numFillAreaBundles;
+    *errorStatus = 0;
+}
+
+void ginqlinefacil(Gwstype wsType, Gint buffSize, Gint *numLineTypes, Glnfac *value, Gint *errorStatus)
+{
+    const GWSDesc *desc = &g_wsDesc[wsType-1];
+    *numLineTypes = desc->lineFacilities.types.number;
+    for (int i = 0; i < desc->lineFacilities.types.number; ++i)
+    {
+        value->types.integers[i] = desc->lineFacilities.types.integers[i];
+    }
+    value->widths = desc->lineFacilities.widths;
+    value->nom_width = desc->lineFacilities.nom_width;
+    value->min_width = desc->lineFacilities.min_width;
+    value->max_width = desc->lineFacilities.max_width;
+    value->predefined = desc->lineFacilities.predefined;
     *errorStatus = 0;
 }
 

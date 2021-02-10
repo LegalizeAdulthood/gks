@@ -61,7 +61,7 @@ Level ma
 [X] Inquire Color Facilities
 [X] Inquire Color Representation
 [X] Inquire Fill Area Facilities
-[ ] Inquire Line Facilities
+[X] Inquire Line Facilities
 [ ] Inquire List of Color Indices
 [ ] Inquire Marker Facilities
 [ ] Inquire Maximum Length of Workstation State Tables
