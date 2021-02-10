@@ -251,6 +251,7 @@ void ginqcharexpan(Gfloat *value, Gint *errorStatus)
 void ginqcharbase(Gpoint *value, Gint *errorStatus)
 {
     *value = g_gksState.currentCharBase;
+    *errorStatus = 0;
 }
 
 void ginqcharheight(Gfloat *value, Gint *errorStatus)

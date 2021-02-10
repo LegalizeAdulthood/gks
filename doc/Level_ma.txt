@@ -5,7 +5,7 @@ Level ma
 [X] Open GKS
 [X] Close GKS
 
-[ ] Inquire Character Base Vector
+[X] Inquire Character Base Vector
 [X] Inquire Character Expansion Factor
 [X] Inquire Character Height
 [X] Inquire Character Spacing

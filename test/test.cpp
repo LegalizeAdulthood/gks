@@ -463,9 +463,17 @@ TEST_CASE("Initial global attribute values", "[output]")
 
         REQUIRE(height == 0.01f);
     }
+    SECTION("char base vector is (1.00")
+    {
+        Gpoint base{-1.0f, -1.0f};
+        ginqcharbase(&base, &status);
+
+        REQUIRE(base.x == 1.0f);
+        REQUIRE(base.y == 0.0f);
+    }
     SECTION("char up vector is (0,1)")
     {
-        Gpoint up{};
+        Gpoint up{-1.0f, -1.0f};
         ginqcharup(&up, &status);
 
         REQUIRE(up.x == 0.0f);
