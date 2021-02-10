@@ -29,10 +29,6 @@ Level ma
 [X] Inquire Marker Size Scale Factor
 [X] Inquire Marker Type
 [X] Inquire Normalization Transform
-[ ] Inquire Pattern Height Vector
-    void ginqpatheight(Gpoint *value, Gint *errorStatus);
-[ ] Inquire Pattern Reference Point
-[ ] Inquire Patterh Width Vector
 [X] Inquire Text Alignment
 [X] Inquire Text Color Index
 [X] Inquire Text Font and Precision
@@ -63,8 +59,8 @@ Level ma
 [X] Update Workstation
 
 [X] Inquire Color Facilities
-[ ] Inquire Color Representation
-[ ] Inquire Fill Area Facilities
+[X] Inquire Color Representation
+[X] Inquire Fill Area Facilities
 [ ] Inquire Line Facilities
 [ ] Inquire List of Color Indices
 [ ] Inquire Marker Facilities

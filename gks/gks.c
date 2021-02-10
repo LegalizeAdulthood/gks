@@ -143,8 +143,10 @@ typedef struct GWSDesc_t
 {
     // type
     // category
+
     // device coordinate units
     Gdspsize displaySpaceSize;
+
     // raster or vector display
     // dynamic modifications accepted for
     //-line rep
@@ -192,11 +194,17 @@ typedef struct GWSDesc_t
     //  - character expansion factor
     //  - character spacing
     //  - text color index
+
     // num available fill area interior styles
     // list of available fill area interior styles
     // num available hatch styles
     // list of available hatch styles
     // num predefined fill area bundles
+    Gint numAvailFillAreaIntStyles;
+    const Gflinter *availFillAreaIntStyles;
+    Gintlist availFillAreaHatchStyles;
+    Gint numFillAreaBundles;
+
     // fill area bundle
     //  - fill area interior style
     //  - fill area style index
@@ -243,6 +251,11 @@ typedef struct GWSDesc_t
     // STRING
 } GWSDesc;
 
+static const Gflinter g_availFillAreaIntStyles[] =
+{
+    GHOLLOW
+};
+
 static const GWSDesc g_wsDesc[MAX_WS_TYPES] =
 {
     // Tektronix 4105
@@ -252,6 +265,9 @@ static const GWSDesc g_wsDesc[MAX_WS_TYPES] =
             { 0.0f, 1.0f },
             { 640, 480 }
         },
+        NUM_OF(g_availFillAreaIntStyles), g_availFillAreaIntStyles,
+        { 0, NULL },
+        1,
         { 16, GCOLOR, 16 }
     }
 };
@@ -395,9 +411,26 @@ void ginqcolorfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gcofac *valu
     *errorStatus = 0;
 }
 
-void ginqdisplaysize(Gwstype wsType, Gdspsize *size, Gint *errorStatus)
+void ginqdisplaysize(Gwstype wsType, Gdspsize *value, Gint *errorStatus)
 {
-    *size = g_wsDesc[wsType-1].displaySpaceSize;
+    *value = g_wsDesc[wsType-1].displaySpaceSize;
+    *errorStatus = 0;
+}
+
+void ginqfillfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gflfac *value, Gint *errorStatus)
+{
+    const GWSDesc *desc = &g_wsDesc[wsType-1];
+    value->n_interiors = desc->numAvailFillAreaIntStyles;
+    for (int i = 0; i < desc->numAvailFillAreaIntStyles; ++i)
+    {
+        value->interiors[i] = desc->availFillAreaIntStyles[i];
+    }
+    *facilSize = desc->availFillAreaHatchStyles.number;
+    for (int i = 0; i < desc->availFillAreaHatchStyles.number; ++i)
+    {
+        value->hatches[i] = desc->availFillAreaHatchStyles.integers[i];
+    }
+    value->predefined = desc->numFillAreaBundles;
     *errorStatus = 0;
 }
 

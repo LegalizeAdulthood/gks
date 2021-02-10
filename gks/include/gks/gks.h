@@ -218,6 +218,20 @@ typedef union Gescout
     Guesc_odatarec esc_odatarec;
 } Gescout;
 
+typedef struct Gintlist
+{
+    Gint number;
+    Gint *integers;
+} Gintlist;
+
+typedef struct Gflfac
+{
+    Gint n_interiors;
+    Gflinter *interiors;
+    Gint *hatches;
+    Gint predefined;
+} Gflfac;
+
 typedef struct Ggdp_datarec
 {
     Gint number_integer;
@@ -252,12 +266,6 @@ typedef struct Gdspsize
     Gpoint device;
     Gipoint raster;
 } Gdspsize;
-
-typedef struct Gintlist
-{
-    Gint number;
-    Gint *integers;
-} Gintlist;
 
 typedef struct Grect
 {
@@ -343,8 +351,9 @@ void ginqtextfontprec(Gtxfp *value, Gint *errorStatus);
 void ginqtextind(Gint *value, Gint *errorStatus);
 void ginqwsmaxnum(Gwsmax *value, Gint *errorStatus);
 
-void ginqcolorfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gcofac *facil, Gint *errorStatus);
-void ginqdisplaysize(Gwstype wsType, Gdspsize *size, Gint *errorStatus);
+void ginqcolorfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gcofac *value, Gint *errorStatus);
+void ginqdisplaysize(Gwstype wsType, Gdspsize *value, Gint *errorStatus);
+void ginqfillfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gflfac *value, Gint *errorStatus);
 
 void gsetasf(Gasfs *value);
 void gsetcharexpan(Gfloat value);

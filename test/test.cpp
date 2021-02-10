@@ -5,6 +5,12 @@
 #include <cstdio>
 #include <string>
 
+template <typename T, size_t N>
+Gint numOf(T (&ary)[N])
+{
+    return static_cast<Gint>(N);
+}
+
 inline enum Gopst getGksOpState()
 {
     Gopst result = static_cast<enum Gopst>(-1);
@@ -190,6 +196,21 @@ TEST_CASE("Workstation description table", "[workstation]")
         REQUIRE(size.units == GDC_OTHER);
         REQUIRE(size.raster.x == 640);
         REQUIRE(size.raster.y == 480);
+    }
+    SECTION("fill area facilities")
+    {
+        Gflinter interiorStyles[4]{};
+        Gint hatchStyles[10]{};
+        Gflfac facil{};
+        facil.interiors = interiorStyles;
+        facil.hatches = hatchStyles;
+        Gint numAvailHatches{};
+        ginqfillfacil(GWSTYPE_TEK4105, numOf(hatchStyles), &numAvailHatches, &facil, &status);
+
+        REQUIRE(facil.n_interiors == 1);
+        REQUIRE(facil.interiors[0] == GHOLLOW);
+        REQUIRE(facil.predefined == 1);
+        REQUIRE(numAvailHatches == 0);
     }
 
     REQUIRE(status == 0);
