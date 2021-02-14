@@ -1,5 +1,9 @@
 add_library(gks
     include/gks/gks.h
+    include/gks/gkserror.h
     gks.c
     ../doc/Level_ma.txt)
 target_include_directories(gks PUBLIC include)
+
+add_library(gks-error gkserror.c)
+target_link_libraries(gks-error PUBLIC gks)

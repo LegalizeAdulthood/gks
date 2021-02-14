@@ -1,9 +1,11 @@
 #include <gks/gks.h>
+#include <gks/gkserror.h>
 
 #include <string.h>
 
 #define NUM_OF(ary_) (sizeof(ary_)/sizeof((ary_)[0]))
 
+static Gfile *g_errFile = NULL;
 static Gopst g_opState = GGKCL;
 
 enum
@@ -337,7 +339,7 @@ static const GWSState g_initialWsState =
 
 static GWSState g_wsState[1];
 
-void gerrorhand(Gint errNum, Gint funcName, Gfile *errFile)
+void gerrorlog(Gint errNum, Gint funcName, Gfile *errFile)
 {
     fprintf(errFile, "GKS error %d in function %d\n", errNum, funcName);
 }
@@ -348,12 +350,18 @@ void gescape(Gint function, Gescin *indata, Gint bufsize, Gescout *outdata, Gint
 
 void gopengks(Gfile *errfile, Glong memory)
 {
+    g_errFile = errfile;
     g_opState = GGKOP;
     g_gksState = g_initialGksState;
 }
 
 void gclosegks(void)
 {
+    if (g_opState != GGKOP)
+    {
+        gerrorhand(GERROR_NOT_STATE_GKOP, GFN_CLOSEGKS, g_errFile);
+        return;
+    }
     g_opState = GGKCL;
 }
 

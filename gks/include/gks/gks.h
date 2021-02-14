@@ -322,6 +322,7 @@ typedef struct Gwsti
 } Gwsti;
 
 void gerrorhand(Gint errNum, Gint funcName, Gfile *errFile);
+void gerrorlog(Gint errNum, Gint funcName, Gfile *errFile);
 
 void gescape(Gint function, Gescin *inData, Gint bufSize, Gescout *outData, Gint *escOutSize);
 

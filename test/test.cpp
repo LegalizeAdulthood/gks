@@ -1,3 +1,5 @@
+#include "error.h"
+
 #include <gks/gks.h>
 
 #include <catch2/catch.hpp>
@@ -9,13 +11,6 @@ template <typename T, size_t N>
 Gint numOf(T (&ary)[N])
 {
     return static_cast<Gint>(N);
-}
-
-inline enum Gopst getGksOpState()
-{
-    Gopst result = static_cast<enum Gopst>(-1);
-    ginqopst(&result);
-    return result;
 }
 
 TEST_CASE("Initially closed", "[gks]")
