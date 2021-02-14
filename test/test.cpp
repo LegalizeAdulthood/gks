@@ -5,7 +5,6 @@
 #include <catch2/catch.hpp>
 
 #include <cstdio>
-#include <string>
 
 template <typename T, size_t N>
 Gint numOf(T (&ary)[N])
@@ -62,7 +61,6 @@ TEST_CASE("GKS state list", "[gks]")
 
     SECTION("Availale workstation types")
     {
-        using namespace std::string_literals;
         const Gint numWsTypes{10};
         Gint start{};
         int wsTypeValues[numWsTypes];
@@ -609,6 +607,13 @@ TEST_CASE("Initial global attribute values", "[output]")
         REQUIRE(asfs.fl_style == GINDIVIDUAL);
         REQUIRE(asfs.fl_color == GINDIVIDUAL);
     }
+    SECTION("current normalization transform is 0")
+    {
+        Gint transform{-1};
+        ginqcurrntrannum(&transform, &status);
+
+        REQUIRE(transform == 0);
+    }
 
     REQUIRE(status == 0);
 
@@ -809,6 +814,14 @@ TEST_CASE("Set global attribute values", "[output]")
         REQUIRE(current.fl_inter == asfs.fl_inter);
         REQUIRE(current.fl_style == asfs.fl_style);
         REQUIRE(current.fl_color == asfs.fl_color);
+    }
+    SECTION("normalization transform")
+    {
+        gselntran(1);
+
+        Gint transform{0};
+        ginqcurrntrannum(&transform, &status);
+        REQUIRE(transform == 1);
     }
 
     REQUIRE(status == 0);

@@ -346,10 +346,21 @@ void gerrorlog(Gint errNum, Gint funcName, Gfile *errFile)
 
 void gescape(Gint function, Gescin *indata, Gint bufsize, Gescout *outdata, Gint *escoutSize)
 {
+    if (g_opState == GGKCL)
+    {
+        gerrorhand(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_ESCAPE, g_errFile);
+        return;
+    }
 }
 
 void gopengks(Gfile *errfile, Glong memory)
 {
+    if (g_opState != GGKCL)
+    {
+        gerrorhand(GERROR_NOT_STATE_GKCL, GFN_OPEN_GKS, g_errFile);
+        return;
+    }
+
     g_errFile = errfile;
     g_opState = GGKOP;
     g_gksState = g_initialGksState;
@@ -359,63 +370,112 @@ void gclosegks(void)
 {
     if (g_opState != GGKOP)
     {
-        gerrorhand(GERROR_NOT_STATE_GKOP, GFN_CLOSEGKS, g_errFile);
+        gerrorhand(GERROR_NOT_STATE_GKOP, GFN_CLOSE_GKS, g_errFile);
         return;
     }
+
     g_opState = GGKCL;
 }
 
 void ginqasf(Gasfs *value, Gint *errorStatus)
 {
+    if (g_opState == GGKCL)
+    {
+        *errorStatus = GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP;
+        return;
+    }
+
     *value = g_gksState.asfs;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqavailwstypes(Gint bufSize, Gint start, Gintlist *wsTypes, Gint *numTypes, Gint *errorStatus)
 {
+    if (g_opState == GGKCL)
+    {
+        *errorStatus = GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP;
+        return;
+    }
+
     *numTypes = g_gksDescription.numWsTypes;
     wsTypes->number = *numTypes;
     for (int i = 0; i < g_gksDescription.numWsTypes; ++i)
     {
         wsTypes->integers[i] = g_gksDescription.wsTypes[i];
     }
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqcharexpan(Gfloat *value, Gint *errorStatus)
 {
+    if (g_opState == GGKCL)
+    {
+        *errorStatus = GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP;
+        return;
+    }
+
     *value = g_gksState.currentCharExpandFactor;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqcharbase(Gpoint *value, Gint *errorStatus)
 {
+    if (g_opState == GGKCL)
+    {
+        *errorStatus = GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP;
+        return;
+    }
+
     *value = g_gksState.currentCharBase;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqcharheight(Gfloat *value, Gint *errorStatus)
 {
+    if (g_opState == GGKCL)
+    {
+        *errorStatus = GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP;
+        return;
+    }
+
     *value = g_gksState.currentCharHeight;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqcharspace(Gfloat *value, Gint *errorStatus)
 {
+    if (g_opState == GGKCL)
+    {
+        *errorStatus = GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP;
+        return;
+    }
+
     *value = g_gksState.currentCharSpacing;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqcharwidth(Gfloat *value, Gint *errorStatus)
 {
+    if (g_opState == GGKCL)
+    {
+        *errorStatus = GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP;
+        return;
+    }
+
     *value = g_gksState.currentCharWidth;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqcharup(Gpoint *value, Gint *errorStatus)
 {
+    if (g_opState == GGKCL)
+    {
+        *errorStatus = GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP;
+        return;
+    }
+
     *value = g_gksState.currentCharUp;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqclip(Gcliprect *value, Gint *errorStatus)
@@ -426,19 +486,25 @@ void ginqclip(Gcliprect *value, Gint *errorStatus)
         0.0f, 1.0f, 0.0f, 1.0f
     };
     value->rec = identity;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
+}
+
+void ginqcurrntrannum(Gint *value, Gint *errorStatus)
+{
+    *value = g_gksState.currentTransform;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqcolorfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gcofac *value, Gint *errorStatus)
 {
     *value = g_wsDesc[wsType-1].colorFacilities;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqdisplaysize(Gwstype wsType, Gdspsize *value, Gint *errorStatus)
 {
     *value = g_wsDesc[wsType-1].displaySpaceSize;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqfillfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gflfac *value, Gint *errorStatus)
@@ -455,7 +521,7 @@ void ginqfillfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gflfac *value
         value->hatches[i] = desc->availFillAreaHatchStyles.integers[i];
     }
     value->predefined = desc->numFillAreaBundles;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqlinefacil(Gwstype wsType, Gint buffSize, Gint *numLineTypes, Glnfac *value, Gint *errorStatus)
@@ -471,97 +537,133 @@ void ginqlinefacil(Gwstype wsType, Gint buffSize, Gint *numLineTypes, Glnfac *va
     value->min_width = desc->lineFacilities.min_width;
     value->max_width = desc->lineFacilities.max_width;
     value->predefined = desc->lineFacilities.predefined;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
+}
+
+void gselntran(Gint value)
+{
+    if (g_opState == GGKCL)
+    {
+        gerrorhand(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_SELECT_NORMALIZATION_TRANSFORMATION, g_errFile);
+        return;
+    }
+
+    g_gksState.currentTransform = value;
 }
 
 void ginqfillcolorind(Gint *value, Gint *errorStatus)
 {
     *value = g_gksState.currentFillColorIndex;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqfillind(Gint *value, Gint *errorStatus)
 {
     *value = g_gksState.currentFillIndex;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqfillstyle(Gflinter *value, Gint *errorStatus)
 {
     *value = g_gksState.currentFillStyle;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqfillstyleind(Gint *value, Gint *errorStatus)
 {
     *value = g_gksState.currentFillStyleIndex;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqlevelgks(Glevel *value, Gint *errorStatus)
 {
-    *value = g_gksDescription.level;
-    *errorStatus = 0;
+    if (g_opState == GGKCL)
+    {
+        *errorStatus = GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP;
+    }
+    else
+    {
+        *value = g_gksDescription.level;
+        *errorStatus = GERROR_NONE;
+    }
 }
 
 void ginqlinecolorind(Gint *value, Gint *errorStatus)
 {
     *value = g_gksState.currentLineColorIndex;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqlineind(Gint *value, Gint *errorStatus)
 {
+    if (g_opState == GGKCL)
+    {
+        *errorStatus = GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP;
+        return;
+    }
+
     *value = g_gksState.currentLineIndex;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqlinetype(Gint *value, Gint *errorStatus)
 {
     *value = g_gksState.currentLineType;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqmarkercolorind(Gint *value, Gint *errorStatus)
 {
     *value = g_gksState.currentMarkerColorIndex;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqmarkerind(Gint *value, Gint *errorStatus)
 {
+    if (g_opState == GGKCL)
+    {
+        *errorStatus = GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP;
+        return;
+    }
+
     *value = g_gksState.currentMarkerIndex;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqmarkersize(Gfloat *value, Gint *errorStatus)
 {
     *value = g_gksState.currentMarkerSize;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqmarkertype(Gint *value, Gint *errorStatus)
 {
     *value = g_gksState.currentMarkerType;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqmaxntrannum(Gint *value, Gint *errorStatus)
 {
+    if (g_opState == GGKCL)
+    {
+        *errorStatus = GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP;
+        return;
+    }
+
     *value = g_gksDescription.numTrans;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqntran(Gint num, Gtran *value, Gint *errorStatus)
 {
     *value = g_gksState.transforms[num];
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqopenws(Gint maxIds, Gint start, Gintlist *wsids, Gint *actualIds, Gint *errorStatus)
 {
     *actualIds = 0;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqopst(Gopst *value)
@@ -572,43 +674,49 @@ void ginqopst(Gopst *value)
 void ginqpatrefpt(Gpoint *value, Gint *errorStatus)
 {
     *value = g_gksState.currentPatternRef;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqpatsize(Gpoint *value, Gint *errorStatus)
 {
     *value = g_gksState.currentPatternSize;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqtextalign(Gtxalign *value, Gint *errorStatus)
 {
     *value = g_gksState.currentTextAlign;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqtextcolorind(Gint *value, Gint *errorStatus)
 {
     *value = g_gksState.currentTextColorIndex;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqtextfontprec(Gtxfp *value, Gint *errorStatus)
 {
     *value = g_gksState.currentTextFontPrec;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqtextind(Gint *value, Gint *errorStatus)
 {
     *value = g_gksState.currentTextIndex;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqwsmaxnum(Gwsmax *value, Gint *errorStatus)
 {
+    if (g_opState == GGKCL)
+    {
+        *errorStatus = GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP;
+        return;
+    }
+
     *value = g_gksDescription.wsmax;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void gsetasf(Gasfs *value)
@@ -623,6 +731,12 @@ void gsetcharexpan(Gfloat value)
 
 void gsetcharheight(Gfloat value)
 {
+    if (g_opState == GGKCL)
+    {
+        gerrorhand(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_SET_CHARACTER_HEIGHT, g_errFile);
+        return;
+    }
+
     g_gksState.currentCharHeight = value;
 }
 
@@ -633,6 +747,12 @@ void gsetcharspace(Gfloat value)
 
 void gsetcharup(Gpoint *value)
 {
+    if (g_opState == GGKCL)
+    {
+        gerrorhand(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_SET_CHARACTER_UP_VECTOR, g_errFile);
+        return;
+    }
+
     g_gksState.currentCharUp = *value;
 }
 
@@ -643,6 +763,12 @@ void gsetclip(Gclip value)
 
 void gsetfillcolorind(Gint value)
 {
+    if (g_opState == GGKCL)
+    {
+        gerrorhand(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_SET_FILL_AREA_COLOR_INDEX, g_errFile);
+        return;
+    }
+
     g_gksState.currentFillColorIndex = value;
 }
 
@@ -653,6 +779,12 @@ void gsetfillind(Gint value)
 
 void gsetfillstyle(Gflinter value)
 {
+    if (g_opState == GGKCL)
+    {
+        gerrorhand(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_SET_FILL_AREA_INTERIOR_STYLE, g_errFile);
+        return;
+    }
+
     g_gksState.currentFillStyle = value;
 }
 
@@ -663,6 +795,12 @@ void gsetfillstyleind(Gint value)
 
 void gsetlinecolorind(Gint value)
 {
+    if (g_opState == GGKCL)
+    {
+        gerrorhand(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_SET_POLYLINE_COLOR_INDEX, g_errFile);
+        return;
+    }
+
     g_gksState.currentLineColorIndex = value;
 }
 
@@ -673,11 +811,23 @@ void gsetlineind(Gint value)
 
 void gsetlinetype(Gint value)
 {
+    if (g_opState == GGKCL)
+    {
+        gerrorhand(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_SET_LINETYPE, g_errFile);
+        return;
+    }
+
     g_gksState.currentLineType = value;
 }
 
 void gsetmarkercolorind(Gint value)
 {
+    if (g_opState == GGKCL)
+    {
+        gerrorhand(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_SET_POLYMARKER_COLOR_INDEX, g_errFile);
+        return;
+    }
+
     g_gksState.currentMarkerColorIndex = value;
 }
 
@@ -693,16 +843,34 @@ void gsetmarkersize(Gfloat value)
 
 void gsetmarkertype(Gint value)
 {
+    if (g_opState == GGKCL)
+    {
+        gerrorhand(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_SET_MARKER_TYPE, g_errFile);
+        return;
+    }
+
     g_gksState.currentMarkerType = value;
 }
 
 void gsettextalign(Gtxalign *value)
 {
+    if (g_opState == GGKCL)
+    {
+        gerrorhand(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_SET_TEXT_ALIGNMENT, g_errFile);
+        return;
+    }
+
     g_gksState.currentTextAlign = *value;
 }
 
 void gsettextcolorind(Gint value)
 {
+    if (g_opState == GGKCL)
+    {
+        gerrorhand(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_SET_TEXT_COLOR_INDEX, g_errFile);
+        return;
+    }
+
     g_gksState.currentTextColorIndex = value;
 }
 
@@ -718,16 +886,34 @@ void gsettextind(Gint value)
 
 void gsetviewport(Gint transform, Glimit *value)
 {
+    if (g_opState == GGKCL)
+    {
+        gerrorhand(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_SET_VIEWPORT, g_errFile);
+        return;
+    }
+
     g_gksState.transforms[transform].v = *value;
 }
 
 void gsetwindow(Gint transform, Glimit *value)
 {
+    if (g_opState == GGKCL)
+    {
+        gerrorhand(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_SET_WINDOW, g_errFile);
+        return;
+    }
+
     g_gksState.transforms[transform].w = *value;
 }
 
 void gopenws(Gint wsId, const Gconn *connId, Gwstype wsType)
 {
+    if (g_opState == GGKCL)
+    {
+        gerrorhand(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_OPEN_WORKSTATION, g_errFile);
+        return;
+    }
+
     g_opState = GWSOP;
     g_gksState.openWs[0] = wsId;
 
@@ -739,24 +925,45 @@ void gopenws(Gint wsId, const Gconn *connId, Gwstype wsType)
 
 void gclosews(Gint wsId)
 {
-    g_opState = GGKOP;
+    if (g_opState == GGKCL || g_opState == GGKOP)
+    {
+        gerrorhand(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_CLOSE_WORKSTATION, g_errFile);
+        return;
+    }
 
+    g_opState = GGKOP;
     g_gksState.openWs[0] = -1;
 }
 
 void gactivatews(Gint wsId)
 {
-    g_opState = GWSAC;
+    if (g_opState != GWSOP && g_opState != GWSAC)
+    {
+        gerrorhand(GERROR_NOT_STATE_WSOP_WSAC, GFN_ACTIVATE_WORKSTATION, g_errFile);
+        return;
+    }
 
+    g_opState = GWSAC;
     g_gksState.activeWs[0] = wsId;
 }
 
 void gclearws(Gint wsId, Gclrflag flag)
 {
+    if (g_opState != GWSOP && g_opState != GWSAC)
+    {
+        gerrorhand(GERROR_NOT_STATE_WSOP_WSAC, GFN_CLEAR_WORKSTATION, g_errFile);
+        return;
+    }
 }
 
 void gdeactivatews(Gint wsId)
 {
+    if (g_opState != GWSAC)
+    {
+        gerrorhand(GERROR_NOT_STATE_WSAC, GFN_DEACTIVATE_WORKSTATION, g_errFile);
+        return;
+    }
+
     g_opState = GWSOP;
 
     g_gksState.activeWs[0] = -1;
@@ -764,6 +971,11 @@ void gdeactivatews(Gint wsId)
 
 void gupdatews(Gint wsId, Gregen flag)
 {
+    if (g_opState == GGKCL || g_opState == GGKOP)
+    {
+        gerrorhand(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_UPDATE_WORKSTATION, g_errFile);
+        return;
+    }
 }
 
 void ginqcolorrep(Gint wsId, Gint index, Gcobundl *value)
@@ -774,21 +986,39 @@ void ginqcolorrep(Gint wsId, Gint index, Gcobundl *value)
 void ginqwstran(Gint wsId, Gwsti *value, Gint *errorStatus)
 {
     *value = g_wsState[0].transform;
-    *errorStatus = 0;
+    *errorStatus = GERROR_NONE;
 }
 
 void gsetcolorrep(Gint wsId, Gint index, Gcobundl *value)
 {
+    if (g_opState == GGKCL || g_opState == GGKOP)
+    {
+        gerrorhand(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_SET_COLOR_REPRESENTATION, g_errFile);
+        return;
+    }
+
     g_wsState[0].colorTable[index] = *value;
 }
 
 void gsetwsviewport(Gint wsId, Glimit *value)
 {
+    if (g_opState == GGKCL || g_opState == GGKOP)
+    {
+        gerrorhand(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_SET_WORKSTATION_VIEWPORT, g_errFile);
+        return;
+    }
+
     g_wsState[0].transform.current.v = *value;
 }
 
 void gsetwswindow(Gint wsId, Glimit *value)
 {
+    if (g_opState == GGKCL || g_opState == GGKOP)
+    {
+        gerrorhand(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_SET_WORKSTATION_WINDOW, g_errFile);
+        return;
+    }
+
     g_wsState[0].transform.current.w = *value;
 }
 
@@ -798,20 +1028,45 @@ void gcellarray(Grect *rect, Gidim *dims, Gint *colors)
 
 void gfillarea(Gint numPoints, Gpoint *points)
 {
+    if (g_opState != GWSAC && g_opState != GSGOP)
+    {
+        gerrorhand(GERROR_NOT_STATE_WSAC_SGOP, GFN_FILL_AREA, g_errFile);
+        return;
+    }
 }
 
 void ggdp(Gint numPoints, Gpoint *points, Gint gdpId, Ggdprec *data)
 {
+    if (g_opState != GWSAC && g_opState != GSGOP)
+    {
+        gerrorhand(GERROR_NOT_STATE_WSAC_SGOP, GFN_GDP, g_errFile);
+        return;
+    }
 }
 
 void gpolyline(Gint numPoints, Gpoint *points)
 {
+    if (g_opState != GWSAC && g_opState != GSGOP)
+    {
+        gerrorhand(GERROR_NOT_STATE_WSAC_SGOP, GFN_POLYLINE, g_errFile);
+        return;
+    }
 }
 
 void gpolymarker(Gint numPoints, Gpoint *points)
 {
+    if (g_opState != GWSAC && g_opState != GSGOP)
+    {
+        gerrorhand(GERROR_NOT_STATE_WSAC_SGOP, GFN_POLYMARKER, g_errFile);
+        return;
+    }
 }
 
 void gtext(Gpoint *start, const Gchar *text)
 {
+    if (g_opState != GWSAC && g_opState != GSGOP)
+    {
+        gerrorhand(GERROR_NOT_STATE_WSAC_SGOP, GFN_TEXT, g_errFile);
+        return;
+    }
 }

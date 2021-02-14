@@ -338,6 +338,7 @@ void ginqcharspace(Gfloat *value, Gint *errorStatus);
 void ginqcharwidth(Gfloat *value, Gint *errorStatus);
 void ginqcharup(Gpoint *value, Gint *errorStatus);
 void ginqclip(Gcliprect *value, Gint *errorStatus);
+void ginqcurrntrannum(Gint *value, Gint *errorStatus);
 void ginqfillcolorind(Gint *value, Gint *errorStatus);
 void ginqfillind(Gint *value, Gint *errorStatus);
 void ginqfillstyle(Gflinter *value, Gint *errorStatus);
@@ -367,6 +368,7 @@ void ginqdisplaysize(Gwstype wsType, Gdspsize *value, Gint *errorStatus);
 void ginqfillfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gflfac *value, Gint *errorStatus);
 void ginqlinefacil(Gwstype wsType, Gint buffSize, Gint *numLineTypes, Glnfac *value, Gint *errorStatus);
 
+void gselntran(Gint value);
 void gsetasf(Gasfs *value);
 void gsetcharexpan(Gfloat value);
 void gsetcharheight(Gfloat value);
