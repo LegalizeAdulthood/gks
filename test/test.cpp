@@ -29,18 +29,14 @@ TEST_CASE("Opened and closed", "[gks]")
     REQUIRE(getGksOpState() == GGKCL);
 }
 
-TEST_CASE("Operating level is Ma", "[gks]")
+TEST_CASE("Error file must be non-NULL", "[gks]")
 {
-    gopengks(stderr, 0L);
+    g_recordedErrors.clear();
 
-    Glevel level{};
-    Gint status{-1};
-    ginqlevelgks(&level, &status);
+    gopengks(nullptr, 0L);
 
-    REQUIRE(status == 0);
-    REQUIRE(level == GLMA);
-
-    gclosegks();
+    requireError(GERROR_INVALID_ERROR_FILE, GFN_OPEN_GKS);
+    REQUIRE(getGksOpState() == GGKCL);
 }
 
 TEST_CASE("Error handling", "[gks]")
@@ -53,6 +49,13 @@ TEST_CASE("GKS state list", "[gks]")
     gopengks(stderr, 0L);
     Gint status{-1};
 
+    SECTION("GKS level")
+    {
+        Glevel level{};
+        ginqlevelgks(&level, &status);
+
+        REQUIRE(level == GLMA);
+    }
     SECTION("Availale workstation types")
     {
         const Gint numWsTypes{10};

@@ -435,12 +435,16 @@ void gescape(Gint function, Gescin *indata, Gint bufsize, Gescout *outdata, Gint
 
 void gopengks(Gfile *errfile, Glong memory)
 {
-    if (g_opState != GGKCL)
+    if (errfile == nullptr)
     {
-        gerrorhand(GERROR_NOT_STATE_GKCL, GFN_OPEN_GKS, g_errFile);
+        gerrorhand(GERROR_INVALID_ERROR_FILE, GFN_OPEN_GKS, stderr);
         return;
     }
-
+    if (g_opState != GGKCL)
+    {
+        gerrorhand(GERROR_NOT_STATE_GKCL, GFN_OPEN_GKS, errfile);
+        return;
+    }
     g_errFile = errfile;
     g_opState = GGKOP;
     g_gksState = g_initialGksState;
