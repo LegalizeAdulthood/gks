@@ -239,11 +239,30 @@ TEST_CASE("GKS closed", "[errors]")
 
         requireGksOpen(GFN_SELECT_NORMALIZATION_TRANSFORMATION);
     }
+    SECTION("gsetasf")
+    {
+        Gasfs value{};
+        gsetasf(&value);
+
+        requireGksOpen(GFN_SET_ASPECT_SOURCE_FLAGS);
+    }
+    SECTION("gsetcharexpan")
+    {
+        gsetcharexpan(1.0f);
+
+        requireGksOpen(GFN_SET_CHARACTER_EXPANSION_FACTOR);
+    }
     SECTION("gsetcharheight")
     {
         gsetcharheight(0.0f);
 
         requireGksOpen(GFN_SET_CHARACTER_HEIGHT);
+    }
+    SECTION("gsetcharspace")
+    {
+        gsetcharspace(1.0f);
+
+        requireGksOpen(GFN_SET_CHARACTER_SPACING);
     }
     SECTION("gsetcharup")
     {
@@ -251,18 +270,21 @@ TEST_CASE("GKS closed", "[errors]")
 
         requireGksOpen(GFN_SET_CHARACTER_UP_VECTOR);
     }
-    SECTION("gsetcolorrep")
+    SECTION("gsetclip")
     {
-        Gint wsId{1};
-        Gint index{1};
-        Gcobundl color{1.0f, 1.0f, 1.0f};
-        gsetcolorrep(wsId, index, &color);
+        gsetclip(GCLIP);
 
-        requireError(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_SET_COLOR_REPRESENTATION);
+        requireGksOpen(GFN_SET_CLIPPING_INDICATOR);
     }
     SECTION("gsetfillcolorind")
     {
         gsetfillcolorind(0);
+
+        requireGksOpen(GFN_SET_FILL_AREA_COLOR_INDEX);
+    }
+    SECTION("gsetfillind")
+    {
+        gsetfillind(1);
 
         requireGksOpen(GFN_SET_FILL_AREA_COLOR_INDEX);
     }
@@ -272,11 +294,23 @@ TEST_CASE("GKS closed", "[errors]")
 
         requireGksOpen(GFN_SET_FILL_AREA_INTERIOR_STYLE);
     }
+    SECTION("gsetfillstyleind")
+    {
+        gsetfillstyleind(1);
+
+        requireGksOpen(GFN_SET_FILL_AREA_INTERIOR_STYLE);
+    }
     SECTION("gsetlinecolorind")
     {
         gsetlinecolorind(0);
 
         requireGksOpen(GFN_SET_POLYLINE_COLOR_INDEX);
+    }
+    SECTION("gsetlineind")
+    {
+        gsetlineind(1);
+
+        requireGksOpen(GFN_SET_POLYLINE_INDEX);
     }
     SECTION("gsetlinetype")
     {
@@ -290,11 +324,29 @@ TEST_CASE("GKS closed", "[errors]")
 
         requireGksOpen(GFN_SET_POLYMARKER_COLOR_INDEX);
     }
+    SECTION("gsetmarkerind")
+    {
+        gsetmarkerind(1);
+
+        requireGksOpen(GFN_SET_POLYMARKER_INDEX);
+    }
+    SECTION("gsetmarkersize")
+    {
+        gsetmarkersize(1.0f);
+
+        requireGksOpen(GFN_SET_MARKER_SIZE_SCALE_FACTOR);
+    }
     SECTION("gsetmarkertype")
     {
         gsetmarkertype(0);
 
         requireGksOpen(GFN_SET_MARKER_TYPE);
+    }
+    SECTION("gsettextalign")
+    {
+        gsettextalign(nullptr);
+
+        requireGksOpen(GFN_SET_TEXT_ALIGNMENT);
     }
     SECTION("gsettextcolorind")
     {
@@ -302,11 +354,18 @@ TEST_CASE("GKS closed", "[errors]")
 
         requireGksOpen(GFN_SET_TEXT_COLOR_INDEX);
     }
-    SECTION("gsettextalign")
+    SECTION("gsettextfontprec")
     {
-        gsettextalign(nullptr);
+        Gtxfp value{};
+        gsettextfontprec(&value);
 
-        requireGksOpen(GFN_SET_TEXT_ALIGNMENT);
+        requireGksOpen(GFN_SET_TEXT_FONT_AND_PRECISION);
+    }
+    SECTION("gsettextind")
+    {
+        gsettextind(1);
+
+        requireGksOpen(GFN_SET_TEXT_INDEX);
     }
     SECTION("gsetviewport")
     {
@@ -384,6 +443,16 @@ TEST_CASE("GKS closed", "[errors]")
         gupdatews(wsId, GPERFORM);
 
         requireError(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_UPDATE_WORKSTATION);
+    }
+
+    SECTION("gsetcolorrep")
+    {
+        Gint wsId{1};
+        Gint index{1};
+        Gcobundl color{1.0f, 1.0f, 1.0f};
+        gsetcolorrep(wsId, index, &color);
+
+        requireError(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_SET_COLOR_REPRESENTATION);
     }
 
     SECTION("gfillarea")
