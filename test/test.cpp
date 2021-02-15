@@ -222,12 +222,58 @@ TEST_CASE("Set clipping indicator", "[gks]")
     gclosegks();
 }
 
+TEST_CASE("Open workstation error handling", "[workstation]")
+{
+    g_recordedErrors.clear();
+    gopengks(stderr, 0L);
+    Gint wsId{};
+    const Gchar *connId{"tek4105"};
+    Gwstype wsType{GWSTYPE_TEK4105};
+
+    SECTION("workstation id negative")
+    {
+        wsId = -1;
+        gopenws(wsId, connId, wsType);
+
+        requireError(GERROR_INVALID_WSID, GFN_OPEN_WORKSTATION);
+        REQUIRE(getGksOpState() == GGKOP);
+    }
+    SECTION("workstation id too large")
+    {
+        const Gint maxOpenWorkstations{1};
+        wsId = maxOpenWorkstations;
+        gopenws(wsId, connId, wsType);
+
+        requireError(GERROR_INVALID_WSID, GFN_OPEN_WORKSTATION);
+        REQUIRE(getGksOpState() == GGKOP);
+    }
+    SECTION("invalid workstation type")
+    {
+        ++wsType;
+        gopenws(wsId, connId, wsType);
+
+        requireError(GERROR_INVALID_WSTYPE, GFN_OPEN_WORKSTATION);
+        REQUIRE(getGksOpState() == GGKOP);
+    } 
+    SECTION("workstation already open")
+    {
+        gopenws(wsId, connId, wsType);
+        REQUIRE(getGksOpState() == GWSOP);
+
+        gopenws(wsId, connId, wsType);
+
+        requireError(GERROR_WS_IS_OPEN, GFN_OPEN_WORKSTATION);
+    }
+
+    gclosegks();
+}
+
 TEST_CASE("Open workstation", "[workstation]")
 {
     gopengks(stderr, 0L);
-    Gint wsId{1};
+    Gint wsId{0};
     const Gchar *connId{"tek4105"};
-    Gint wsType{};
+    Gint wsType{GWSTYPE_TEK4105};
     gopenws(wsId, connId, wsType);
 
     SECTION("operating state is GSOP")
@@ -332,9 +378,9 @@ TEST_CASE("Open workstation", "[workstation]")
 TEST_CASE("Close last workstation enters GGKOP state", "[workstation]")
 {
     gopengks(stderr, 0L);
-    Gint wsId{1};
+    Gint wsId{0};
     const Gchar *connId{"tek4105"};
-    Gint wsType{};
+    Gint wsType{GWSTYPE_TEK4105};
     gopenws(wsId, connId, wsType);
 
     Gopst before{};
@@ -352,9 +398,9 @@ TEST_CASE("Close last workstation enters GGKOP state", "[workstation]")
 TEST_CASE("Output primitives", "[output]")
 {
     gopengks(stderr, 0L);
-    Gint wsId{1};
+    Gint wsId{0};
     const Gchar *connId{"tek4105"};
-    Gint wsType{};
+    Gint wsType{GWSTYPE_TEK4105};
     gopenws(wsId, connId, wsType);
     gactivatews(wsId);
 
@@ -829,9 +875,9 @@ TEST_CASE("Set global attribute values", "[output]")
 TEST_CASE("Workstation dependent attribute values", "[output]")
 {
     gopengks(stderr, 0L);
-    Gint wsId{1};
+    Gint wsId{0};
     const Gchar *connId{"tek4105"};
-    Gint wsType{};
+    Gint wsType{GWSTYPE_TEK4105};
     gopenws(wsId, connId, wsType);
 
     SECTION("color representation")

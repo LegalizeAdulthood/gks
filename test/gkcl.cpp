@@ -382,16 +382,16 @@ TEST_CASE("GKS closed", "[errors]")
 
     SECTION("gopenws")
     {
-        Gint wsId{1};
+        Gint wsId{0};
         const Gchar *connId{"tek4105"};
-        Gint wsType{};
+        Gint wsType{GWSTYPE_TEK4105};
         gopenws(wsId, connId, wsType);
 
         requireGksOpen(GFN_OPEN_WORKSTATION);
     }
     SECTION("gclosews")
     {
-        Gint wsId{1};
+        Gint wsId{0};
         gclosews(wsId);
 
         requireError(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_CLOSE_WORKSTATION);
@@ -412,21 +412,21 @@ TEST_CASE("GKS closed", "[errors]")
 
     SECTION("gactivatews")
     {
-        Gint wsId{1};
+        Gint wsId{0};
         gactivatews(wsId);
 
         requireError(GERROR_NOT_STATE_WSOP_WSAC, GFN_ACTIVATE_WORKSTATION);
     }
     SECTION("gclearws")
     {
-        Gint wsId{1};
+        Gint wsId{0};
         gclearws(wsId, GALWAYS);
 
         requireError(GERROR_NOT_STATE_WSOP_WSAC, GFN_CLEAR_WORKSTATION);
     }
     SECTION("gdeactivatews")
     {
-        Gint wsId{1};
+        Gint wsId{0};
         gdeactivatews(wsId);
 
         requireError(GERROR_NOT_STATE_WSAC, GFN_DEACTIVATE_WORKSTATION);
@@ -439,7 +439,7 @@ TEST_CASE("GKS closed", "[errors]")
     }
     SECTION("gupdatews")
     {
-        Gint wsId{1};
+        Gint wsId{0};
         gupdatews(wsId, GPERFORM);
 
         requireError(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_UPDATE_WORKSTATION);
@@ -447,7 +447,7 @@ TEST_CASE("GKS closed", "[errors]")
 
     SECTION("ginqcolorrep")
     {
-        Gint wsId{1};
+        Gint wsId{0};
         Gint index{1};
         Gcobundl value{};
         Gint status{};
@@ -457,7 +457,7 @@ TEST_CASE("GKS closed", "[errors]")
     }
     SECTION("ginqwstran")
     {
-        Gint wsId{1};
+        Gint wsId{0};
         struct Gwsti transform{};
         Gint status{-1};
         ginqwstran(wsId, &transform, &status);
@@ -467,7 +467,7 @@ TEST_CASE("GKS closed", "[errors]")
 
     SECTION("gsetcolorrep")
     {
-        Gint wsId{1};
+        Gint wsId{0};
         Gint index{1};
         Gcobundl color{1.0f, 1.0f, 1.0f};
         gsetcolorrep(wsId, index, &color);

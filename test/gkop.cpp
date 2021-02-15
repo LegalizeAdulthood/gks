@@ -19,7 +19,7 @@ TEST_CASE("GKS open")
 
     SECTION("gclosews")
     {
-        Gint wsId{1};
+        Gint wsId{0};
         gclosews(wsId);
 
         requireError(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_CLOSE_WORKSTATION);
@@ -27,28 +27,28 @@ TEST_CASE("GKS open")
 
     SECTION("gactivatews")
     {
-        Gint wsId{1};
+        Gint wsId{0};
         gactivatews(wsId);
 
         requireError(GERROR_NOT_STATE_WSOP_WSAC, GFN_ACTIVATE_WORKSTATION);
     }
     SECTION("gclearws")
     {
-        Gint wsId{1};
+        Gint wsId{0};
         gclearws(wsId, GALWAYS);
 
         requireError(GERROR_NOT_STATE_WSOP_WSAC, GFN_CLEAR_WORKSTATION);
     }
     SECTION("gdeactivatews")
     {
-        Gint wsId{1};
+        Gint wsId{0};
         gdeactivatews(wsId);
 
         requireError(GERROR_NOT_STATE_WSAC, GFN_DEACTIVATE_WORKSTATION);
     }
     SECTION("gupdatews")
     {
-        Gint wsId{1};
+        Gint wsId{0};
         gupdatews(wsId, GPERFORM);
 
         requireError(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_UPDATE_WORKSTATION);
@@ -91,7 +91,7 @@ TEST_CASE("GKS open")
 
     SECTION("gsetcolorrep")
     {
-        Gint wsId{1};
+        Gint wsId{0};
         Gint index{1};
         Gcobundl value{};
         gsetcolorrep(wsId, index, &value);
@@ -100,7 +100,7 @@ TEST_CASE("GKS open")
     }
     SECTION("gsetwswindow")
     {
-        Gint wsId{1};
+        Gint wsId{0};
         Glimit window{};
         gsetwswindow(wsId, &window);
 
@@ -108,7 +108,7 @@ TEST_CASE("GKS open")
     }
     SECTION("gsetwsviewport")
     {
-        Gint wsId{1};
+        Gint wsId{0};
         Glimit viewport{};
         gsetwsviewport(wsId, &viewport);
 

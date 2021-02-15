@@ -9,9 +9,9 @@ TEST_CASE("workstation active")
 {
     g_recordedErrors.clear();
     gopengks(stderr, 0);
-    Gint wsId{1};
+    Gint wsId{};
     const Gchar *connId{"tek4105"};
-    Gint wsType{};
+    Gint wsType{GWSTYPE_TEK4105};
     gopenws(wsId, connId, wsType);
     gactivatews(wsId);
 

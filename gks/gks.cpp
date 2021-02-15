@@ -1,10 +1,14 @@
 #include <gks/gks.h>
 #include <gks/gkserror.h>
 
-#include <string.h>
+#include <algorithm>
+#include <cstring>
 
-#define NUM_OF(ary_) (sizeof(ary_)/sizeof((ary_)[0]))
-
+template <typename T, size_t N>
+Gint numOf(T (&ary)[N])
+{
+    return static_cast<Gint>(N);
+}
 static Gfile *g_errFile = NULL;
 static Gopst g_opState = GGKCL;
 
@@ -35,7 +39,7 @@ static const Gwstype g_wsTypes[MAX_WS_TYPES] =
 static GGKSDescription g_gksDescription =
 {
     GLMA,
-    NUM_OF(g_wsTypes),
+    numOf(g_wsTypes),
     g_wsTypes,
     { MAX_OPEN_WS, MAX_ACTIVE_WS, MAX_SEGMENT_ASSOC },
     MAX_NUM_TRANSFORMS
@@ -84,8 +88,8 @@ struct GGKSState
 
 static GGKSState g_initialGksState =
 {
-    {0},
-    {0},
+    {-1},
+    {-1},
     0,
     {
         {
@@ -276,14 +280,14 @@ static const GWSDesc g_wsDesc[MAX_WS_TYPES] =
             { 640, 480 }
         },
         {
-            { NUM_OF(g_availLineTypes), g_availLineTypes },
+            { numOf(g_availLineTypes), g_availLineTypes },
             1,
             1.0f,
             1.0f,
             1.0f,
             1
         },
-        NUM_OF(g_availFillAreaIntStyles), g_availFillAreaIntStyles,
+        numOf(g_availFillAreaIntStyles), g_availFillAreaIntStyles,
         { 0, NULL },
         1,
         { 16, GCOLOR, 16 }
@@ -816,6 +820,27 @@ void gopenws(Gint wsId, const Gconn *connId, Gwstype wsType)
     {
         gerrorhand(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_OPEN_WORKSTATION, g_errFile);
         return;
+    }
+    if (wsId < 0 || wsId >= g_gksDescription.wsmax.open)
+    {
+        gerrorhand(GERROR_INVALID_WSID, GFN_OPEN_WORKSTATION, g_errFile);
+        return;
+    }
+    {
+        const Gwstype *const end = &g_gksDescription.wsTypes[g_gksDescription.numWsTypes];
+        if (std::find(&g_gksDescription.wsTypes[0], end, wsType) == end)
+        {
+            gerrorhand(GERROR_INVALID_WSTYPE, GFN_OPEN_WORKSTATION, g_errFile);
+            return;
+        }
+    }
+    {
+        Gint *last = std::end(g_gksState.openWs);
+        if (std::find(std::begin(g_gksState.openWs), last, wsId) != last)
+        {
+            gerrorhand(GERROR_WS_IS_OPEN, GFN_OPEN_WORKSTATION, g_errFile);
+            return;
+        }
     }
 
     g_opState = GWSOP;

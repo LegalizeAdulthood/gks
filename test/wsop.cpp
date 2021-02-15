@@ -9,9 +9,9 @@ TEST_CASE("workstation open")
 {
     g_recordedErrors.clear();
     gopengks(stderr, 0);
-    Gint wsId{1};
+    Gint wsId{0};
     const Gchar *connId{"tek4105"};
-    Gint wsType{};
+    Gint wsType{GWSTYPE_TEK4105};
     gopenws(wsId, connId, wsType);
 
     SECTION("gopengks")
@@ -28,7 +28,7 @@ TEST_CASE("workstation open")
     }
     SECTION("gdeactivatews")
     {
-        Gint wsId{1};
+        Gint wsId{0};
         gdeactivatews(wsId);
 
         requireError(GERROR_NOT_STATE_WSAC, GFN_DEACTIVATE_WORKSTATION);
