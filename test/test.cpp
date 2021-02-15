@@ -837,7 +837,9 @@ TEST_CASE("Workstation dependent attribute values", "[output]")
         gsetcolorrep(wsId, 0, &rep);
 
         struct Gcobundl current{};
-        ginqcolorrep(wsId, 0, &current);
+        Gint status{};
+        ginqcolorrep(wsId, 0, &current, &status);
+        REQUIRE(status == GERROR_NONE);
         REQUIRE(current.red == rep.red);
         REQUIRE(current.green == rep.green);
         REQUIRE(current.blue == rep.blue);

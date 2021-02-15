@@ -392,6 +392,31 @@ void setGksValue(T &dest, T *source, GFunction fn)
     dest = *source;
 }
 
+template <typename T>
+void getWorkstationValue(T *dest, const T &source, Gint *errorStatus)
+{
+    if (g_opState == GGKCL || g_opState == GGKOP)
+    {
+        *errorStatus = GERROR_NOT_STATE_WSOP_WSAC_SGOP;
+        return;
+    }
+
+    *dest = source;
+    *errorStatus = GERROR_NONE;
+}
+
+template <typename T>
+void setWorkstationValue(T &dest, const T *source, GFunction fn)
+{
+    if (g_opState == GGKCL || g_opState == GGKOP)
+    {
+        gerrorhand(GERROR_NOT_STATE_WSOP_WSAC_SGOP, fn, g_errFile);
+        return;
+    }
+
+    dest = *source;
+}
+
 }
 
 void gerrorlog(Gint errNum, Gint funcName, Gfile *errFile)
@@ -852,48 +877,29 @@ void gupdatews(Gint wsId, Gregen flag)
     }
 }
 
-void ginqcolorrep(Gint wsId, Gint index, Gcobundl *value)
+void ginqcolorrep(Gint wsId, Gint index, Gcobundl *value, Gint *errorStatus)
 {
-    *value = g_wsState[0].colorTable[index];
+    getWorkstationValue(value, g_wsState[0].colorTable[index], errorStatus);
 }
 
 void ginqwstran(Gint wsId, Gwsti *value, Gint *errorStatus)
 {
-    *value = g_wsState[0].transform;
-    *errorStatus = GERROR_NONE;
+    getWorkstationValue(value, g_wsState[0].transform, errorStatus);
 }
 
 void gsetcolorrep(Gint wsId, Gint index, Gcobundl *value)
 {
-    if (g_opState == GGKCL || g_opState == GGKOP)
-    {
-        gerrorhand(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_SET_COLOR_REPRESENTATION, g_errFile);
-        return;
-    }
-
-    g_wsState[0].colorTable[index] = *value;
+    setWorkstationValue(g_wsState[0].colorTable[index], value, GFN_SET_COLOR_REPRESENTATION);
 }
 
 void gsetwsviewport(Gint wsId, Glimit *value)
 {
-    if (g_opState == GGKCL || g_opState == GGKOP)
-    {
-        gerrorhand(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_SET_WORKSTATION_VIEWPORT, g_errFile);
-        return;
-    }
-
-    g_wsState[0].transform.current.v = *value;
+    setWorkstationValue(g_wsState[0].transform.current.v, value, GFN_SET_WORKSTATION_VIEWPORT);
 }
 
 void gsetwswindow(Gint wsId, Glimit *value)
 {
-    if (g_opState == GGKCL || g_opState == GGKOP)
-    {
-        gerrorhand(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_SET_WORKSTATION_WINDOW, g_errFile);
-        return;
-    }
-
-    g_wsState[0].transform.current.w = *value;
+    setWorkstationValue(g_wsState[0].transform.current.w, value, GFN_SET_WORKSTATION_WINDOW);
 }
 
 void gcellarray(Grect *rect, Gidim *dims, Gint *colors)

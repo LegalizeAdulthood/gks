@@ -401,7 +401,7 @@ void gclearws(Gint wsId, Gclrflag flag);
 void gdeactivatews(Gint wsId);
 void gupdatews(Gint wsId, Gregen flag);
 
-void ginqcolorrep(Gint wsId, Gint index, Gcobundl *value);
+void ginqcolorrep(Gint wsId, Gint index, Gcobundl *value, Gint *errorStatus);
 void ginqwstran(Gint wsId, Gwsti *value, Gint *errorStatus);
 
 void gsetcolorrep(Gint wsId, Gint index, Gcobundl *value);

@@ -445,6 +445,26 @@ TEST_CASE("GKS closed", "[errors]")
         requireError(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_UPDATE_WORKSTATION);
     }
 
+    SECTION("ginqcolorrep")
+    {
+        Gint wsId{1};
+        Gint index{1};
+        Gcobundl value{};
+        Gint status{};
+        ginqcolorrep(wsId, index, &value, &status);
+
+        REQUIRE(status == GERROR_NOT_STATE_WSOP_WSAC_SGOP);
+    }
+    SECTION("ginqwstran")
+    {
+        Gint wsId{1};
+        struct Gwsti transform{};
+        Gint status{-1};
+        ginqwstran(wsId, &transform, &status);
+
+        REQUIRE(status == GERROR_NOT_STATE_WSOP_WSAC_SGOP);
+    }
+
     SECTION("gsetcolorrep")
     {
         Gint wsId{1};
