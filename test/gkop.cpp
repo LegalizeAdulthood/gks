@@ -16,6 +16,7 @@ TEST_CASE("GKS open")
 
         requireError(GERROR_NOT_STATE_GKCL, GFN_OPEN_GKS);
     }
+
     SECTION("gclosews")
     {
         Gint wsId{1};
@@ -23,19 +24,13 @@ TEST_CASE("GKS open")
 
         requireError(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_CLOSE_WORKSTATION);
     }
+
     SECTION("gactivatews")
     {
         Gint wsId{1};
         gactivatews(wsId);
 
         requireError(GERROR_NOT_STATE_WSOP_WSAC, GFN_ACTIVATE_WORKSTATION);
-    }
-    SECTION("gdeactivatews")
-    {
-        Gint wsId{1};
-        gdeactivatews(wsId);
-
-        requireError(GERROR_NOT_STATE_WSAC, GFN_DEACTIVATE_WORKSTATION);
     }
     SECTION("gclearws")
     {
@@ -44,6 +39,13 @@ TEST_CASE("GKS open")
 
         requireError(GERROR_NOT_STATE_WSOP_WSAC, GFN_CLEAR_WORKSTATION);
     }
+    SECTION("gdeactivatews")
+    {
+        Gint wsId{1};
+        gdeactivatews(wsId);
+
+        requireError(GERROR_NOT_STATE_WSAC, GFN_DEACTIVATE_WORKSTATION);
+    }
     SECTION("gupdatews")
     {
         Gint wsId{1};
@@ -51,27 +53,11 @@ TEST_CASE("GKS open")
 
         requireError(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_UPDATE_WORKSTATION);
     }
-    SECTION("gpolyline")
-    {
-        gpolyline(0, nullptr);
 
-        requireError(GERROR_NOT_STATE_WSAC_SGOP, GFN_POLYLINE);
-    }
-    SECTION("gpolymarker")
-    {
-        gpolymarker(0, nullptr);
-
-        requireError(GERROR_NOT_STATE_WSAC_SGOP, GFN_POLYMARKER);
-    }
-    SECTION("gtext")
-    {
-        gtext(nullptr, nullptr);
-
-        requireError(GERROR_NOT_STATE_WSAC_SGOP, GFN_TEXT);
-    }
     SECTION("gfillarea")
     {
-        gfillarea(0, nullptr);
+        Gpoint points[] = {{0.0f, 0.0f}, {1.0f, 1.0f}};
+        gfillarea(numOf(points), points);
 
         requireError(GERROR_NOT_STATE_WSAC_SGOP, GFN_FILL_AREA);
     }
@@ -81,21 +67,50 @@ TEST_CASE("GKS open")
 
         requireError(GERROR_NOT_STATE_WSAC_SGOP, GFN_GDP);
     }
+    SECTION("gpolyline")
+    {
+        Gpoint points[] = {{0.0f, 0.0f}, {1.0f, 1.0f}};
+        gpolyline(numOf(points), points);
+
+        requireError(GERROR_NOT_STATE_WSAC_SGOP, GFN_POLYLINE);
+    }
+    SECTION("gpolymarker")
+    {
+        Gpoint points[] = {{0.0f, 0.0f}, {1.0f, 1.0f}};
+        gpolymarker(numOf(points), points);
+
+        requireError(GERROR_NOT_STATE_WSAC_SGOP, GFN_POLYMARKER);
+    }
+    SECTION("gtext")
+    {
+        Gpoint pos{0.1f, 0.1f};
+        gtext(&pos, "Hello, world!");
+
+        requireError(GERROR_NOT_STATE_WSAC_SGOP, GFN_TEXT);
+    }
+
     SECTION("gsetcolorrep")
     {
-        gsetcolorrep(0, 0, nullptr);
+        Gint wsId{1};
+        Gint index{1};
+        Gcobundl value{};
+        gsetcolorrep(wsId, index, &value);
 
         requireError(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_SET_COLOR_REPRESENTATION);
     }
     SECTION("gsetwswindow")
     {
-        gsetwswindow(0, nullptr);
+        Gint wsId{1};
+        Glimit window{};
+        gsetwswindow(wsId, &window);
 
         requireError(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_SET_WORKSTATION_WINDOW);
     }
     SECTION("gsetwsviewport")
     {
-        gsetwsviewport(0, nullptr);
+        Gint wsId{1};
+        Glimit viewport{};
+        gsetwsviewport(wsId, &viewport);
 
         requireError(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_SET_WORKSTATION_VIEWPORT);
     }
