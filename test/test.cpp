@@ -6,12 +6,6 @@
 
 #include <cstdio>
 
-template <typename T, size_t N>
-Gint numOf(T (&ary)[N])
-{
-    return static_cast<Gint>(N);
-}
-
 TEST_CASE("Initially closed", "[gks]")
 {
     REQUIRE(getGksOpState() == GGKCL);

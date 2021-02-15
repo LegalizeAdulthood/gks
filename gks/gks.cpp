@@ -355,6 +355,19 @@ void inquireGKSValue(T *dest, const T &source, Gint *errorStatus)
     *errorStatus = GERROR_NONE;
 }
 
+template <typename T>
+void inquireGKSValue(Gint *errorStatus, const T &body)
+{
+    if (g_opState == GGKCL)
+    {
+        *errorStatus = GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP;
+        return;
+    }
+
+    body();
+    *errorStatus = GERROR_NONE;
+}
+
 }
 
 void gerrorlog(Gint errNum, Gint funcName, Gfile *errFile)
@@ -402,19 +415,14 @@ void ginqasf(Gasfs *value, Gint *errorStatus)
 
 void ginqavailwstypes(Gint bufSize, Gint start, Gintlist *wsTypes, Gint *numTypes, Gint *errorStatus)
 {
-    if (g_opState == GGKCL)
-    {
-        *errorStatus = GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP;
-        return;
-    }
-
-    *numTypes = g_gksDescription.numWsTypes;
-    wsTypes->number = *numTypes;
-    for (int i = 0; i < g_gksDescription.numWsTypes; ++i)
-    {
-        wsTypes->integers[i] = g_gksDescription.wsTypes[i];
-    }
-    *errorStatus = GERROR_NONE;
+    inquireGKSValue(errorStatus, [=] {
+            *numTypes = g_gksDescription.numWsTypes;
+            wsTypes->number = *numTypes;
+            for (int i = 0; i < g_gksDescription.numWsTypes; ++i)
+            {
+                wsTypes->integers[i] = g_gksDescription.wsTypes[i];
+            }
+        });
 }
 
 void ginqcharexpan(Gfloat *value, Gint *errorStatus)
@@ -449,88 +457,39 @@ void ginqcharup(Gpoint *value, Gint *errorStatus)
 
 void ginqclip(Gcliprect *value, Gint *errorStatus)
 {
-    value->ind = g_gksState.clipping;
-    const Glimit identity =
-    {
-        0.0f, 1.0f, 0.0f, 1.0f
-    };
-    value->rec = identity;
-    *errorStatus = GERROR_NONE;
+    inquireGKSValue(errorStatus, [=] {
+            value->ind = g_gksState.clipping;
+            const Glimit identity =
+            {
+                0.0f, 1.0f, 0.0f, 1.0f
+            };
+            value->rec = identity;
+        });
 }
 
 void ginqcurrntrannum(Gint *value, Gint *errorStatus)
 {
-    *value = g_gksState.currentTransform;
-    *errorStatus = GERROR_NONE;
-}
-
-void ginqcolorfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gcofac *value, Gint *errorStatus)
-{
-    *value = g_wsDesc[wsType-1].colorFacilities;
-    *errorStatus = GERROR_NONE;
-}
-
-void ginqdisplaysize(Gwstype wsType, Gdspsize *value, Gint *errorStatus)
-{
-    *value = g_wsDesc[wsType-1].displaySpaceSize;
-    *errorStatus = GERROR_NONE;
-}
-
-void ginqfillfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gflfac *value, Gint *errorStatus)
-{
-    const GWSDesc *desc = &g_wsDesc[wsType-1];
-    value->n_interiors = desc->numAvailFillAreaIntStyles;
-    for (int i = 0; i < desc->numAvailFillAreaIntStyles; ++i)
-    {
-        value->interiors[i] = desc->availFillAreaIntStyles[i];
-    }
-    *facilSize = desc->availFillAreaHatchStyles.number;
-    for (int i = 0; i < desc->availFillAreaHatchStyles.number; ++i)
-    {
-        value->hatches[i] = desc->availFillAreaHatchStyles.integers[i];
-    }
-    value->predefined = desc->numFillAreaBundles;
-    *errorStatus = GERROR_NONE;
-}
-
-void ginqlinefacil(Gwstype wsType, Gint buffSize, Gint *numLineTypes, Glnfac *value, Gint *errorStatus)
-{
-    const GWSDesc *desc = &g_wsDesc[wsType-1];
-    *numLineTypes = desc->lineFacilities.types.number;
-    for (int i = 0; i < desc->lineFacilities.types.number; ++i)
-    {
-        value->types.integers[i] = desc->lineFacilities.types.integers[i];
-    }
-    value->widths = desc->lineFacilities.widths;
-    value->nom_width = desc->lineFacilities.nom_width;
-    value->min_width = desc->lineFacilities.min_width;
-    value->max_width = desc->lineFacilities.max_width;
-    value->predefined = desc->lineFacilities.predefined;
-    *errorStatus = GERROR_NONE;
+    inquireGKSValue(value, g_gksState.currentTransform, errorStatus);
 }
 
 void ginqfillcolorind(Gint *value, Gint *errorStatus)
 {
-    *value = g_gksState.currentFillColorIndex;
-    *errorStatus = GERROR_NONE;
+    inquireGKSValue(value, g_gksState.currentFillColorIndex, errorStatus);
 }
 
 void ginqfillind(Gint *value, Gint *errorStatus)
 {
-    *value = g_gksState.currentFillIndex;
-    *errorStatus = GERROR_NONE;
+    inquireGKSValue(value, g_gksState.currentFillIndex, errorStatus);
 }
 
 void ginqfillstyle(Gflinter *value, Gint *errorStatus)
 {
-    *value = g_gksState.currentFillStyle;
-    *errorStatus = GERROR_NONE;
+    inquireGKSValue(value, g_gksState.currentFillStyle, errorStatus);
 }
 
 void ginqfillstyleind(Gint *value, Gint *errorStatus)
 {
-    *value = g_gksState.currentFillStyleIndex;
-    *errorStatus = GERROR_NONE;
+    inquireGKSValue(value, g_gksState.currentFillStyleIndex, errorStatus);
 }
 
 void ginqlevelgks(Glevel *value, Gint *errorStatus)
@@ -540,8 +499,7 @@ void ginqlevelgks(Glevel *value, Gint *errorStatus)
 
 void ginqlinecolorind(Gint *value, Gint *errorStatus)
 {
-    *value = g_gksState.currentLineColorIndex;
-    *errorStatus = GERROR_NONE;
+    inquireGKSValue(value, g_gksState.currentLineColorIndex, errorStatus);
 }
 
 void ginqlineind(Gint *value, Gint *errorStatus)
@@ -551,14 +509,12 @@ void ginqlineind(Gint *value, Gint *errorStatus)
 
 void ginqlinetype(Gint *value, Gint *errorStatus)
 {
-    *value = g_gksState.currentLineType;
-    *errorStatus = GERROR_NONE;
+    inquireGKSValue(value, g_gksState.currentLineType, errorStatus);
 }
 
 void ginqmarkercolorind(Gint *value, Gint *errorStatus)
 {
-    *value = g_gksState.currentMarkerColorIndex;
-    *errorStatus = GERROR_NONE;
+    inquireGKSValue(value, g_gksState.currentMarkerColorIndex, errorStatus);
 }
 
 void ginqmarkerind(Gint *value, Gint *errorStatus)
@@ -568,14 +524,12 @@ void ginqmarkerind(Gint *value, Gint *errorStatus)
 
 void ginqmarkersize(Gfloat *value, Gint *errorStatus)
 {
-    *value = g_gksState.currentMarkerSize;
-    *errorStatus = GERROR_NONE;
+    inquireGKSValue(value, g_gksState.currentMarkerSize, errorStatus);
 }
 
 void ginqmarkertype(Gint *value, Gint *errorStatus)
 {
-    *value = g_gksState.currentMarkerType;
-    *errorStatus = GERROR_NONE;
+    inquireGKSValue(value, g_gksState.currentMarkerType, errorStatus);
 }
 
 void ginqmaxntrannum(Gint *value, Gint *errorStatus)
@@ -585,14 +539,15 @@ void ginqmaxntrannum(Gint *value, Gint *errorStatus)
 
 void ginqntran(Gint num, Gtran *value, Gint *errorStatus)
 {
-    *value = g_gksState.transforms[num];
-    *errorStatus = GERROR_NONE;
+    inquireGKSValue(value, g_gksState.transforms[num], errorStatus);
 }
 
 void ginqopenws(Gint maxIds, Gint start, Gintlist *wsids, Gint *actualIds, Gint *errorStatus)
 {
-    *actualIds = 0;
-    *errorStatus = GERROR_NONE;
+    inquireGKSValue(errorStatus,
+        [=] {
+            *actualIds = 0;
+        });
 }
 
 void ginqopst(Gopst *value)
@@ -602,43 +557,84 @@ void ginqopst(Gopst *value)
 
 void ginqpatrefpt(Gpoint *value, Gint *errorStatus)
 {
-    *value = g_gksState.currentPatternRef;
-    *errorStatus = GERROR_NONE;
+    inquireGKSValue(value, g_gksState.currentPatternRef, errorStatus);
 }
 
 void ginqpatsize(Gpoint *value, Gint *errorStatus)
 {
-    *value = g_gksState.currentPatternSize;
-    *errorStatus = GERROR_NONE;
+    inquireGKSValue(value, g_gksState.currentPatternSize, errorStatus);
 }
 
 void ginqtextalign(Gtxalign *value, Gint *errorStatus)
 {
-    *value = g_gksState.currentTextAlign;
-    *errorStatus = GERROR_NONE;
+    inquireGKSValue(value, g_gksState.currentTextAlign, errorStatus);
 }
 
 void ginqtextcolorind(Gint *value, Gint *errorStatus)
 {
-    *value = g_gksState.currentTextColorIndex;
-    *errorStatus = GERROR_NONE;
+    inquireGKSValue(value, g_gksState.currentTextColorIndex, errorStatus);
 }
 
 void ginqtextfontprec(Gtxfp *value, Gint *errorStatus)
 {
-    *value = g_gksState.currentTextFontPrec;
-    *errorStatus = GERROR_NONE;
+    inquireGKSValue(value, g_gksState.currentTextFontPrec, errorStatus);
 }
 
 void ginqtextind(Gint *value, Gint *errorStatus)
 {
-    *value = g_gksState.currentTextIndex;
-    *errorStatus = GERROR_NONE;
+    inquireGKSValue(value, g_gksState.currentTextIndex, errorStatus);
 }
 
 void ginqwsmaxnum(Gwsmax *value, Gint *errorStatus)
 {
     inquireGKSValue(value, g_gksDescription.wsmax, errorStatus);
+}
+
+void ginqcolorfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gcofac *value, Gint *errorStatus)
+{
+    inquireGKSValue(value, g_wsDesc[wsType-1].colorFacilities, errorStatus);
+}
+
+void ginqdisplaysize(Gwstype wsType, Gdspsize *value, Gint *errorStatus)
+{
+    inquireGKSValue(value, g_wsDesc[wsType-1].displaySpaceSize, errorStatus);
+}
+
+void ginqfillfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gflfac *value, Gint *errorStatus)
+{
+    inquireGKSValue(errorStatus,
+        [=] {
+            const GWSDesc *desc = &g_wsDesc[wsType - 1];
+            value->n_interiors = desc->numAvailFillAreaIntStyles;
+            for (int i = 0; i < desc->numAvailFillAreaIntStyles; ++i)
+            {
+                value->interiors[i] = desc->availFillAreaIntStyles[i];
+            }
+            *facilSize = desc->availFillAreaHatchStyles.number;
+            for (int i = 0; i < desc->availFillAreaHatchStyles.number; ++i)
+            {
+                value->hatches[i] = desc->availFillAreaHatchStyles.integers[i];
+            }
+            value->predefined = desc->numFillAreaBundles;
+        });
+}
+
+void ginqlinefacil(Gwstype wsType, Gint buffSize, Gint *numLineTypes, Glnfac *value, Gint *errorStatus)
+{
+    inquireGKSValue(errorStatus,
+        [=] {
+            const GWSDesc *desc = &g_wsDesc[wsType-1];
+            *numLineTypes = desc->lineFacilities.types.number;
+            for (int i = 0; i < desc->lineFacilities.types.number; ++i)
+            {
+                value->types.integers[i] = desc->lineFacilities.types.integers[i];
+            }
+            value->widths = desc->lineFacilities.widths;
+            value->nom_width = desc->lineFacilities.nom_width;
+            value->min_width = desc->lineFacilities.min_width;
+            value->max_width = desc->lineFacilities.max_width;
+            value->predefined = desc->lineFacilities.predefined;
+        });
 }
 
 void gselntran(Gint value)

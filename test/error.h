@@ -29,3 +29,8 @@ inline void requireError(GError error, GFunction fn)
     REQUIRE(g_recordedErrors[0].function == fn);
 }
 
+template <typename T, size_t N>
+Gint numOf(T (&ary)[N])
+{
+    return static_cast<Gint>(N);
+}
