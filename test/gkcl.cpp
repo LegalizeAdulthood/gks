@@ -5,6 +5,16 @@
 
 #include <catch2/catch.hpp>
 
+namespace
+{
+
+inline void requireGksOpen(GFunction fn)
+{
+    requireError(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, fn);
+}
+
+}
+
 TEST_CASE("GKS closed", "[errors]")
 {
     g_recordedErrors.clear();
@@ -16,23 +26,8 @@ TEST_CASE("GKS closed", "[errors]")
 
         requireError(GERROR_NOT_STATE_GKOP, GFN_CLOSE_GKS);
     }
-    SECTION("gopenws")
-    {
-        Gint wsId{1};
-        const Gchar *connId{"tek4105"};
-        Gint wsType{};
-        gopenws(wsId, connId, wsType);
 
-        requireError(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_OPEN_WORKSTATION);
-    }
-    SECTION("gclosews")
-    {
-        Gint wsId{1};
-        gclosews(wsId);
-
-        requireError(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_CLOSE_WORKSTATION);
-    }
-    SECTION("GKS value inquiry")
+    SECTION("value inquiry")
     {
         Gint status{};
 
@@ -237,83 +232,24 @@ TEST_CASE("GKS closed", "[errors]")
 
         REQUIRE(status == GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP);
     }
-    SECTION("gsetlinetype")
-    {
-        gsetlinetype(0);
 
-        requireError(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_SET_LINETYPE);
-    }
-    SECTION("gsetlinecolorind")
+    SECTION("gselntran")
     {
-        gsetlinecolorind(0);
+        gselntran(0);
 
-        requireError(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_SET_POLYLINE_COLOR_INDEX);
-    }
-    SECTION("gsetmarkertype")
-    {
-        gsetmarkertype(0);
-
-        requireError(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_SET_MARKER_TYPE);
-    }
-    SECTION("gsetmarkercolorind")
-    {
-        gsetmarkercolorind(0);
-
-        requireError(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_SET_POLYMARKER_COLOR_INDEX);
-    }
-    SECTION("gsettextcolorind")
-    {
-        gsettextcolorind(0);
-
-        requireError(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_SET_TEXT_COLOR_INDEX);
+        requireGksOpen(GFN_SELECT_NORMALIZATION_TRANSFORMATION);
     }
     SECTION("gsetcharheight")
     {
         gsetcharheight(0.0f);
 
-        requireError(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_SET_CHARACTER_HEIGHT);
+        requireGksOpen(GFN_SET_CHARACTER_HEIGHT);
     }
-    SECTION("gsetcharheight")
+    SECTION("gsetcharup")
     {
         gsetcharup(nullptr);
 
-        requireError(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_SET_CHARACTER_UP_VECTOR);
-    }
-    SECTION("gsettextalign")
-    {
-        gsettextalign(nullptr);
-
-        requireError(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_SET_TEXT_ALIGNMENT);
-    }
-    SECTION("gsetfillstyle")
-    {
-        gsetfillstyle(GHOLLOW);
-
-        requireError(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_SET_FILL_AREA_INTERIOR_STYLE);
-    }
-    SECTION("gsetfillcolorind")
-    {
-        gsetfillcolorind(0);
-
-        requireError(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_SET_FILL_AREA_COLOR_INDEX);
-    }
-    SECTION("gsetwindow")
-    {
-        gsetwindow(0, nullptr);
-
-        requireError(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_SET_WINDOW);
-    }
-    SECTION("gsetviewport")
-    {
-        gsetviewport(0, nullptr);
-
-        requireError(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_SET_VIEWPORT);
-    }
-    SECTION("gselntran")
-    {
-        gselntran(0);
-
-        requireError(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_SELECT_NORMALIZATION_TRANSFORMATION);
+        requireGksOpen(GFN_SET_CHARACTER_UP_VECTOR);
     }
     SECTION("gsetcolorrep")
     {
@@ -324,31 +260,103 @@ TEST_CASE("GKS closed", "[errors]")
 
         requireError(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_SET_COLOR_REPRESENTATION);
     }
-    SECTION("gsetwswindow")
+    SECTION("gsetfillcolorind")
     {
-        gsetwswindow(0, nullptr);
+        gsetfillcolorind(0);
 
-        requireError(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_SET_WORKSTATION_WINDOW);
+        requireGksOpen(GFN_SET_FILL_AREA_COLOR_INDEX);
     }
+    SECTION("gsetfillstyle")
+    {
+        gsetfillstyle(GHOLLOW);
+
+        requireGksOpen(GFN_SET_FILL_AREA_INTERIOR_STYLE);
+    }
+    SECTION("gsetlinecolorind")
+    {
+        gsetlinecolorind(0);
+
+        requireGksOpen(GFN_SET_POLYLINE_COLOR_INDEX);
+    }
+    SECTION("gsetlinetype")
+    {
+        gsetlinetype(0);
+
+        requireGksOpen(GFN_SET_LINETYPE);
+    }
+    SECTION("gsetmarkercolorind")
+    {
+        gsetmarkercolorind(0);
+
+        requireGksOpen(GFN_SET_POLYMARKER_COLOR_INDEX);
+    }
+    SECTION("gsetmarkertype")
+    {
+        gsetmarkertype(0);
+
+        requireGksOpen(GFN_SET_MARKER_TYPE);
+    }
+    SECTION("gsettextcolorind")
+    {
+        gsettextcolorind(0);
+
+        requireGksOpen(GFN_SET_TEXT_COLOR_INDEX);
+    }
+    SECTION("gsettextalign")
+    {
+        gsettextalign(nullptr);
+
+        requireGksOpen(GFN_SET_TEXT_ALIGNMENT);
+    }
+    SECTION("gsetviewport")
+    {
+        gsetviewport(0, nullptr);
+
+        requireGksOpen(GFN_SET_VIEWPORT);
+    }
+    SECTION("gsetwindow")
+    {
+        gsetwindow(0, nullptr);
+
+        requireGksOpen(GFN_SET_WINDOW);
+    }
+
+    SECTION("gopenws")
+    {
+        Gint wsId{1};
+        const Gchar *connId{"tek4105"};
+        Gint wsType{};
+        gopenws(wsId, connId, wsType);
+
+        requireGksOpen(GFN_OPEN_WORKSTATION);
+    }
+    SECTION("gclosews")
+    {
+        Gint wsId{1};
+        gclosews(wsId);
+
+        requireError(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_CLOSE_WORKSTATION);
+    }
+
     SECTION("gsetwsviewport")
     {
         gsetwsviewport(0, nullptr);
 
         requireError(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_SET_WORKSTATION_VIEWPORT);
     }
+    SECTION("gsetwswindow")
+    {
+        gsetwswindow(0, nullptr);
+
+        requireError(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_SET_WORKSTATION_WINDOW);
+    }
+
     SECTION("gactivatews")
     {
         Gint wsId{1};
         gactivatews(wsId);
 
         requireError(GERROR_NOT_STATE_WSOP_WSAC, GFN_ACTIVATE_WORKSTATION);
-    }
-    SECTION("gdeactivatews")
-    {
-        Gint wsId{1};
-        gdeactivatews(wsId);
-
-        requireError(GERROR_NOT_STATE_WSAC, GFN_DEACTIVATE_WORKSTATION);
     }
     SECTION("gclearws")
     {
@@ -357,6 +365,19 @@ TEST_CASE("GKS closed", "[errors]")
 
         requireError(GERROR_NOT_STATE_WSOP_WSAC, GFN_CLEAR_WORKSTATION);
     }
+    SECTION("gdeactivatews")
+    {
+        Gint wsId{1};
+        gdeactivatews(wsId);
+
+        requireError(GERROR_NOT_STATE_WSAC, GFN_DEACTIVATE_WORKSTATION);
+    }
+    SECTION("gescape")
+    {
+        gescape(0, nullptr, 0, nullptr, nullptr);
+
+        requireGksOpen(GFN_ESCAPE);
+    }
     SECTION("gupdatews")
     {
         Gint wsId{1};
@@ -364,11 +385,18 @@ TEST_CASE("GKS closed", "[errors]")
 
         requireError(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_UPDATE_WORKSTATION);
     }
-    SECTION("gescape")
-    {
-        gescape(0, nullptr, 0, nullptr, nullptr);
 
-        requireError(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_ESCAPE);
+    SECTION("gfillarea")
+    {
+        gfillarea(0, nullptr);
+
+        requireError(GERROR_NOT_STATE_WSAC_SGOP, GFN_FILL_AREA);
+    }
+    SECTION("ggdp")
+    {
+        ggdp(0, nullptr, 0, nullptr);
+
+        requireError(GERROR_NOT_STATE_WSAC_SGOP, GFN_GDP);
     }
     SECTION("gpolyline")
     {
@@ -387,18 +415,6 @@ TEST_CASE("GKS closed", "[errors]")
         gtext(nullptr, nullptr);
 
         requireError(GERROR_NOT_STATE_WSAC_SGOP, GFN_TEXT);
-    }
-    SECTION("gfillarea")
-    {
-        gfillarea(0, nullptr);
-
-        requireError(GERROR_NOT_STATE_WSAC_SGOP, GFN_FILL_AREA);
-    }
-    SECTION("ggdp")
-    {
-        ggdp(0, nullptr, 0, nullptr);
-
-        requireError(GERROR_NOT_STATE_WSAC_SGOP, GFN_GDP);
     }
 
     REQUIRE(getGksOpState() == GGKCL);
