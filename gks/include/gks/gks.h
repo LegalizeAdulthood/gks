@@ -391,7 +391,7 @@ void gsettextcolorind(Gint value);
 void gsettextfontprec(Gtxfp *fontPrec);
 void gsettextind(Gint value);
 void gsetviewport(Gint transform, Glimit *value);
-void gsetwindow(Gint transform, Glimit *value);
+void gsetwindow(Gint tranId, Glimit *value);
 
 void gopenws(Gint wsId, const Gconn *connId, Gwstype wsType);
 void gclosews(Gint wsId);

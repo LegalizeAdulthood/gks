@@ -376,7 +376,8 @@ TEST_CASE("GKS closed", "[errors]")
     }
     SECTION("gsetwindow")
     {
-        gsetwindow(0, nullptr);
+        Glimit window{0.0f, 1.0f, 0.0f, 1.0f};
+        gsetwindow(1, &window);
 
         requireGksOpen(GFN_SET_WINDOW);
     }

@@ -439,6 +439,12 @@ inline bool wsIsActive(Gint wsId)
     return std::find(std::cbegin(g_gksState.activeWs), last, wsId) != last;
 }
 
+inline bool rectIsValid(const Glimit *rect)
+{
+    return rect->xmin < rect->xmax
+        && rect->ymin < rect->ymax;
+}
+
 }
 
 void gerrorlog(Gint errNum, Gint funcName, Gfile *errFile)
@@ -614,7 +620,7 @@ void ginqmaxntrannum(Gint *value, Gint *errorStatus)
 
 void ginqntran(Gint num, Gtran *value, Gint *errorStatus)
 {
-    inquireGKSValue(value, g_gksState.transforms[num], errorStatus);
+    inquireGKSValue(value, g_gksState.transforms[num-1], errorStatus);
 }
 
 void ginqopenws(Gint maxIds, Gint start, Gintlist *wsids, Gint *actualIds, Gint *errorStatus)
@@ -926,12 +932,23 @@ void gsettextind(Gint value)
 
 void gsetviewport(Gint transform, Glimit *value)
 {
-    setGksValue(g_gksState.transforms[transform].v, value, GFN_SET_VIEWPORT);
+    setGksValue(g_gksState.transforms[transform-1].v, value, GFN_SET_VIEWPORT);
 }
 
-void gsetwindow(Gint transform, Glimit *value)
+void gsetwindow(Gint tranId, Glimit *value)
 {
-    setGksValue(g_gksState.transforms[transform].w, value, GFN_SET_WINDOW);
+    if (tranId < 1)
+    {
+        gerrorhand(GERROR_INVALID_TRAN_NUM, GFN_SET_WINDOW, g_errFile);
+        return;
+    }
+    if (!rectIsValid(value))
+    {
+        gerrorhand(GERROR_INVALID_RECT, GFN_SET_WINDOW, g_errFile);
+        return;
+    }
+
+    setGksValue(g_gksState.transforms[tranId-1].w, value, GFN_SET_WINDOW);
 }
 
 void gopenws(Gint wsId, const Gconn *connId, Gwstype wsType)

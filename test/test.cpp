@@ -83,7 +83,7 @@ TEST_CASE("GKS state list", "[gks]")
     SECTION("Normalization transform zero is identity")
     {
         Gtran transform{};
-        ginqntran(0, &transform, &status);
+        ginqntran(1, &transform, &status);
 
         REQUIRE(transform.w.xmin == 0.0f);
         REQUIRE(transform.w.xmax == 1.0f);
@@ -1337,6 +1337,31 @@ TEST_CASE("global attribute error handling", "[gks]")
         Gint value{};
         ginqtextind(&value, &status);
         REQUIRE(value == 1);
+    }
+    SECTION("window")
+    {
+        SECTION("invalid index")
+        {
+            Glimit window{0.0f, 1.0f, 0.0f, 1.0f};
+            gsetwindow(0, &window);
+
+            requireError(GERROR_INVALID_TRAN_NUM, GFN_SET_WINDOW);
+        }
+        SECTION("invalid rectangle")
+        {
+            SECTION("x range")
+            {
+                Glimit window{1.0f, 0.0f, 0.0f, 1.0f};
+                gsetwindow(1, &window);
+            }
+            SECTION("y range")
+            {
+                Glimit window{0.0f, 1.0f, 1.0f, 0.0f};
+                gsetwindow(1, &window);
+            }
+
+            requireError(GERROR_INVALID_RECT, GFN_SET_WINDOW);
+        }
     }
 
     REQUIRE(status == GERROR_NONE);
