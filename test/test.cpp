@@ -1553,6 +1553,14 @@ TEST_CASE("workstation dependent attribute error handling", "[workstation]")
 
         REQUIRE(status == GERROR_WS_NOT_OPEN);
     }
+    SECTION("get workstation transformation ws not open")
+    {
+        struct Gwsti transform{};
+        Gint status{};
+        ginqwstran(wsId + 1, &transform, &status);
+
+        REQUIRE(status == GERROR_WS_NOT_OPEN);
+    }
     SECTION("set color representation bad index")
     {
         struct Gcobundl rep{0.5f, 0.5f, 0.5f};
