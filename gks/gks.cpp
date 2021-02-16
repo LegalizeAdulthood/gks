@@ -397,11 +397,17 @@ void setGksValue(T &dest, T source, GFunction fn,
 }
 
 template <typename T>
-void setGksValue(T &dest, T *source, GFunction fn)
+void setGksValue(T &dest, T *source, GFunction fn,
+    const std::function<GError()> &check = [] { return GERROR_NONE; })
 {
     if (g_opState == GGKCL)
     {
         gerrorhand(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, fn, g_errFile);
+        return;
+    }
+    if (const GError error = check())
+    {
+        gerrorhand(error, fn, g_errFile);
         return;
     }
 
@@ -469,7 +475,6 @@ inline bool rectIsWithinUnitSquare(const Glimit *rect)
         && rect->ymin >= 0.0f && rect->ymax <= 1.0f;
 }
 
-
 }
 
 void gerrorlog(Gint errNum, Gint funcName, Gfile *errFile)
@@ -488,6 +493,7 @@ void gescape(Gint function, Gescin *indata, Gint bufsize, Gescout *outdata, Gint
 
 void gopengks(Gfile *errfile, Glong memory)
 {
+    // Validate errfile first before we use it to report state errors
     if (errfile == nullptr)
     {
         gerrorhand(GERROR_INVALID_ERROR_FILE, GFN_OPEN_GKS, stderr);
@@ -498,6 +504,7 @@ void gopengks(Gfile *errfile, Glong memory)
         gerrorhand(GERROR_NOT_STATE_GKCL, GFN_OPEN_GKS, errfile);
         return;
     }
+
     g_errFile = errfile;
     g_opState = GGKOP;
     g_gksState = g_initialGksState;
@@ -766,13 +773,10 @@ void gsetcharexpan(Gfloat value)
 
 void gsetcharheight(Gfloat value)
 {
-    if (value <= 0.0f)
-    {
-        gerrorhand(GERROR_CHAR_HEIGHT_NOT_POSITIVE, GFN_SET_CHARACTER_HEIGHT, g_errFile);
-        return;
-    }
-
-    setGksValue(g_gksState.currentCharHeight, value, GFN_SET_CHARACTER_HEIGHT);
+    setGksValue(g_gksState.currentCharHeight, value, GFN_SET_CHARACTER_HEIGHT,
+        [value] {
+            return value <= 0.0f ? GERROR_CHAR_HEIGHT_NOT_POSITIVE : GERROR_NONE;
+        });
 }
 
 void gsetcharspace(Gfloat value)
@@ -782,13 +786,10 @@ void gsetcharspace(Gfloat value)
 
 void gsetcharup(Gpoint *value)
 {
-    if (value->x == 0.0f && value->y == 0.0f)
-    {
-        gerrorhand(GERROR_CHAR_UP_LENGTH_ZERO, GFN_SET_CHARACTER_UP_VECTOR, g_errFile);
-        return;
-    }
-
-    setGksValue(g_gksState.currentCharUp, value, GFN_SET_CHARACTER_UP_VECTOR);
+    setGksValue(g_gksState.currentCharUp, value, GFN_SET_CHARACTER_UP_VECTOR,
+        [value] {
+            return value->x == 0.0f && value->y == 0.0f ? GERROR_CHAR_UP_LENGTH_ZERO : GERROR_NONE;
+        });
 }
 
 void gsetclip(Gclip value)
@@ -798,24 +799,18 @@ void gsetclip(Gclip value)
 
 void gsetfillcolorind(Gint value)
 {
-    if (value < 0 || value > 1)
-    {
-        gerrorhand(GERROR_INVALID_COLOR_INDEX, GFN_SET_FILL_AREA_COLOR_INDEX, g_errFile);
-        return;
-    }
-
-    setGksValue(g_gksState.currentFillColorIndex, value, GFN_SET_FILL_AREA_COLOR_INDEX);
+    setGksValue(g_gksState.currentFillColorIndex, value, GFN_SET_FILL_AREA_COLOR_INDEX,
+        [value] {
+            return value < 0 || value > 1 ? GERROR_INVALID_COLOR_INDEX : GERROR_NONE;
+        });
 }
 
 void gsetfillind(Gint value)
 {
-    if (value < 1 || value > 1)
-    {
-        gerrorhand(GERROR_INVALID_FILL_INDEX, GFN_SET_FILL_AREA_INDEX, g_errFile);
-        return;
-    }
-
-    setGksValue(g_gksState.currentFillIndex, value, GFN_SET_FILL_AREA_INDEX);
+    setGksValue(g_gksState.currentFillIndex, value, GFN_SET_FILL_AREA_INDEX,
+        [value] {
+            return value < 1 || value > 1 ? GERROR_INVALID_FILL_INDEX : GERROR_NONE;
+        });
 }
 
 void gsetfillstyle(Gflinter value)
@@ -825,90 +820,66 @@ void gsetfillstyle(Gflinter value)
 
 void gsetfillstyleind(Gint value)
 {
-    if (value == 0)
-    {
-        gerrorhand(GERROR_FILL_STYLE_ZERO, GFN_SET_FILL_AREA_INTERIOR_STYLE, g_errFile);
-        return;
-    }
-
-    setGksValue(g_gksState.currentFillStyleIndex, value, GFN_SET_FILL_AREA_INTERIOR_STYLE);
+    setGksValue(g_gksState.currentFillStyleIndex, value, GFN_SET_FILL_AREA_INTERIOR_STYLE,
+        [value] {
+            return value == 0 ? GERROR_FILL_STYLE_ZERO : GERROR_NONE;
+        });
 }
 
 void gsetlinecolorind(Gint value)
 {
-    if (value < 0 || value > 1)
-    {
-        gerrorhand(GERROR_INVALID_COLOR_INDEX, GFN_SET_POLYLINE_COLOR_INDEX, g_errFile);
-        return;
-    }
-
-    setGksValue(g_gksState.currentLineColorIndex, value, GFN_SET_POLYLINE_COLOR_INDEX);
+    setGksValue(g_gksState.currentLineColorIndex, value, GFN_SET_POLYLINE_COLOR_INDEX,
+        [value] {
+            return value < 0 || value > 1 ? GERROR_INVALID_COLOR_INDEX : GERROR_NONE;
+        });
 }
 
 void gsetlineind(Gint value)
 {
-    if (value < 1 || value > 1)
-    {
-        gerrorhand(GERROR_INVALID_LINE_INDEX, GFN_SET_POLYLINE_INDEX, g_errFile);
-        return;
-    }
-
-    setGksValue(g_gksState.currentLineIndex, value, GFN_SET_POLYLINE_INDEX);
+    setGksValue(g_gksState.currentLineIndex, value, GFN_SET_POLYLINE_INDEX,
+        [value] {
+            return value < 1 || value > 1 ? GERROR_INVALID_LINE_INDEX : GERROR_NONE;
+        });
 }
 
 void gsetlinetype(Gint value)
 {
-    if (value == 0)
-    {
-        gerrorhand(GERROR_LINE_TYPE_ZERO, GFN_SET_LINETYPE, g_errFile);
-        return;
-    }
-
-    setGksValue(g_gksState.currentLineType, value, GFN_SET_LINETYPE);
+    setGksValue(g_gksState.currentLineType, value, GFN_SET_LINETYPE,
+        [value] {
+            return value == 0 ? GERROR_LINE_TYPE_ZERO : GERROR_NONE;
+        });
 }
 
 void gsetmarkercolorind(Gint value)
 {
-    if (value < 0 || value > 1)
-    {
-        gerrorhand(GERROR_INVALID_COLOR_INDEX, GFN_SET_POLYMARKER_COLOR_INDEX, g_errFile);
-        return;
-    }
-
-    setGksValue(g_gksState.currentMarkerColorIndex, value, GFN_SET_POLYMARKER_COLOR_INDEX);
+    setGksValue(g_gksState.currentMarkerColorIndex, value, GFN_SET_POLYMARKER_COLOR_INDEX,
+        [value] {
+            return value < 0 || value > 1 ? GERROR_INVALID_COLOR_INDEX : GERROR_NONE;
+        });
 }
 
 void gsetmarkerind(Gint value)
 {
-    if (value < 1 || value > 1)
-    {
-        gerrorhand(GERROR_INVALID_MARKER_INDEX, GFN_SET_POLYMARKER_INDEX, g_errFile);
-        return;
-    }
-
-    setGksValue(g_gksState.currentMarkerIndex, value, GFN_SET_POLYMARKER_INDEX);
+    setGksValue(g_gksState.currentMarkerIndex, value, GFN_SET_POLYMARKER_INDEX,
+        [value] {
+            return value < 1 || value > 1 ? GERROR_INVALID_MARKER_INDEX : GERROR_NONE;
+        });
 }
 
 void gsetmarkersize(Gfloat value)
 {
-    if (value < 0.0f)
-    {
-        gerrorhand(GERROR_NEGATIVE_MARKER_SIZE, GFN_SET_MARKER_SIZE_SCALE_FACTOR, g_errFile);
-        return;
-    }
-
-    setGksValue(g_gksState.currentMarkerSize, value, GFN_SET_MARKER_SIZE_SCALE_FACTOR);
+    setGksValue(g_gksState.currentMarkerSize, value, GFN_SET_MARKER_SIZE_SCALE_FACTOR,
+        [value] {
+            return value < 0.0f ? GERROR_NEGATIVE_MARKER_SIZE : GERROR_NONE;
+        });
 }
 
 void gsetmarkertype(Gint value)
 {
-    if (value == 0)
-    {
-        gerrorhand(GERROR_MARKER_TYPE_ZERO, GFN_SET_MARKER_TYPE, g_errFile);
-        return;
-    }
-
-    setGksValue(g_gksState.currentMarkerType, value, GFN_SET_MARKER_TYPE);
+    setGksValue(g_gksState.currentMarkerType, value, GFN_SET_MARKER_TYPE,
+        [value] {
+            return value == 0 ? GERROR_MARKER_TYPE_ZERO : GERROR_NONE;
+        });
 }
 
 void gsettextalign(Gtxalign *value)
@@ -918,72 +889,62 @@ void gsettextalign(Gtxalign *value)
 
 void gsettextcolorind(Gint value)
 {
-    if (value < 0 || value > 1)
-    {
-        gerrorhand(GERROR_INVALID_COLOR_INDEX, GFN_SET_TEXT_COLOR_INDEX, g_errFile);
-        return;
-    }
-
-    setGksValue(g_gksState.currentTextColorIndex, value, GFN_SET_TEXT_COLOR_INDEX);
+    setGksValue(g_gksState.currentTextColorIndex, value, GFN_SET_TEXT_COLOR_INDEX,
+        [value] {
+            return value < 0 || value > 1 ? GERROR_INVALID_COLOR_INDEX : GERROR_NONE;
+        });
 }
 
 void gsettextfontprec(Gtxfp *fontPrec)
 {
-    if (fontPrec->font == 0)
-    {
-        gerrorhand(GERROR_TEXT_FONT_ZERO, GFN_SET_TEXT_FONT_AND_PRECISION, g_errFile);
-        return;
-    }
-
-    setGksValue(g_gksState.currentTextFontPrec, fontPrec, GFN_SET_TEXT_FONT_AND_PRECISION);
+    setGksValue(g_gksState.currentTextFontPrec, fontPrec, GFN_SET_TEXT_FONT_AND_PRECISION,
+        [fontPrec] {
+            return fontPrec->font == 0 ? GERROR_TEXT_FONT_ZERO : GERROR_NONE;
+        });
 }
 
 void gsettextind(Gint value)
 {
-    if (value < 1 || value > 1)
-    {
-        gerrorhand(GERROR_INVALID_TEXT_INDEX, GFN_SET_TEXT_INDEX, g_errFile);
-        return;
-    }
-
-    setGksValue(g_gksState.currentTextIndex, value, GFN_SET_TEXT_INDEX);
+    setGksValue(g_gksState.currentTextIndex, value, GFN_SET_TEXT_INDEX,
+        [value] {
+            return value < 1 || value > 1 ? GERROR_INVALID_TEXT_INDEX : GERROR_NONE;
+        });
 }
 
 void gsetviewport(Gint transform, Glimit *value)
 {
-    if (transform < 1)
-    {
-        gerrorhand(GERROR_INVALID_TRAN_NUM, GFN_SET_VIEWPORT, g_errFile);
-        return;
-    }
-    if (!rectIsValid(value))
-    {
-        gerrorhand(GERROR_INVALID_RECT, GFN_SET_VIEWPORT, g_errFile);
-        return;
-    }
-    if (!rectIsWithinUnitSquare(value))
-    {
-        gerrorhand(GERROR_VIEWPORT_NOT_IN_NDC, GFN_SET_VIEWPORT, g_errFile);
-        return;
-    }
-
-    setGksValue(g_gksState.transforms[transform-1].v, value, GFN_SET_VIEWPORT);
+    setGksValue(g_gksState.transforms[transform-1].v, value, GFN_SET_VIEWPORT,
+        [transform, value] {
+            if (transform < 1)
+            {
+                return GERROR_INVALID_TRAN_NUM;
+            }
+            if (!rectIsValid(value))
+            {
+                return GERROR_INVALID_RECT;
+            }
+            if (!rectIsWithinUnitSquare(value))
+            {
+                return GERROR_VIEWPORT_NOT_IN_NDC;
+            }
+            return GERROR_NONE;
+        });
 }
 
 void gsetwindow(Gint tranId, Glimit *value)
 {
-    if (tranId < 1)
-    {
-        gerrorhand(GERROR_INVALID_TRAN_NUM, GFN_SET_WINDOW, g_errFile);
-        return;
-    }
-    if (!rectIsValid(value))
-    {
-        gerrorhand(GERROR_INVALID_RECT, GFN_SET_WINDOW, g_errFile);
-        return;
-    }
-
-    setGksValue(g_gksState.transforms[tranId-1].w, value, GFN_SET_WINDOW);
+    setGksValue(g_gksState.transforms[tranId-1].w, value, GFN_SET_WINDOW,
+        [tranId, value] {
+            if (tranId < 1)
+            {
+                return GERROR_INVALID_TRAN_NUM;
+            }
+            if (!rectIsValid(value))
+            {
+                return GERROR_INVALID_RECT;
+            }
+            return GERROR_NONE;
+        });
 }
 
 void gopenws(Gint wsId, const Gconn *connId, Gwstype wsType)
