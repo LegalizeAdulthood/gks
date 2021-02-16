@@ -757,6 +757,12 @@ void gsetcharspace(Gfloat value)
 
 void gsetcharup(Gpoint *value)
 {
+    if (value->x == 0.0f && value->y == 0.0f)
+    {
+        gerrorhand(GERROR_CHAR_UP_LENGTH_ZERO, GFN_SET_CHARACTER_UP_VECTOR, g_errFile);
+        return;
+    }
+
     setGksValue(g_gksState.currentCharUp, value, GFN_SET_CHARACTER_UP_VECTOR);
 }
 

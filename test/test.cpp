@@ -1175,6 +1175,17 @@ TEST_CASE("global attribute error handling", "[gks]")
         ginqcharheight(&value, &status);
         REQUIRE(value == 0.01f);
     }
+    SECTION("character up vector")
+    {
+        Gpoint up{};
+        gsetcharup(&up);
+
+        requireError(GERROR_CHAR_UP_LENGTH_ZERO, GFN_SET_CHARACTER_UP_VECTOR);
+        Gpoint value{};
+        ginqcharup(&value, &status);
+        REQUIRE(value.x == 0.0f);
+        REQUIRE(value.y == 1.0f);
+    }
     SECTION("line color")
     {
         SECTION("too small")

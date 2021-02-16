@@ -266,7 +266,8 @@ TEST_CASE("GKS closed", "[errors]")
     }
     SECTION("gsetcharup")
     {
-        gsetcharup(nullptr);
+        Gpoint up{0.0f, 1.0f};
+        gsetcharup(&up);
 
         requireGksOpen(GFN_SET_CHARACTER_UP_VECTOR);
     }
