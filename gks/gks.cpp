@@ -1107,6 +1107,12 @@ void ginqwstran(Gint wsId, Gwsti *value, Gint *errorStatus)
 
 void gsetcolorrep(Gint wsId, Gint index, Gcobundl *value)
 {
+    if (index < 0 || index > 1)
+    {
+        gerrorhand(GERROR_INVALID_COLOR_INDEX, GFN_SET_COLOR_REPRESENTATION, g_errFile);
+        return;
+    }
+
     setWorkstationValue(g_wsState[0].colorTable[index], value, GFN_SET_COLOR_REPRESENTATION);
 }
 

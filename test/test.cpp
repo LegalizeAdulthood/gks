@@ -1368,3 +1368,31 @@ TEST_CASE("Workstation dependent attribute values", "[output]")
     gclosews(wsId);
     gclosegks();
 }
+
+TEST_CASE("workstation dependent attribute error handling", "[workstation]")
+{
+    g_recordedErrors.clear();
+    gopengks(stderr, 0L);
+    Gint wsId{0};
+    const Gchar *connId{"tek4105"};
+    Gint wsType{GWSTYPE_TEK4105};
+    gopenws(wsId, connId, wsType);
+
+    SECTION("color representation")
+    {
+        struct Gcobundl rep{0.5f, 0.5f, 0.5f};
+        gsetcolorrep(wsId, -1, &rep);
+
+        requireError(GERROR_INVALID_COLOR_INDEX, GFN_SET_COLOR_REPRESENTATION);
+        struct Gcobundl current{};
+        Gint status{};
+        ginqcolorrep(wsId, 0, &current, &status);
+        REQUIRE(status == GERROR_NONE);
+        REQUIRE(current.red == 0.0f);
+        REQUIRE(current.green == 0.0f);
+        REQUIRE(current.blue == 0.0f);
+    }
+
+    gclosews(wsId);
+    gclosegks();
+}
