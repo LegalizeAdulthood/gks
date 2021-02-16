@@ -1338,6 +1338,56 @@ TEST_CASE("global attribute error handling", "[gks]")
         ginqtextind(&value, &status);
         REQUIRE(value == 1);
     }
+    SECTION("viewport")
+    {
+        SECTION("invalid index")
+        {
+            Glimit viewport{0.0f, 1.0f, 0.0f, 1.0f};
+            gsetviewport(0, &viewport);
+
+            requireError(GERROR_INVALID_TRAN_NUM, GFN_SET_VIEWPORT);
+        }
+        SECTION("invalid rectangle")
+        {
+            SECTION("x range")
+            {
+                Glimit viewport{1.0f, 0.0f, 0.0f, 1.0f};
+                gsetviewport(1, &viewport);
+            }
+            SECTION("y range")
+            {
+                Glimit viewport{0.0f, 1.0f, 1.0f, 0.0f};
+                gsetviewport(1, &viewport);
+            }
+
+            requireError(GERROR_INVALID_RECT, GFN_SET_VIEWPORT);
+        }
+        SECTION("not in NDC unit square")
+        {
+            Glimit viewport{0.0f, 1.0f, 0.0f, 1.0f};
+
+            SECTION("x min out of range")
+            {
+                viewport.xmin = -1.0f;
+            }
+            SECTION("x max out of range")
+            {
+                viewport.xmax = 2.0f;
+            }
+            SECTION("y min out of range")
+            {
+                viewport.ymin = -1.0f;
+            }
+            SECTION("y max out of range")
+            {
+                viewport.ymax = 2.0f;
+            }
+
+            gsetviewport(1, &viewport);
+
+            requireError(GERROR_VIEWPORT_NOT_IN_NDC, GFN_SET_VIEWPORT);
+        }
+    }
     SECTION("window")
     {
         SECTION("invalid index")

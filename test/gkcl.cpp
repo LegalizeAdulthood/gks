@@ -370,7 +370,8 @@ TEST_CASE("GKS closed", "[errors]")
     }
     SECTION("gsetviewport")
     {
-        gsetviewport(0, nullptr);
+        Glimit viewport{0.0f, 1.0f, 0.0f, 1.0f};
+        gsetviewport(1, &viewport);
 
         requireGksOpen(GFN_SET_VIEWPORT);
     }

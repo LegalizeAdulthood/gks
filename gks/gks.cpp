@@ -445,6 +445,13 @@ inline bool rectIsValid(const Glimit *rect)
         && rect->ymin < rect->ymax;
 }
 
+inline bool rectIsWithinUnitSquare(const Glimit *rect)
+{
+    return rect->xmin >= 0.0f && rect->xmax <= 1.0f
+        && rect->ymin >= 0.0f && rect->ymax <= 1.0f;
+}
+
+
 }
 
 void gerrorlog(Gint errNum, Gint funcName, Gfile *errFile)
@@ -932,6 +939,22 @@ void gsettextind(Gint value)
 
 void gsetviewport(Gint transform, Glimit *value)
 {
+    if (transform < 1)
+    {
+        gerrorhand(GERROR_INVALID_TRAN_NUM, GFN_SET_VIEWPORT, g_errFile);
+        return;
+    }
+    if (!rectIsValid(value))
+    {
+        gerrorhand(GERROR_INVALID_RECT, GFN_SET_VIEWPORT, g_errFile);
+        return;
+    }
+    if (!rectIsWithinUnitSquare(value))
+    {
+        gerrorhand(GERROR_VIEWPORT_NOT_IN_NDC, GFN_SET_VIEWPORT, g_errFile);
+        return;
+    }
+
     setGksValue(g_gksState.transforms[transform-1].v, value, GFN_SET_VIEWPORT);
 }
 
