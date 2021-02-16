@@ -1256,6 +1256,16 @@ TEST_CASE("global attribute error handling", "[gks]")
         ginqcurrntrannum(&value, &status);
         REQUIRE(value == 0);
     }
+    SECTION("text font and precision")
+    {
+        Gtxfp fontPrec{0, GP_STROKE};
+        gsettextfontprec(&fontPrec);
+
+        requireError(GERROR_TEXT_FONT_ZERO, GFN_SET_TEXT_FONT_AND_PRECISION);
+        Gtxfp value{};
+        ginqtextfontprec(&value, &status);
+        REQUIRE(value.font == 1);
+    }
     SECTION("text index")
     {
         gsettextind(0);

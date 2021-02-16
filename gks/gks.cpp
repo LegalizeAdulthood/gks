@@ -868,6 +868,12 @@ void gsettextcolorind(Gint value)
 
 void gsettextfontprec(Gtxfp *fontPrec)
 {
+    if (fontPrec->font == 0)
+    {
+        gerrorhand(GERROR_TEXT_FONT_ZERO, GFN_SET_TEXT_FONT_AND_PRECISION, g_errFile);
+        return;
+    }
+
     setGksValue(g_gksState.currentTextFontPrec, fontPrec, GFN_SET_TEXT_FONT_AND_PRECISION);
 }
 

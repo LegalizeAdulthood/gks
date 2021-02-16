@@ -356,7 +356,7 @@ TEST_CASE("GKS closed", "[errors]")
     }
     SECTION("gsettextfontprec")
     {
-        Gtxfp value{};
+        Gtxfp value{1, GP_STRING};
         gsettextfontprec(&value);
 
         requireGksOpen(GFN_SET_TEXT_FONT_AND_PRECISION);
