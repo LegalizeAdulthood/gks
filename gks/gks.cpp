@@ -835,6 +835,12 @@ void gsetmarkersize(Gfloat value)
 
 void gsetmarkertype(Gint value)
 {
+    if (value == 0)
+    {
+        gerrorhand(GERROR_MARKER_TYPE_ZERO, GFN_SET_MARKER_TYPE, g_errFile);
+        return;
+    }
+
     setGksValue(g_gksState.currentMarkerType, value, GFN_SET_MARKER_TYPE);
 }
 

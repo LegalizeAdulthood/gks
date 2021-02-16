@@ -338,7 +338,7 @@ TEST_CASE("GKS closed", "[errors]")
     }
     SECTION("gsetmarkertype")
     {
-        gsetmarkertype(0);
+        gsetmarkertype(GMK_DIAGONAL_CROSS);
 
         requireGksOpen(GFN_SET_MARKER_TYPE);
     }

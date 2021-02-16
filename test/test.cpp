@@ -1204,6 +1204,15 @@ TEST_CASE("global attribute error handling", "[gks]")
         ginqmarkerind(&value, &status);
         REQUIRE(value == 1);
     }
+    SECTION("marker type")
+    {
+        gsetmarkertype(0);
+
+        requireError(GERROR_MARKER_TYPE_ZERO, GFN_SET_MARKER_TYPE);
+        Gint value{};
+        ginqmarkertype(&value, &status);
+        REQUIRE(value == GMK_STAR);
+    }
     SECTION("normalization transform")
     {
         SECTION("too small")
