@@ -5,6 +5,7 @@
 #include <catch2/catch.hpp>
 
 #include <cstdio>
+#include <string>
 
 TEST_CASE("Initially closed", "[gks]")
 {
@@ -226,9 +227,9 @@ TEST_CASE("open workstation", "[workstation]")
 {
     gopengks(stderr, 0L);
     Gint wsId{0};
-    const Gchar *connId{"tek4105"};
+    std::string connId{"tek4105"};
     Gint wsType{GWSTYPE_TEK4105};
-    gopenws(wsId, connId, wsType);
+    gopenws(wsId, connId.c_str(), wsType);
 
     SECTION("operating state is GSOP")
     {
@@ -281,6 +282,18 @@ TEST_CASE("open workstation", "[workstation]")
         REQUIRE(transform.current.w.xmax == 1.0f);
         REQUIRE(transform.current.w.ymin == 0.0f);
         REQUIRE(transform.current.w.ymax == 1.0f);
+    }
+    SECTION("connection id and type")
+    {
+        Gint numCt{};
+        Gwsct ct{};
+        Gint status{};
+        ginqwsconntype(wsId, 1, &numCt, &ct, &status);
+
+        REQUIRE(status == GERROR_NONE);
+        REQUIRE(numCt == 1);
+        REQUIRE(ct.conn == connId);
+        REQUIRE(ct.type == wsType);
     }
     SECTION("update workstation")
     {
@@ -1418,7 +1431,31 @@ TEST_CASE("global attribute error handling", "[gks]")
     gclosegks();
 }
 
-TEST_CASE("Workstation dependent attribute values", "[output]")
+TEST_CASE("initial workstation dependent attribute values", "[workstation]")
+{
+    gopengks(stderr, 0L);
+    Gint wsId{0};
+    std::string connId{"tek4105"};
+    Gint wsType{GWSTYPE_TEK4105};
+    gopenws(wsId, connId.c_str(), wsType);
+
+    SECTION("connection id and type")
+    {
+        Gwsct ct{};
+        Gint numCt{};
+        Gint status{};
+        ginqwsconntype(wsId, 0, &numCt, &ct, &status);
+        REQUIRE(status == GERROR_NONE);
+        REQUIRE(ct.conn == connId);
+        REQUIRE(ct.type == wsType);
+    }
+
+    gclosews(wsId);
+    gclosegks();
+    REQUIRE(getGksOpState() == GGKCL);
+}
+
+TEST_CASE("set workstation dependent attribute values", "[output]")
 {
     gopengks(stderr, 0L);
     Gint wsId{0};
@@ -1466,6 +1503,16 @@ TEST_CASE("workstation dependent attribute error handling", "[workstation]")
         REQUIRE(current.red == 0.0f);
         REQUIRE(current.green == 0.0f);
         REQUIRE(current.blue == 0.0f);
+    }
+    SECTION("connection and type")
+    {
+        Gwsct ct{};
+        Gint buffSize{};
+        Gint numCts{};
+        Gint status{};
+        ginqwsconntype(wsId + 1, buffSize, &numCts, &ct, &status);
+
+        REQUIRE(status == GERROR_WS_NOT_OPEN);
     }
     SECTION("viewport")
     {

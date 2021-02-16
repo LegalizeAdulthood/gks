@@ -1116,6 +1116,20 @@ void ginqcolorrep(Gint wsId, Gint index, Gcobundl *value, Gint *errorStatus)
         });
 }
 
+void ginqwsconntype(Gint wsId, Gint buffSize, Gint *ctSize, Gwsct *ct, Gint *errorStatus)
+{
+    if (!wsIsOpen(wsId))
+    {
+        *errorStatus = GERROR_WS_NOT_OPEN;
+        return;
+    }
+
+    *ctSize = 1;
+    ct->conn = g_wsState[0].connId;
+    ct->type = g_wsState[0].type;
+    *errorStatus = GERROR_NONE;
+}
+
 void ginqwstran(Gint wsId, Gwsti *value, Gint *errorStatus)
 {
     getWorkstationValue(value, g_wsState[wsId].transform, errorStatus,
@@ -1253,3 +1267,4 @@ void gtext(Gpoint *start, const Gchar *text)
         return;
     }
 }
+

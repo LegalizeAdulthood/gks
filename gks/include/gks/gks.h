@@ -307,6 +307,12 @@ typedef struct Gtxfp
     Gtxprec prec;
 } Gtxfp;
 
+typedef struct Gwsct
+{
+    const Gconn *conn;
+    Gwstype type;
+} Gwsct;
+
 typedef struct Gwsmax
 {
     Gint open;
@@ -402,6 +408,7 @@ void gdeactivatews(Gint wsId);
 void gupdatews(Gint wsId, Gregen flag);
 
 void ginqcolorrep(Gint wsId, Gint index, Gcobundl *value, Gint *errorStatus);
+void ginqwsconntype(Gint wsId, Gint buffSize, Gint *ctSize, Gwsct *ct, Gint *errorStatus);
 void ginqwstran(Gint wsId, Gwsti *value, Gint *errorStatus);
 
 void gsetcolorrep(Gint wsId, Gint index, Gcobundl *value);
