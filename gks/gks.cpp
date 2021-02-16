@@ -778,7 +778,13 @@ void gsetfillcolorind(Gint value)
 
 void gsetfillind(Gint value)
 {
-    setGksValue(g_gksState.currentFillIndex, value, GFN_SET_FILL_AREA_COLOR_INDEX);
+    if (value < 1 || value > 1)
+    {
+        gerrorhand(GERROR_INVALID_FILL_INDEX, GFN_SET_FILL_AREA_INDEX, g_errFile);
+        return;
+    }
+
+    setGksValue(g_gksState.currentFillIndex, value, GFN_SET_FILL_AREA_INDEX);
 }
 
 void gsetfillstyle(Gflinter value)

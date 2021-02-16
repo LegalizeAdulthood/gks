@@ -287,7 +287,7 @@ TEST_CASE("GKS closed", "[errors]")
     {
         gsetfillind(1);
 
-        requireGksOpen(GFN_SET_FILL_AREA_COLOR_INDEX);
+        requireGksOpen(GFN_SET_FILL_AREA_INDEX);
     }
     SECTION("gsetfillstyle")
     {
