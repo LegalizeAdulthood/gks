@@ -830,6 +830,12 @@ void gsetmarkerind(Gint value)
 
 void gsetmarkersize(Gfloat value)
 {
+    if (value < 0.0f)
+    {
+        gerrorhand(GERROR_NEGATIVE_MARKER_SIZE, GFN_SET_MARKER_SIZE_SCALE_FACTOR, g_errFile);
+        return;
+    }
+
     setGksValue(g_gksState.currentMarkerSize, value, GFN_SET_MARKER_SIZE_SCALE_FACTOR);
 }
 

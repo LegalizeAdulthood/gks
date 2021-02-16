@@ -1204,6 +1204,15 @@ TEST_CASE("global attribute error handling", "[gks]")
         ginqmarkerind(&value, &status);
         REQUIRE(value == 1);
     }
+    SECTION("marker size")
+    {
+        gsetmarkersize(-1.0f);
+
+        requireError(GERROR_NEGATIVE_MARKER_SIZE, GFN_SET_MARKER_SIZE_SCALE_FACTOR);
+        Gfloat value{};
+        ginqmarkersize(&value, &status);
+        REQUIRE(value == 1.0f);
+    }
     SECTION("marker type")
     {
         gsetmarkertype(0);
