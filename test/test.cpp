@@ -1013,7 +1013,7 @@ TEST_CASE("Set global attribute values", "[output]")
     }
     SECTION("text color index is 1")
     {
-        const Gint color{3};
+        const Gint color{0};
         gsettextcolorind(color);
 
         ginqtextcolorind(&value, &status);
@@ -1255,6 +1255,15 @@ TEST_CASE("global attribute error handling", "[gks]")
         Gint value{};
         ginqcurrntrannum(&value, &status);
         REQUIRE(value == 0);
+    }
+    SECTION("text color")
+    {
+        gsettextcolorind(-1);
+
+        requireError(GERROR_INVALID_COLOR_INDEX, GFN_SET_TEXT_COLOR_INDEX);
+        Gint value{};
+        ginqtextcolorind(&value, &status);
+        REQUIRE(value == 1);
     }
     SECTION("text font and precision")
     {

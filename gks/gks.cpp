@@ -863,6 +863,12 @@ void gsettextalign(Gtxalign *value)
 
 void gsettextcolorind(Gint value)
 {
+    if (value < 0 || value > 1)
+    {
+        gerrorhand(GERROR_INVALID_COLOR_INDEX, GFN_SET_TEXT_COLOR_INDEX, g_errFile);
+        return;
+    }
+
     setGksValue(g_gksState.currentTextColorIndex, value, GFN_SET_TEXT_COLOR_INDEX);
 }
 
