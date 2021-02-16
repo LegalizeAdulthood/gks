@@ -282,7 +282,7 @@ static const GWSDesc g_wsDesc[MAX_WS_TYPES] =
     {
         {
             GDC_OTHER,
-            { 0.0f, 1.0f },
+            { 1.0f, 1.0f },
             { 640, 480 }
         },
         {
@@ -1142,7 +1142,26 @@ void gsetcolorrep(Gint wsId, Gint index, Gcobundl *value)
 
 void gsetwsviewport(Gint wsId, Glimit *value)
 {
-    setWorkstationValue(g_wsState[0].transform.current.v, value, GFN_SET_WORKSTATION_VIEWPORT);
+    setWorkstationValue(g_wsState[0].transform.current.v, value, GFN_SET_WORKSTATION_VIEWPORT,
+        [wsId, value] {
+            if (!wsIsOpen(wsId))
+            {
+                return GERROR_WS_NOT_OPEN;
+            }
+            if (!rectIsValid(value))
+            {
+                return GERROR_INVALID_RECT;
+            }
+            const Gpoint &size = g_wsDesc[0].displaySpaceSize.device;
+            if (value->xmin < 0 || value->xmin >= size.x
+                || value->xmax < 0 || value->xmax >= size.x
+                || value->ymin < 0 || value->ymin >= size.y
+                || value->ymax < 0 || value->ymax >= size.y)
+            {
+                return GERROR_WS_VIEWPORT_NOT_IN_DISPLAY;
+            }
+            return GERROR_NONE;
+        });
 }
 
 void gsetwswindow(Gint wsId, Glimit *value)

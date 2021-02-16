@@ -1467,6 +1467,26 @@ TEST_CASE("workstation dependent attribute error handling", "[workstation]")
         REQUIRE(current.green == 0.0f);
         REQUIRE(current.blue == 0.0f);
     }
+    SECTION("viewport")
+    {
+        Glimit viewport{0.0f, 1.0f, 0.0f, 1.0f};
+
+        SECTION("invalid rectangle")
+        {
+            SECTION("x range")
+            {
+                viewport.xmin = 2.0f;
+            }
+            SECTION("y range")
+            {
+                viewport.ymin = 2.0f;
+            }
+
+            gsetwsviewport(wsId, &viewport);
+
+            requireError(GERROR_INVALID_RECT, GFN_SET_WORKSTATION_VIEWPORT);
+        }
+    }
     SECTION("window")
     {
         Glimit window{0.0f, 1.0f, 0.0f, 1.0f};
