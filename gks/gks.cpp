@@ -945,6 +945,16 @@ void gdeactivatews(Gint wsId)
         gerrorhand(GERROR_NOT_STATE_WSAC, GFN_DEACTIVATE_WORKSTATION, g_errFile);
         return;
     }
+    if (wsId < 0 || wsId >= g_gksDescription.wsmax.open)
+    {
+        gerrorhand(GERROR_INVALID_WSID, GFN_DEACTIVATE_WORKSTATION, g_errFile);
+        return;
+    }
+    if (!wsIsActive(wsId))
+    {
+        gerrorhand(GERROR_WS_NOT_ACTIVE, GFN_DEACTIVATE_WORKSTATION, g_errFile);
+        return;
+    }
 
     --g_gksState.numActiveWs;
     g_gksState.activeWs[g_gksState.numActiveWs] = -1;
