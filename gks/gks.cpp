@@ -773,6 +773,12 @@ void gsetclip(Gclip value)
 
 void gsetfillcolorind(Gint value)
 {
+    if (value < 0 || value > 1)
+    {
+        gerrorhand(GERROR_INVALID_COLOR_INDEX, GFN_SET_FILL_AREA_COLOR_INDEX, g_errFile);
+        return;
+    }
+
     setGksValue(g_gksState.currentFillColorIndex, value, GFN_SET_FILL_AREA_COLOR_INDEX);
 }
 

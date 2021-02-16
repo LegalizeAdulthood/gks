@@ -1015,10 +1015,10 @@ TEST_CASE("Set global attribute values", "[output]")
     }
     SECTION("fill area color index")
     {
-        gsetfillcolorind(2);
+        gsetfillcolorind(0);
 
         ginqfillcolorind(&value, &status);
-        REQUIRE(value == 2);
+        REQUIRE(value == 0);
     }
     SECTION("fill area index")
     {
@@ -1185,6 +1185,15 @@ TEST_CASE("global attribute error handling", "[gks]")
         ginqcharup(&value, &status);
         REQUIRE(value.x == 0.0f);
         REQUIRE(value.y == 1.0f);
+    }
+    SECTION("fill area color")
+    {
+        gsetfillcolorind(-1);
+
+        requireError(GERROR_INVALID_COLOR_INDEX, GFN_SET_FILL_AREA_COLOR_INDEX);
+        Gint value{};
+        ginqfillcolorind(&value, &status);
+        REQUIRE(value == 1);
     }
     SECTION("fill area index")
     {
