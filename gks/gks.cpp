@@ -730,6 +730,12 @@ void gsetasf(Gasfs *value)
 
 void gsetcharexpan(Gfloat value)
 {
+    if (value <= 0.0f)
+    {
+        gerrorhand(GERROR_CHAR_EXPANSION_NOT_POSITIVE, GFN_SET_CHARACTER_EXPANSION_FACTOR, g_errFile);
+        return;
+    }
+
     setGksValue(g_gksState.currentCharExpandFactor, value, GFN_SET_CHARACTER_EXPANSION_FACTOR);
 }
 

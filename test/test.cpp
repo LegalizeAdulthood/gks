@@ -1150,6 +1150,12 @@ TEST_CASE("global attribute error handling", "[gks]")
     gopengks(stderr, 0L);
     Gint status{GERROR_NONE};
 
+    SECTION("character expansion factor")
+    {
+        gsetcharexpan(0.0f);
+
+        requireError(GERROR_CHAR_EXPANSION_NOT_POSITIVE, GFN_SET_CHARACTER_EXPANSION_FACTOR);
+    }
     SECTION("line type")
     {
         gsetlinetype(0);
