@@ -1148,14 +1148,39 @@ TEST_CASE("global attribute error handling", "[gks]")
 {
     g_recordedErrors.clear();
     gopengks(stderr, 0L);
+    Gint status{GERROR_NONE};
 
     SECTION("line type")
     {
         gsetlinetype(0);
 
         requireError(GERROR_LINE_TYPE_ZERO, GFN_SET_LINETYPE);
+        Gint value{};
+        ginqlinetype(&value, &status);
+        REQUIRE(value == 1);
+    }
+    SECTION("normalization transform")
+    {
+        SECTION("too small")
+        {
+            gselntran(-1);
+        }
+        SECTION("too large")
+        {
+            Gint maxTranNum{};
+            ginqmaxntrannum(&maxTranNum, &status);
+            REQUIRE(status == GERROR_NONE);
+
+            gselntran(maxTranNum + 1);
+        }
+
+        requireError(GERROR_INVALID_TRAN_NUM, GFN_SELECT_NORMALIZATION_TRANSFORMATION);
+        Gint value{};
+        ginqcurrntrannum(&value, &status);
+        REQUIRE(value == 0);
     }
 
+    REQUIRE(status == GERROR_NONE);
     gclosegks();
 }
 

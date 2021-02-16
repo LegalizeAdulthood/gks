@@ -714,6 +714,12 @@ void ginqlinefacil(Gwstype wsType, Gint buffSize, Gint *numLineTypes, Glnfac *va
 
 void gselntran(Gint value)
 {
+    if (value < 0 || value > g_gksDescription.numTrans)
+    {
+        gerrorhand(GERROR_INVALID_TRAN_NUM, GFN_SELECT_NORMALIZATION_TRANSFORMATION, g_errFile);
+        return;
+    }
+
     setGksValue(g_gksState.currentTransform, value, GFN_SELECT_NORMALIZATION_TRANSFORMATION);
 }
 
