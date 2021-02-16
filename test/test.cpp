@@ -1155,6 +1155,15 @@ TEST_CASE("global attribute error handling", "[gks]")
         gsetcharexpan(0.0f);
 
         requireError(GERROR_CHAR_EXPANSION_NOT_POSITIVE, GFN_SET_CHARACTER_EXPANSION_FACTOR);
+        Gfloat value{};
+        ginqcharexpan(&value, &status);
+        REQUIRE(value == 1.0f);
+    }
+    SECTION("line index")
+    {
+        gsetlineind(0);
+
+        requireError(GERROR_INVALID_LINE_INDEX, GFN_SET_POLYLINE_INDEX);
     }
     SECTION("line type")
     {
