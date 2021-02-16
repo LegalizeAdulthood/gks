@@ -792,7 +792,7 @@ void gsetlinecolorind(Gint value)
 
 void gsetlineind(Gint value)
 {
-    if (value < 1)
+    if (value < 1 || value > 1)
     {
         gerrorhand(GERROR_INVALID_LINE_INDEX, GFN_SET_POLYLINE_INDEX, g_errFile);
         return;

@@ -957,10 +957,10 @@ TEST_CASE("Set global attribute values", "[output]")
     }
     SECTION("line index")
     {
-        gsetlineind(4);
+        gsetlineind(1);
 
         ginqlineind(&value, &status);
-        REQUIRE(value == 4);
+        REQUIRE(value == 1);
     }
     SECTION("marker type")
     {
