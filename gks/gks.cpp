@@ -814,6 +814,12 @@ void gsetlinetype(Gint value)
 
 void gsetmarkercolorind(Gint value)
 {
+    if (value < 0 || value > 1)
+    {
+        gerrorhand(GERROR_INVALID_COLOR_INDEX, GFN_SET_POLYMARKER_COLOR_INDEX, g_errFile);
+        return;
+    }
+
     setGksValue(g_gksState.currentMarkerColorIndex, value, GFN_SET_POLYMARKER_COLOR_INDEX);
 }
 

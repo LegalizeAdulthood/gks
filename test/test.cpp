@@ -979,11 +979,11 @@ TEST_CASE("Set global attribute values", "[output]")
     }
     SECTION("marker color index")
     {
-        Gint color{4};
-        gsetmarkercolorind(color);
+        Gint index{1};
+        gsetmarkercolorind(index);
 
         ginqmarkercolorind(&value, &status);
-        REQUIRE(value == color);
+        REQUIRE(value == index);
     }
     SECTION("marker index")
     {
@@ -1164,18 +1164,16 @@ TEST_CASE("global attribute error handling", "[gks]")
         SECTION("too small")
         {
             gsetlinecolorind(-1);
-
-            requireError(GERROR_INVALID_COLOR_INDEX, GFN_SET_POLYLINE_COLOR_INDEX);
-            Gint value{};
-            ginqlinecolorind(&value, &status);
-            REQUIRE(value == 1);
         }
         SECTION("too large")
         {
             gsetlinecolorind(2);
-
-            requireError(GERROR_INVALID_COLOR_INDEX, GFN_SET_POLYLINE_COLOR_INDEX);
         }
+
+        requireError(GERROR_INVALID_COLOR_INDEX, GFN_SET_POLYLINE_COLOR_INDEX);
+        Gint value{};
+        ginqlinecolorind(&value, &status);
+        REQUIRE(value == 1);
     }
     SECTION("line index")
     {
@@ -1193,6 +1191,22 @@ TEST_CASE("global attribute error handling", "[gks]")
         requireError(GERROR_LINE_TYPE_ZERO, GFN_SET_LINETYPE);
         Gint value{};
         ginqlinetype(&value, &status);
+        REQUIRE(value == 1);
+    }
+    SECTION("marker color")
+    {
+        SECTION("too small")
+        {
+            gsetmarkercolorind(-1);
+        }
+        SECTION("too large")
+        {
+            gsetmarkercolorind(2);
+        }
+
+        requireError(GERROR_INVALID_COLOR_INDEX, GFN_SET_POLYMARKER_COLOR_INDEX);
+        Gint value{};
+        ginqmarkercolorind(&value, &status);
         REQUIRE(value == 1);
     }
     SECTION("marker index")
