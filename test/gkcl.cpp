@@ -254,7 +254,7 @@ TEST_CASE("GKS closed", "[errors]")
     }
     SECTION("gsetcharheight")
     {
-        gsetcharheight(0.0f);
+        gsetcharheight(0.02f);
 
         requireGksOpen(GFN_SET_CHARACTER_HEIGHT);
     }

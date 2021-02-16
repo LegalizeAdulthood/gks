@@ -741,6 +741,12 @@ void gsetcharexpan(Gfloat value)
 
 void gsetcharheight(Gfloat value)
 {
+    if (value <= 0.0f)
+    {
+        gerrorhand(GERROR_CHAR_HEIGHT_NOT_POSITIVE, GFN_SET_CHARACTER_HEIGHT, g_errFile);
+        return;
+    }
+
     setGksValue(g_gksState.currentCharHeight, value, GFN_SET_CHARACTER_HEIGHT);
 }
 

@@ -1159,6 +1159,22 @@ TEST_CASE("global attribute error handling", "[gks]")
         ginqcharexpan(&value, &status);
         REQUIRE(value == 1.0f);
     }
+    SECTION("character height")
+    {
+        SECTION("zero")
+        {
+            gsetcharheight(0.0f);
+        }
+        SECTION("negative")
+        {
+            gsetcharheight(-1.0f);
+        }
+
+        requireError(GERROR_CHAR_HEIGHT_NOT_POSITIVE, GFN_SET_CHARACTER_HEIGHT);
+        Gfloat value{-1.0f};
+        ginqcharheight(&value, &status);
+        REQUIRE(value == 0.01f);
+    }
     SECTION("line color")
     {
         SECTION("too small")
