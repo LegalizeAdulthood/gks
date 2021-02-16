@@ -795,6 +795,7 @@ void gsetlineind(Gint value)
     if (value < 1)
     {
         gerrorhand(GERROR_INVALID_LINE_INDEX, GFN_SET_POLYLINE_INDEX, g_errFile);
+        return;
     }
 
     setGksValue(g_gksState.currentLineIndex, value, GFN_SET_POLYLINE_INDEX);
@@ -818,6 +819,12 @@ void gsetmarkercolorind(Gint value)
 
 void gsetmarkerind(Gint value)
 {
+    if (value < 1 || value > 1)
+    {
+        gerrorhand(GERROR_INVALID_MARKER_INDEX, GFN_SET_POLYMARKER_INDEX, g_errFile);
+        return;
+    }
+
     setGksValue(g_gksState.currentMarkerIndex, value, GFN_SET_POLYMARKER_INDEX);
 }
 

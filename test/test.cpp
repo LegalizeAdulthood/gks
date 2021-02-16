@@ -987,7 +987,7 @@ TEST_CASE("Set global attribute values", "[output]")
     }
     SECTION("marker index")
     {
-        Gint index{4};
+        Gint index{1};
         gsetmarkerind(index);
 
         ginqmarkerind(&value, &status);
@@ -1182,6 +1182,9 @@ TEST_CASE("global attribute error handling", "[gks]")
         gsetlineind(0);
 
         requireError(GERROR_INVALID_LINE_INDEX, GFN_SET_POLYLINE_INDEX);
+        Gint value{};
+        ginqlineind(&value, &status);
+        REQUIRE(value == 1);
     }
     SECTION("line type")
     {
@@ -1190,6 +1193,15 @@ TEST_CASE("global attribute error handling", "[gks]")
         requireError(GERROR_LINE_TYPE_ZERO, GFN_SET_LINETYPE);
         Gint value{};
         ginqlinetype(&value, &status);
+        REQUIRE(value == 1);
+    }
+    SECTION("marker index")
+    {
+        gsetmarkerind(0);
+
+        requireError(GERROR_INVALID_MARKER_INDEX, GFN_SET_POLYMARKER_INDEX);
+        Gint value{};
+        ginqmarkerind(&value, &status);
         REQUIRE(value == 1);
     }
     SECTION("normalization transform")
