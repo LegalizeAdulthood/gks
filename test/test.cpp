@@ -950,10 +950,10 @@ TEST_CASE("Set global attribute values", "[output]")
     }
     SECTION("line color index")
     {
-        gsetlinecolorind(GLN_DASHDOT);
+        gsetlinecolorind(1);
 
         ginqlinecolorind(&value, &status);
-        REQUIRE(value == GLN_DASHDOT);
+        REQUIRE(value == 1);
     }
     SECTION("line index")
     {
@@ -1158,6 +1158,24 @@ TEST_CASE("global attribute error handling", "[gks]")
         Gfloat value{};
         ginqcharexpan(&value, &status);
         REQUIRE(value == 1.0f);
+    }
+    SECTION("line color")
+    {
+        SECTION("too small")
+        {
+            gsetlinecolorind(-1);
+
+            requireError(GERROR_INVALID_COLOR_INDEX, GFN_SET_POLYLINE_COLOR_INDEX);
+            Gint value{};
+            ginqlinecolorind(&value, &status);
+            REQUIRE(value == 1);
+        }
+        SECTION("too large")
+        {
+            gsetlinecolorind(2);
+
+            requireError(GERROR_INVALID_COLOR_INDEX, GFN_SET_POLYLINE_COLOR_INDEX);
+        }
     }
     SECTION("line index")
     {
