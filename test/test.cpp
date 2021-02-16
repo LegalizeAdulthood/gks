@@ -941,6 +941,107 @@ TEST_CASE("Set global attribute values", "[output]")
     Gint value{-1};
     Gint status{-1};
 
+    SECTION("aspect source flags")
+    {
+        struct Gasfs asfs =
+        {
+            GBUNDLED,
+            GINDIVIDUAL,
+            GBUNDLED,
+            GINDIVIDUAL,
+            GBUNDLED,
+            GINDIVIDUAL,
+            GBUNDLED,
+            GINDIVIDUAL,
+            GBUNDLED,
+            GINDIVIDUAL,
+            GBUNDLED,
+            GINDIVIDUAL,
+            GBUNDLED,
+        };
+        gsetasf(&asfs);
+
+        struct Gasfs current{};
+        ginqasf(&current, &status);
+        REQUIRE(current.ln_type == asfs.ln_type);
+        REQUIRE(current.ln_width == asfs.ln_width);
+        REQUIRE(current.ln_color == asfs.ln_color);
+        REQUIRE(current.mk_type == asfs.mk_type);
+        REQUIRE(current.mk_size == asfs.mk_size);
+        REQUIRE(current.mk_color == asfs.mk_color);
+        REQUIRE(current.tx_fp == asfs.tx_fp);
+        REQUIRE(current.tx_exp == asfs.tx_exp);
+        REQUIRE(current.tx_space == asfs.tx_space);
+        REQUIRE(current.tx_color == asfs.tx_color);
+        REQUIRE(current.fl_inter == asfs.fl_inter);
+        REQUIRE(current.fl_style == asfs.fl_style);
+        REQUIRE(current.fl_color == asfs.fl_color);
+    }
+    SECTION("char expansion factor")
+    {
+        const Gfloat expan{0.5f};
+        gsetcharexpan(expan);
+
+        Gfloat current{};
+        ginqcharexpan(&current, &status);
+        REQUIRE(current == expan);
+    }
+    SECTION("char height")
+    {
+        gsetcharheight(0.5f);
+
+        Gfloat charHeight{-1.0f};
+        ginqcharheight(&charHeight, &status);
+        REQUIRE(charHeight == 0.5f);
+    }
+    SECTION("char spacing")
+    {
+        const Gfloat space{0.5f};
+        gsetcharspace(space);
+
+        Gfloat current{};
+        ginqcharspace(&current, &status);
+        REQUIRE(current == space);
+    }
+    SECTION("char up vector")
+    {
+        Gpoint up{1.0f, 0.0f};
+        gsetcharup(&up);
+
+        Gpoint current{};
+        ginqcharup(&current, &status);
+        REQUIRE(current.x == up.x);
+        REQUIRE(current.y == up.y);
+    }
+    SECTION("fill area color index")
+    {
+        gsetfillcolorind(2);
+
+        ginqfillcolorind(&value, &status);
+        REQUIRE(value == 2);
+    }
+    SECTION("fill area index")
+    {
+        gsetfillind(1);
+
+        ginqfillind(&value, &status);
+        REQUIRE(value == 1);
+    }
+    SECTION("fill area interior style")
+    {
+        gsetfillstyle(GSOLID);
+
+        enum Gflinter current{};
+        ginqfillstyle(&current, &status);
+        REQUIRE(current == GSOLID);
+    }
+    SECTION("fill area interior style index")
+    {
+        gsetfillstyleind(2);
+
+        ginqfillstyleind(&value, &status);
+        REQUIRE(value == 2);
+    }
     SECTION("line type")
     {
         gsetlinetype(GLN_DASHED);
@@ -993,39 +1094,13 @@ TEST_CASE("Set global attribute values", "[output]")
         ginqmarkerind(&value, &status);
         REQUIRE(value == index);
     }
-    SECTION("char height")
+    SECTION("normalization transform")
     {
-        gsetcharheight(0.5f);
+        gselntran(1);
 
-        Gfloat charHeight{-1.0f};
-        ginqcharheight(&charHeight, &status);
-        REQUIRE(charHeight == 0.5f);
-    }
-    SECTION("char up vector")
-    {
-        Gpoint up{1.0f, 0.0f};
-        gsetcharup(&up);
-
-        Gpoint current{};
-        ginqcharup(&current, &status);
-        REQUIRE(current.x == up.x);
-        REQUIRE(current.y == up.y);
-    }
-    SECTION("text color index is 1")
-    {
-        const Gint color{0};
-        gsettextcolorind(color);
-
-        ginqtextcolorind(&value, &status);
-        REQUIRE(value == color);
-    }
-    SECTION("text index")
-    {
-        const Gint index{1};
-        gsettextind(index);
-
-        ginqtextind(&value, &status);
-        REQUIRE(value == index);
+        Gint transform{0};
+        ginqcurrntrannum(&transform, &status);
+        REQUIRE(transform == 1);
     }
     SECTION("text alignment")
     {
@@ -1037,6 +1112,14 @@ TEST_CASE("Set global attribute values", "[output]")
         REQUIRE(current.hor == align.hor);
         REQUIRE(current.ver == align.ver);
     }
+    SECTION("text color index is 1")
+    {
+        const Gint color{0};
+        gsettextcolorind(color);
+
+        ginqtextcolorind(&value, &status);
+        REQUIRE(value == color);
+    }
     SECTION("text font and precision")
     {
         Gtxfp font{2, GP_STROKE};
@@ -1047,96 +1130,13 @@ TEST_CASE("Set global attribute values", "[output]")
         REQUIRE(current.font == font.font);
         REQUIRE(current.prec == font.prec);
     }
-    SECTION("char expansion factor")
+    SECTION("text index")
     {
-        const Gfloat expan{0.5f};
-        gsetcharexpan(expan);
+        const Gint index{1};
+        gsettextind(index);
 
-        Gfloat current{};
-        ginqcharexpan(&current, &status);
-        REQUIRE(current == expan);
-    }
-    SECTION("char spacing")
-    {
-        const Gfloat space{0.5f};
-        gsetcharspace(space);
-
-        Gfloat current{};
-        ginqcharspace(&current, &status);
-        REQUIRE(current == space);
-    }
-    SECTION("fill area interior style")
-    {
-        gsetfillstyle(GSOLID);
-
-        enum Gflinter current{};
-        ginqfillstyle(&current, &status);
-        REQUIRE(current == GSOLID);
-    }
-    SECTION("fill area interior style index")
-    {
-        gsetfillstyleind(2);
-
-        ginqfillstyleind(&value, &status);
-        REQUIRE(value == 2);
-    }
-    SECTION("fill area color index")
-    {
-        gsetfillcolorind(2);
-
-        ginqfillcolorind(&value, &status);
-        REQUIRE(value == 2);
-    }
-    SECTION("fill area index")
-    {
-        gsetfillind(1);
-
-        ginqfillind(&value, &status);
-        REQUIRE(value == 1);
-    }
-    SECTION("aspect source flags")
-    {
-        struct Gasfs asfs =
-        {
-            GBUNDLED,
-            GINDIVIDUAL,
-            GBUNDLED,
-            GINDIVIDUAL,
-            GBUNDLED,
-            GINDIVIDUAL,
-            GBUNDLED,
-            GINDIVIDUAL,
-            GBUNDLED,
-            GINDIVIDUAL,
-            GBUNDLED,
-            GINDIVIDUAL,
-            GBUNDLED,
-        };
-        gsetasf(&asfs);
-
-        struct Gasfs current{};
-        ginqasf(&current, &status);
-        REQUIRE(current.ln_type == asfs.ln_type);
-        REQUIRE(current.ln_width == asfs.ln_width);
-        REQUIRE(current.ln_color == asfs.ln_color);
-        REQUIRE(current.mk_type == asfs.mk_type);
-        REQUIRE(current.mk_size == asfs.mk_size);
-        REQUIRE(current.mk_color == asfs.mk_color);
-        REQUIRE(current.tx_fp == asfs.tx_fp);
-        REQUIRE(current.tx_exp == asfs.tx_exp);
-        REQUIRE(current.tx_space == asfs.tx_space);
-        REQUIRE(current.tx_color == asfs.tx_color);
-        REQUIRE(current.fl_inter == asfs.fl_inter);
-        REQUIRE(current.fl_style == asfs.fl_style);
-        REQUIRE(current.fl_color == asfs.fl_color);
-    }
-    SECTION("normalization transform")
-    {
-        gselntran(1);
-
-        Gint transform{0};
-        ginqcurrntrannum(&transform, &status);
-        REQUIRE(transform == 1);
+        ginqtextind(&value, &status);
+        REQUIRE(value == index);
     }
 
     REQUIRE(status == 0);
@@ -1193,6 +1193,15 @@ TEST_CASE("global attribute error handling", "[gks]")
         requireError(GERROR_INVALID_FILL_INDEX, GFN_SET_FILL_AREA_INDEX);
         Gint value{};
         ginqfillind(&value, &status);
+        REQUIRE(value == 1);
+    }
+    SECTION("fill area interior style index")
+    {
+        gsetfillstyleind(0);
+
+        requireError(GERROR_FILL_STYLE_ZERO, GFN_SET_FILL_AREA_INTERIOR_STYLE);
+        Gint value{};
+        ginqfillstyleind(&value, &status);
         REQUIRE(value == 1);
     }
     SECTION("line color")

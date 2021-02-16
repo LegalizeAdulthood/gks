@@ -794,6 +794,12 @@ void gsetfillstyle(Gflinter value)
 
 void gsetfillstyleind(Gint value)
 {
+    if (value == 0)
+    {
+        gerrorhand(GERROR_FILL_STYLE_ZERO, GFN_SET_FILL_AREA_INTERIOR_STYLE, g_errFile);
+        return;
+    }
+
     setGksValue(g_gksState.currentFillStyleIndex, value, GFN_SET_FILL_AREA_INTERIOR_STYLE);
 }
 
