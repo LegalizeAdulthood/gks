@@ -1144,6 +1144,21 @@ TEST_CASE("Set global attribute values", "[output]")
     gclosegks();
 }
 
+TEST_CASE("global attribute error handling", "[gks]")
+{
+    g_recordedErrors.clear();
+    gopengks(stderr, 0L);
+
+    SECTION("line type")
+    {
+        gsetlinetype(0);
+
+        requireError(GERROR_LINE_TYPE_ZERO, GFN_SET_LINETYPE);
+    }
+
+    gclosegks();
+}
+
 TEST_CASE("Workstation dependent attribute values", "[output]")
 {
     gopengks(stderr, 0L);

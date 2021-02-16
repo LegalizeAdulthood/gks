@@ -314,7 +314,7 @@ TEST_CASE("GKS closed", "[errors]")
     }
     SECTION("gsetlinetype")
     {
-        gsetlinetype(0);
+        gsetlinetype(1);
 
         requireGksOpen(GFN_SET_LINETYPE);
     }

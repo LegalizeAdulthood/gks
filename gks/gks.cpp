@@ -779,6 +779,12 @@ void gsetlineind(Gint value)
 
 void gsetlinetype(Gint value)
 {
+    if (value == 0)
+    {
+        gerrorhand(GERROR_LINE_TYPE_ZERO, GFN_SET_LINETYPE, g_errFile);
+        return;
+    }
+
     setGksValue(g_gksState.currentLineType, value, GFN_SET_LINETYPE);
 }
 
