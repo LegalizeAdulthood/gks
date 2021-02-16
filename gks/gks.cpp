@@ -936,6 +936,11 @@ void gclearws(Gint wsId, Gclrflag flag)
         gerrorhand(GERROR_NOT_STATE_WSOP_WSAC, GFN_CLEAR_WORKSTATION, g_errFile);
         return;
     }
+    if (wsId < 0 || wsId >= g_gksDescription.wsmax.open)
+    {
+        gerrorhand(GERROR_INVALID_WSID, GFN_CLEAR_WORKSTATION, g_errFile);
+        return;
+    }
 }
 
 void gdeactivatews(Gint wsId)
