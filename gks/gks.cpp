@@ -1146,8 +1146,16 @@ void ginqcolorindices(Gint wsId, Gint sizeIndices, Gint start, Gintlist *indices
 void ginqcolorrep(Gint wsId, Gint index, Gcobundl *value, Gint *errorStatus)
 {
     getWorkstationValue(value, g_wsState[0].colorTable[index], errorStatus,
-        [wsId] {
-            return wsIsOpen(wsId) ? GERROR_NONE : GERROR_WS_NOT_OPEN;
+        [wsId, index] {
+            if (!wsIsOpen(wsId))
+            {
+                return GERROR_WS_NOT_OPEN;
+            }
+            if (index < 0 || index > 1)
+            {
+                return GERROR_INVALID_COLOR_INDEX;
+            }
+            return GERROR_NONE;
         });
 }
 

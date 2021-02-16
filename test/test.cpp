@@ -1514,7 +1514,46 @@ TEST_CASE("workstation dependent attribute error handling", "[workstation]")
     Gint wsType{GWSTYPE_TEK4105};
     gopenws(wsId, connId, wsType);
 
-    SECTION("color representation bad index")
+    SECTION("get color indices")
+    {
+        Gint colors[16]{};
+        Gint numIndices{};
+        Gintlist indices{};
+        Gint status{-1};
+        ginqcolorindices(wsId + 1, numOf(colors), 0, &indices, &numIndices, &status);
+
+        REQUIRE(status == GERROR_WS_NOT_OPEN);
+    }
+    SECTION("get color representation")
+    {
+        Gint index{1};
+        Gcobundl value{};
+        Gint status{};
+
+        SECTION("workstation not open")
+        {
+            ginqcolorrep(wsId + 1, index, &value, &status);
+
+            REQUIRE(status == GERROR_WS_NOT_OPEN);
+        }
+        SECTION("bad color index")
+        {
+            ginqcolorrep(wsId, -1, &value, &status);
+
+            REQUIRE(status == GERROR_INVALID_COLOR_INDEX);
+        }
+    }
+    SECTION("get connection and type")
+    {
+        Gwsct ct{};
+        Gint buffSize{};
+        Gint numCts{};
+        Gint status{};
+        ginqwsconntype(wsId + 1, buffSize, &numCts, &ct, &status);
+
+        REQUIRE(status == GERROR_WS_NOT_OPEN);
+    }
+    SECTION("set color representation bad index")
     {
         struct Gcobundl rep{0.5f, 0.5f, 0.5f};
         gsetcolorrep(wsId, -1, &rep);
@@ -1528,27 +1567,7 @@ TEST_CASE("workstation dependent attribute error handling", "[workstation]")
         REQUIRE(current.green == 0.0f);
         REQUIRE(current.blue == 0.0f);
     }
-    SECTION("color indices")
-    {
-        Gint colors[16]{};
-        Gint numIndices{};
-        Gintlist indices{};
-        Gint status{-1};
-        ginqcolorindices(wsId + 1, numOf(colors), 0, &indices, &numIndices, &status);
-
-        REQUIRE(status == GERROR_WS_NOT_OPEN);
-    }
-    SECTION("connection and type")
-    {
-        Gwsct ct{};
-        Gint buffSize{};
-        Gint numCts{};
-        Gint status{};
-        ginqwsconntype(wsId + 1, buffSize, &numCts, &ct, &status);
-
-        REQUIRE(status == GERROR_WS_NOT_OPEN);
-    }
-    SECTION("viewport")
+    SECTION("set viewport")
     {
         Glimit viewport{0.0f, 1.0f, 0.0f, 1.0f};
 
@@ -1568,7 +1587,7 @@ TEST_CASE("workstation dependent attribute error handling", "[workstation]")
             requireError(GERROR_INVALID_RECT, GFN_SET_WORKSTATION_VIEWPORT);
         }
     }
-    SECTION("window")
+    SECTION("set window")
     {
         Glimit window{0.0f, 1.0f, 0.0f, 1.0f};
 
