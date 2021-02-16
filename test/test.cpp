@@ -1021,7 +1021,7 @@ TEST_CASE("Set global attribute values", "[output]")
     }
     SECTION("text index")
     {
-        const Gint index{3};
+        const Gint index{1};
         gsettextind(index);
 
         ginqtextind(&value, &status);
@@ -1255,6 +1255,15 @@ TEST_CASE("global attribute error handling", "[gks]")
         Gint value{};
         ginqcurrntrannum(&value, &status);
         REQUIRE(value == 0);
+    }
+    SECTION("text index")
+    {
+        gsettextind(0);
+
+        requireError(GERROR_INVALID_TEXT_INDEX, GFN_SET_TEXT_INDEX);
+        Gint value{};
+        ginqtextind(&value, &status);
+        REQUIRE(value == 1);
     }
 
     REQUIRE(status == GERROR_NONE);

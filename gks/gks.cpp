@@ -873,6 +873,12 @@ void gsettextfontprec(Gtxfp *fontPrec)
 
 void gsettextind(Gint value)
 {
+    if (value < 1 || value > 1)
+    {
+        gerrorhand(GERROR_INVALID_TEXT_INDEX, GFN_SET_TEXT_INDEX, g_errFile);
+        return;
+    }
+
     setGksValue(g_gksState.currentTextIndex, value, GFN_SET_TEXT_INDEX);
 }
 
