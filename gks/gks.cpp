@@ -941,6 +941,11 @@ void gclearws(Gint wsId, Gclrflag flag)
         gerrorhand(GERROR_INVALID_WSID, GFN_CLEAR_WORKSTATION, g_errFile);
         return;
     }
+    if (!wsIsOpen(wsId))
+    {
+        gerrorhand(GERROR_WS_NOT_OPEN, GFN_CLEAR_WORKSTATION, g_errFile);
+        return;
+    }
 }
 
 void gdeactivatews(Gint wsId)
@@ -974,6 +979,16 @@ void gupdatews(Gint wsId, Gregen flag)
     if (g_opState == GGKCL || g_opState == GGKOP)
     {
         gerrorhand(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_UPDATE_WORKSTATION, g_errFile);
+        return;
+    }
+    if (wsId < 0 || wsId >= g_gksDescription.wsmax.open)
+    {
+        gerrorhand(GERROR_INVALID_WSID, GFN_UPDATE_WORKSTATION, g_errFile);
+        return;
+    }
+    if (!wsIsOpen(wsId))
+    {
+        gerrorhand(GERROR_WS_NOT_OPEN, GFN_UPDATE_WORKSTATION, g_errFile);
         return;
     }
 }

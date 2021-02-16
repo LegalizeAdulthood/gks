@@ -559,42 +559,42 @@ TEST_CASE("clear workstation error handling", "[workstation]")
     REQUIRE(getGksOpState() == GGKCL);
 }
 
-//TEST_CASE("update workstation error handling", "[workstation]")
-//{
-//    REQUIRE(getGksOpState() == GGKCL);
-//    g_recordedErrors.clear();
-//    gopengks(stderr, 0L);
-//    Gint wsId{};
-//    const Gchar *connId{"tek4105"};
-//    Gwstype wsType{GWSTYPE_TEK4105};
-//    gopenws(wsId, connId, wsType);
-//    REQUIRE(getGksOpState() == GWSOP);
-//    REQUIRE(g_recordedErrors.empty());
-//
-//    SECTION("workstation id negative")
-//    {
-//        Gint badWsId{-1};
-//        gupdatews(badWsId, GPERFORM);
-//
-//        requireError(GERROR_INVALID_WSID, GFN_DEACTIVATE_WORKSTATION);
-//    }
-//    SECTION("workstation id too large")
-//    {
-//        const Gint maxOpenWorkstations{1};
-//        Gint badWsId{maxOpenWorkstations};
-//        gupdatews(badWsId, GPERFORM);
-//
-//        requireError(GERROR_INVALID_WSID, GFN_DEACTIVATE_WORKSTATION);
-//    }
-//    SECTION("workstation not open")
-//    {
-//        // This test requires multiple workstations to be open
-//    }
-//
-//    gclosews(wsId);
-//    gclosegks();
-//    REQUIRE(getGksOpState() == GGKCL);
-//}
+TEST_CASE("update workstation error handling", "[workstation]")
+{
+    REQUIRE(getGksOpState() == GGKCL);
+    g_recordedErrors.clear();
+    gopengks(stderr, 0L);
+    Gint wsId{};
+    const Gchar *connId{"tek4105"};
+    Gwstype wsType{GWSTYPE_TEK4105};
+    gopenws(wsId, connId, wsType);
+    REQUIRE(getGksOpState() == GWSOP);
+    REQUIRE(g_recordedErrors.empty());
+
+    SECTION("workstation id negative")
+    {
+        Gint badWsId{-1};
+        gupdatews(badWsId, GPERFORM);
+
+        requireError(GERROR_INVALID_WSID, GFN_UPDATE_WORKSTATION);
+    }
+    SECTION("workstation id too large")
+    {
+        const Gint maxOpenWorkstations{1};
+        Gint badWsId{maxOpenWorkstations};
+        gupdatews(badWsId, GPERFORM);
+
+        requireError(GERROR_INVALID_WSID, GFN_UPDATE_WORKSTATION);
+    }
+    SECTION("workstation not open")
+    {
+        // This test requires multiple workstations to be open
+    }
+
+    gclosews(wsId);
+    gclosegks();
+    REQUIRE(getGksOpState() == GGKCL);
+}
 
 TEST_CASE("Output primitives", "[output]")
 {
