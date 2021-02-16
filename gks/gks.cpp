@@ -353,11 +353,17 @@ namespace
 {
 
 template <typename T>
-void inquireGKSValue(T *dest, const T &source, Gint *errorStatus)
+void inquireGKSValue(T *dest, const T &source, Gint *errorStatus,
+    const std::function<GError()> &check = [] { return GERROR_NONE; })
 {
     if (g_opState == GGKCL)
     {
         *errorStatus = GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP;
+        return;
+    }
+    if (const GError error = check())
+    {
+        *errorStatus = error;
         return;
     }
 
@@ -449,6 +455,12 @@ void setWorkstationValue(T &dest, const T *source, GFunction fn,
     }
 
     dest = *source;
+}
+
+inline bool wsTypeIsValid(Gwstype wsType)
+{
+    const Gwstype *const end = std::cend(g_wsTypes);
+    return std::find(std::cbegin(g_wsTypes), end, wsType) != end;
 }
 
 inline bool wsIsOpen(Gint wsId)
@@ -716,7 +728,10 @@ void ginqcolorfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gcofac *valu
 
 void ginqdisplaysize(Gwstype wsType, Gdspsize *value, Gint *errorStatus)
 {
-    inquireGKSValue(value, g_wsDesc[wsType-1].displaySpaceSize, errorStatus);
+    inquireGKSValue(value, g_wsDesc[wsType-1].displaySpaceSize, errorStatus,
+        [wsType] {
+            return !wsTypeIsValid(wsType) ? GERROR_INVALID_WSTYPE : GERROR_NONE;
+        });
 }
 
 void ginqfillfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gflfac *value, Gint *errorStatus)

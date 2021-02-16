@@ -1172,7 +1172,7 @@ TEST_CASE("global attribute error handling", "[gks]")
 {
     g_recordedErrors.clear();
     gopengks(stderr, 0L);
-    Gint status{GERROR_NONE};
+    Gint status{-1};
 
     SECTION("character expansion factor")
     {
@@ -1181,6 +1181,7 @@ TEST_CASE("global attribute error handling", "[gks]")
         requireError(GERROR_CHAR_EXPANSION_NOT_POSITIVE, GFN_SET_CHARACTER_EXPANSION_FACTOR);
         Gfloat value{};
         ginqcharexpan(&value, &status);
+        REQUIRE(status == GERROR_NONE);
         REQUIRE(value == 1.0f);
     }
     SECTION("character height")
@@ -1197,6 +1198,7 @@ TEST_CASE("global attribute error handling", "[gks]")
         requireError(GERROR_CHAR_HEIGHT_NOT_POSITIVE, GFN_SET_CHARACTER_HEIGHT);
         Gfloat value{-1.0f};
         ginqcharheight(&value, &status);
+        REQUIRE(status == GERROR_NONE);
         REQUIRE(value == 0.01f);
     }
     SECTION("character up vector")
@@ -1210,6 +1212,13 @@ TEST_CASE("global attribute error handling", "[gks]")
         REQUIRE(value.x == 0.0f);
         REQUIRE(value.y == 1.0f);
     }
+    SECTION("display space size")
+    {
+        Gdspsize value{};
+        ginqdisplaysize(GWSTYPE_TEK4105 + 1, &value, &status);
+
+        REQUIRE(status == GERROR_INVALID_WSTYPE);
+    }
     SECTION("fill area color")
     {
         gsetfillcolorind(-1);
@@ -1217,6 +1226,7 @@ TEST_CASE("global attribute error handling", "[gks]")
         requireError(GERROR_INVALID_COLOR_INDEX, GFN_SET_FILL_AREA_COLOR_INDEX);
         Gint value{};
         ginqfillcolorind(&value, &status);
+        REQUIRE(status == GERROR_NONE);
         REQUIRE(value == 1);
     }
     SECTION("fill area index")
@@ -1226,6 +1236,7 @@ TEST_CASE("global attribute error handling", "[gks]")
         requireError(GERROR_INVALID_FILL_INDEX, GFN_SET_FILL_AREA_INDEX);
         Gint value{};
         ginqfillind(&value, &status);
+        REQUIRE(status == GERROR_NONE);
         REQUIRE(value == 1);
     }
     SECTION("fill area interior style index")
@@ -1235,6 +1246,7 @@ TEST_CASE("global attribute error handling", "[gks]")
         requireError(GERROR_FILL_STYLE_ZERO, GFN_SET_FILL_AREA_INTERIOR_STYLE);
         Gint value{};
         ginqfillstyleind(&value, &status);
+        REQUIRE(status == GERROR_NONE);
         REQUIRE(value == 1);
     }
     SECTION("line color")
@@ -1251,6 +1263,7 @@ TEST_CASE("global attribute error handling", "[gks]")
         requireError(GERROR_INVALID_COLOR_INDEX, GFN_SET_POLYLINE_COLOR_INDEX);
         Gint value{};
         ginqlinecolorind(&value, &status);
+        REQUIRE(status == GERROR_NONE);
         REQUIRE(value == 1);
     }
     SECTION("line index")
@@ -1260,6 +1273,7 @@ TEST_CASE("global attribute error handling", "[gks]")
         requireError(GERROR_INVALID_LINE_INDEX, GFN_SET_POLYLINE_INDEX);
         Gint value{};
         ginqlineind(&value, &status);
+        REQUIRE(status == GERROR_NONE);
         REQUIRE(value == 1);
     }
     SECTION("line type")
@@ -1269,6 +1283,7 @@ TEST_CASE("global attribute error handling", "[gks]")
         requireError(GERROR_LINE_TYPE_ZERO, GFN_SET_LINETYPE);
         Gint value{};
         ginqlinetype(&value, &status);
+        REQUIRE(status == GERROR_NONE);
         REQUIRE(value == 1);
     }
     SECTION("marker color")
@@ -1285,6 +1300,7 @@ TEST_CASE("global attribute error handling", "[gks]")
         requireError(GERROR_INVALID_COLOR_INDEX, GFN_SET_POLYMARKER_COLOR_INDEX);
         Gint value{};
         ginqmarkercolorind(&value, &status);
+        REQUIRE(status == GERROR_NONE);
         REQUIRE(value == 1);
     }
     SECTION("marker index")
@@ -1294,6 +1310,7 @@ TEST_CASE("global attribute error handling", "[gks]")
         requireError(GERROR_INVALID_MARKER_INDEX, GFN_SET_POLYMARKER_INDEX);
         Gint value{};
         ginqmarkerind(&value, &status);
+        REQUIRE(status == GERROR_NONE);
         REQUIRE(value == 1);
     }
     SECTION("marker size")
@@ -1303,6 +1320,7 @@ TEST_CASE("global attribute error handling", "[gks]")
         requireError(GERROR_NEGATIVE_MARKER_SIZE, GFN_SET_MARKER_SIZE_SCALE_FACTOR);
         Gfloat value{};
         ginqmarkersize(&value, &status);
+        REQUIRE(status == GERROR_NONE);
         REQUIRE(value == 1.0f);
     }
     SECTION("marker type")
@@ -1312,6 +1330,7 @@ TEST_CASE("global attribute error handling", "[gks]")
         requireError(GERROR_MARKER_TYPE_ZERO, GFN_SET_MARKER_TYPE);
         Gint value{};
         ginqmarkertype(&value, &status);
+        REQUIRE(status == GERROR_NONE);
         REQUIRE(value == GMK_STAR);
     }
     SECTION("normalization transform")
@@ -1332,6 +1351,7 @@ TEST_CASE("global attribute error handling", "[gks]")
         requireError(GERROR_INVALID_TRAN_NUM, GFN_SELECT_NORMALIZATION_TRANSFORMATION);
         Gint value{};
         ginqcurrntrannum(&value, &status);
+        REQUIRE(status == GERROR_NONE);
         REQUIRE(value == 0);
     }
     SECTION("text color")
@@ -1341,6 +1361,7 @@ TEST_CASE("global attribute error handling", "[gks]")
         requireError(GERROR_INVALID_COLOR_INDEX, GFN_SET_TEXT_COLOR_INDEX);
         Gint value{};
         ginqtextcolorind(&value, &status);
+        REQUIRE(status == GERROR_NONE);
         REQUIRE(value == 1);
     }
     SECTION("text font and precision")
@@ -1351,6 +1372,7 @@ TEST_CASE("global attribute error handling", "[gks]")
         requireError(GERROR_TEXT_FONT_ZERO, GFN_SET_TEXT_FONT_AND_PRECISION);
         Gtxfp value{};
         ginqtextfontprec(&value, &status);
+        REQUIRE(status == GERROR_NONE);
         REQUIRE(value.font == 1);
     }
     SECTION("text index")
@@ -1360,6 +1382,7 @@ TEST_CASE("global attribute error handling", "[gks]")
         requireError(GERROR_INVALID_TEXT_INDEX, GFN_SET_TEXT_INDEX);
         Gint value{};
         ginqtextind(&value, &status);
+        REQUIRE(status == GERROR_NONE);
         REQUIRE(value == 1);
     }
     SECTION("viewport")
@@ -1438,7 +1461,6 @@ TEST_CASE("global attribute error handling", "[gks]")
         }
     }
 
-    REQUIRE(status == GERROR_NONE);
     gclosegks();
 }
 
