@@ -286,6 +286,16 @@ typedef struct Glnfac
     Gint predefined;
 } Glnfac;
 
+typedef struct Gmkfac
+{
+    Gintlist types;
+    Gint sizes;
+    Gfloat nom_size;
+    Gfloat min_size;
+    Gfloat max_size;
+    Gint predefined;
+} Gmkfac;
+
 typedef struct Grect
 {
     Gpoint ul;
@@ -382,6 +392,7 @@ void ginqcolorfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gcofac *valu
 void ginqdisplaysize(Gwstype wsType, Gdspsize *value, Gint *errorStatus);
 void ginqfillfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gflfac *value, Gint *errorStatus);
 void ginqlinefacil(Gwstype wsType, Gint buffSize, Gint *numLineTypes, Glnfac *value, Gint *errorStatus);
+void ginqmarkerfacil(Gwstype wsType, Gint buffSIze, Gint *numMarkerTypes, Gmkfac *value, Gint *errorStatus);
 
 void gselntran(Gint value);
 void gsetasf(Gasfs *value);

@@ -1474,6 +1474,15 @@ TEST_CASE("global attribute error handling", "[gks]")
 
             REQUIRE(status == GERROR_INVALID_WSTYPE);
         }
+        SECTION("marker facilities")
+        {
+            Gint markerTypes[10]{};
+            Gint numMarkerTypes{};
+            Gmkfac value{};
+            ginqmarkerfacil(badWsType, numOf(markerTypes), &numMarkerTypes, &value, &status);
+
+            REQUIRE(status == GERROR_INVALID_WSTYPE);
+        }
     }
 
     gclosegks();

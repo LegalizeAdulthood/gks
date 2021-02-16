@@ -184,6 +184,7 @@ struct GWSDesc
     //  - line type
     //  - line width scale factor
     //  - line color index
+
     // num available marker types
     // list of available marker types
     // num available marker sizes
@@ -191,6 +192,8 @@ struct GWSDesc
     // minimum marker size
     // maximum marker size
     // num predefined marker bundles
+    Gmkfac markerFacilities;
+
     // marker bundles
     //  - marker type
     //  - marker size scale factor
@@ -276,6 +279,15 @@ static Gint g_availLineTypes[] =
     GLN_SOLID
 };
 
+static Gint g_availMarkerTypes[] =
+{
+    GMK_DOT,
+    GMK_PLUS,
+    GMK_STAR,
+    GMK_CIRCLE,
+    GMK_DIAGONAL_CROSS
+};
+
 static const GWSDesc g_wsDesc[MAX_WS_TYPES] =
 {
     // Tektronix 4105
@@ -293,8 +305,16 @@ static const GWSDesc g_wsDesc[MAX_WS_TYPES] =
             1.0f,
             1
         },
+        {
+            { numOf(g_availMarkerTypes), g_availMarkerTypes },
+            1,
+            1.0f,
+            1.0f,
+            1.0f,
+            1
+        },
         numOf(g_availFillAreaIntStyles), g_availFillAreaIntStyles,
-        { 0, NULL },
+        { 0, nullptr },
         1,
         { 16, GCOLOR, 16 }
     }
@@ -764,17 +784,39 @@ void ginqlinefacil(Gwstype wsType, Gint buffSize, Gint *numLineTypes, Glnfac *va
 {
     inquireGKSValue(errorStatus,
         [wsType, numLineTypes, value] {
-            const GWSDesc *desc = &g_wsDesc[wsType-1];
-            *numLineTypes = desc->lineFacilities.types.number;
-            for (int i = 0; i < desc->lineFacilities.types.number; ++i)
+            const GWSDesc &desc = g_wsDesc[wsType-1];
+            *numLineTypes = desc.lineFacilities.types.number;
+            for (int i = 0; i < desc.lineFacilities.types.number; ++i)
             {
-                value->types.integers[i] = desc->lineFacilities.types.integers[i];
+                value->types.integers[i] = desc.lineFacilities.types.integers[i];
             }
-            value->widths = desc->lineFacilities.widths;
-            value->nom_width = desc->lineFacilities.nom_width;
-            value->min_width = desc->lineFacilities.min_width;
-            value->max_width = desc->lineFacilities.max_width;
-            value->predefined = desc->lineFacilities.predefined;
+            value->widths = desc.lineFacilities.widths;
+            value->nom_width = desc.lineFacilities.nom_width;
+            value->min_width = desc.lineFacilities.min_width;
+            value->max_width = desc.lineFacilities.max_width;
+            value->predefined = desc.lineFacilities.predefined;
+        },
+        [wsType] {
+            return !wsTypeIsValid(wsType) ? GERROR_INVALID_WSTYPE : GERROR_NONE;
+        });
+}
+
+void ginqmarkerfacil(Gwstype wsType, Gint buffSIze, Gint *numMarkerTypes, Gmkfac *value, Gint *errorStatus)
+{
+    inquireGKSValue(errorStatus,
+        [wsType, numMarkerTypes, value] {
+            const GWSDesc &desc = g_wsDesc[wsType-1];
+            const Gmkfac &facil = desc.markerFacilities;
+            *numMarkerTypes = facil.types.number;
+            for (int i = 0; i < facil.types.number; ++i)
+            {
+                value->types.integers[i] = facil.types.integers[i];
+            }
+            value->sizes = facil.sizes;
+            value->nom_size = facil.nom_size;
+            value->min_size = facil.min_size;
+            value->max_size = facil.max_size;
+            value->predefined = facil.predefined;
         },
         [wsType] {
             return !wsTypeIsValid(wsType) ? GERROR_INVALID_WSTYPE : GERROR_NONE;
