@@ -14,6 +14,7 @@ TEST_CASE("workstation active")
     Gint wsType{GWSTYPE_TEK4105};
     gopenws(wsId, connId, wsType);
     gactivatews(wsId);
+    REQUIRE(getGksOpState() == GWSAC);
 
     SECTION("gopengks")
     {
@@ -30,6 +31,7 @@ TEST_CASE("workstation active")
 
     REQUIRE(getGksOpState() == GWSAC);
 
+    gdeactivatews(wsId);
     gclosews(wsId);
     gclosegks();
 }

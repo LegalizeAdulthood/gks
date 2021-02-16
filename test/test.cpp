@@ -41,7 +41,7 @@ TEST_CASE("Error file must be non-NULL", "[gks]")
 
 TEST_CASE("Error handling", "[gks]")
 {
-    gerrorhand(1, 1, stderr);
+    gerrorhand(GERROR_NOT_STATE_GKCL, GFN_OPEN_GKS, stderr);
 }
 
 TEST_CASE("GKS state list", "[gks]")
@@ -164,7 +164,7 @@ TEST_CASE("GKS state list", "[gks]")
     gclosegks();
 }
 
-TEST_CASE("Workstation description table", "[workstation]")
+TEST_CASE("workstation description table", "[workstation]")
 {
     gopengks(stderr, 0L);
     Gint status{-1};
@@ -208,7 +208,7 @@ TEST_CASE("Workstation description table", "[workstation]")
     gclosegks();
 }
 
-TEST_CASE("Set clipping indicator", "[gks]")
+TEST_CASE("set clipping indicator", "[gks]")
 {
     gopengks(stderr, 0L);
 
@@ -222,53 +222,7 @@ TEST_CASE("Set clipping indicator", "[gks]")
     gclosegks();
 }
 
-TEST_CASE("Open workstation error handling", "[workstation]")
-{
-    g_recordedErrors.clear();
-    gopengks(stderr, 0L);
-    Gint wsId{};
-    const Gchar *connId{"tek4105"};
-    Gwstype wsType{GWSTYPE_TEK4105};
-
-    SECTION("workstation id negative")
-    {
-        wsId = -1;
-        gopenws(wsId, connId, wsType);
-
-        requireError(GERROR_INVALID_WSID, GFN_OPEN_WORKSTATION);
-        REQUIRE(getGksOpState() == GGKOP);
-    }
-    SECTION("workstation id too large")
-    {
-        const Gint maxOpenWorkstations{1};
-        wsId = maxOpenWorkstations;
-        gopenws(wsId, connId, wsType);
-
-        requireError(GERROR_INVALID_WSID, GFN_OPEN_WORKSTATION);
-        REQUIRE(getGksOpState() == GGKOP);
-    }
-    SECTION("invalid workstation type")
-    {
-        ++wsType;
-        gopenws(wsId, connId, wsType);
-
-        requireError(GERROR_INVALID_WSTYPE, GFN_OPEN_WORKSTATION);
-        REQUIRE(getGksOpState() == GGKOP);
-    } 
-    SECTION("workstation already open")
-    {
-        gopenws(wsId, connId, wsType);
-        REQUIRE(getGksOpState() == GWSOP);
-
-        gopenws(wsId, connId, wsType);
-
-        requireError(GERROR_WS_IS_OPEN, GFN_OPEN_WORKSTATION);
-    }
-
-    gclosegks();
-}
-
-TEST_CASE("Open workstation", "[workstation]")
+TEST_CASE("open workstation", "[workstation]")
 {
     gopengks(stderr, 0L);
     Gint wsId{0};
@@ -371,6 +325,138 @@ TEST_CASE("Open workstation", "[workstation]")
         REQUIRE(transform.current.w.ymax == ymax);
     }
 
+    gclosews(wsId);
+    gclosegks();
+}
+
+TEST_CASE("open workstation error handling", "[workstation]")
+{
+    g_recordedErrors.clear();
+    gopengks(stderr, 0L);
+    REQUIRE(getGksOpState() == GGKOP);
+    Gint wsId{};
+    const Gchar *connId{"tek4105"};
+    Gwstype wsType{GWSTYPE_TEK4105};
+
+    SECTION("workstation id negative")
+    {
+        wsId = -1;
+        gopenws(wsId, connId, wsType);
+
+        requireError(GERROR_INVALID_WSID, GFN_OPEN_WORKSTATION);
+    }
+    SECTION("workstation id too large")
+    {
+        const Gint maxOpenWorkstations{1};
+        wsId = maxOpenWorkstations;
+        gopenws(wsId, connId, wsType);
+
+        requireError(GERROR_INVALID_WSID, GFN_OPEN_WORKSTATION);
+    }
+    SECTION("invalid workstation type")
+    {
+        ++wsType;
+        gopenws(wsId, connId, wsType);
+
+        requireError(GERROR_INVALID_WSTYPE, GFN_OPEN_WORKSTATION);
+    } 
+    SECTION("workstation already open")
+    {
+        gopenws(wsId, connId, wsType);
+        REQUIRE(getGksOpState() == GWSOP);
+
+        gopenws(wsId, connId, wsType);
+
+        requireError(GERROR_WS_IS_OPEN, GFN_OPEN_WORKSTATION);
+
+        gclosews(wsId);
+    }
+
+    REQUIRE(getGksOpState() == GGKOP);
+
+    gclosegks();
+}
+
+TEST_CASE("close workstation error handling", "[workstation]")
+{
+    g_recordedErrors.clear();
+    gopengks(stderr, 0L);
+    Gint wsId{};
+    const Gchar *connId{"tek4105"};
+    Gwstype wsType{GWSTYPE_TEK4105};
+    gopenws(wsId, connId, wsType);
+    REQUIRE(getGksOpState() == GWSOP);
+    REQUIRE(g_recordedErrors.empty());
+
+    SECTION("workstation id negative")
+    {
+        Gint badWsId{-1};
+        gclosews(badWsId);
+
+        requireError(GERROR_INVALID_WSID, GFN_CLOSE_WORKSTATION);
+    }
+    SECTION("workstation id too large")
+    {
+        const Gint maxOpenWorkstations{1};
+        Gint badWsId{maxOpenWorkstations};
+        gclosews(badWsId);
+
+        requireError(GERROR_INVALID_WSID, GFN_CLOSE_WORKSTATION);
+    }
+    SECTION("workstation is active")
+    {
+        gactivatews(wsId);
+
+        gclosews(wsId);
+
+        requireError(GERROR_WS_IS_ACTIVE, GFN_CLOSE_WORKSTATION);
+
+        gdeactivatews(wsId);
+    }
+
+    REQUIRE(getGksOpState() == GWSOP);
+    gclosews(wsId);
+    gclosegks();
+}
+
+TEST_CASE("activate workstation error handling", "[workstation]")
+{
+    g_recordedErrors.clear();
+    gopengks(stderr, 0L);
+    Gint wsId{};
+    const Gchar *connId{"tek4105"};
+    Gwstype wsType{GWSTYPE_TEK4105};
+    gopenws(wsId, connId, wsType);
+    REQUIRE(getGksOpState() == GWSOP);
+    REQUIRE(g_recordedErrors.empty());
+
+    SECTION("workstation id negative")
+    {
+        Gint badWsId{-1};
+        gactivatews(badWsId);
+
+        requireError(GERROR_INVALID_WSID, GFN_ACTIVATE_WORKSTATION);
+    }
+    SECTION("workstation id too large")
+    {
+        const Gint maxOpenWorkstations{1};
+        Gint badWsId{maxOpenWorkstations};
+        gactivatews(badWsId);
+
+        requireError(GERROR_INVALID_WSID, GFN_ACTIVATE_WORKSTATION);
+    }
+    SECTION("workstation is active")
+    {
+        gactivatews(wsId);
+
+        gactivatews(wsId);
+
+        requireError(GERROR_WS_IS_ACTIVE, GFN_ACTIVATE_WORKSTATION);
+
+        gdeactivatews(wsId);
+    }
+
+    REQUIRE(getGksOpState() == GWSOP);
     gclosews(wsId);
     gclosegks();
 }

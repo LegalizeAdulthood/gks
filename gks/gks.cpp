@@ -47,9 +47,12 @@ static GGKSDescription g_gksDescription =
 
 struct GGKSState
 {
+    Gint numOpenWs;
     Gint openWs[MAX_OPEN_WS];
+    Gint numActiveWs;
     Gint activeWs[MAX_ACTIVE_WS];
     Gint currentTransform;
+    Gint numTransforms;
     Gtran transforms[MAX_NUM_TRANSFORMS];
     Gclip clipping;
     // polyline
@@ -88,8 +91,11 @@ struct GGKSState
 
 static GGKSState g_initialGksState =
 {
+    0,
     {-1},
+    0,
     {-1},
+    0,
     0,
     {
         {
@@ -421,6 +427,18 @@ void setWorkstationValue(T &dest, const T *source, GFunction fn)
     dest = *source;
 }
 
+inline bool wsIsOpen(Gint wsId)
+{
+    const Gint *const end = std::cend(g_gksState.openWs);
+    return std::find(std::cbegin(g_gksState.openWs), end, wsId) != end;
+}
+
+inline bool wsIsActive(Gint wsId)
+{
+    const Gint *const last = std::cend(g_gksState.activeWs);
+    return std::find(std::cbegin(g_gksState.activeWs), last, wsId) != last;
+}
+
 }
 
 void gerrorlog(Gint errNum, Gint funcName, Gfile *errFile)
@@ -454,7 +472,7 @@ void gopengks(Gfile *errfile, Glong memory)
     g_gksState = g_initialGksState;
 }
 
-void gclosegks(void)
+void gclosegks()
 {
     if (g_opState != GGKOP)
     {
@@ -821,11 +839,6 @@ void gopenws(Gint wsId, const Gconn *connId, Gwstype wsType)
         gerrorhand(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_OPEN_WORKSTATION, g_errFile);
         return;
     }
-    if (wsId < 0 || wsId >= g_gksDescription.wsmax.open)
-    {
-        gerrorhand(GERROR_INVALID_WSID, GFN_OPEN_WORKSTATION, g_errFile);
-        return;
-    }
     {
         const Gwstype *const end = &g_gksDescription.wsTypes[g_gksDescription.numWsTypes];
         if (std::find(&g_gksDescription.wsTypes[0], end, wsType) == end)
@@ -834,21 +847,25 @@ void gopenws(Gint wsId, const Gconn *connId, Gwstype wsType)
             return;
         }
     }
+    if (wsId < 0 || wsId >= g_gksDescription.wsmax.open)
     {
-        Gint *last = std::end(g_gksState.openWs);
-        if (std::find(std::begin(g_gksState.openWs), last, wsId) != last)
-        {
-            gerrorhand(GERROR_WS_IS_OPEN, GFN_OPEN_WORKSTATION, g_errFile);
-            return;
-        }
+        gerrorhand(GERROR_INVALID_WSID, GFN_OPEN_WORKSTATION, g_errFile);
+        return;
+    }
+    if (wsIsOpen(wsId))
+    {
+        gerrorhand(GERROR_WS_IS_OPEN, GFN_OPEN_WORKSTATION, g_errFile);
+        return;
     }
 
     g_opState = GWSOP;
-    g_gksState.openWs[0] = wsId;
-    g_wsState[0] = g_initialWsState;
-    g_wsState[0].id = wsId;
-    g_wsState[0].connId = connId;
-    g_wsState[0].type = wsType;
+    const int i = g_gksState.numOpenWs;
+    g_gksState.openWs[i] = wsId;
+    g_wsState[i] = g_initialWsState;
+    g_wsState[i].id = wsId;
+    g_wsState[i].connId = connId;
+    g_wsState[i].type = wsType;
+    ++g_gksState.numOpenWs;
 }
 
 void gclosews(Gint wsId)
@@ -858,9 +875,30 @@ void gclosews(Gint wsId)
         gerrorhand(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_CLOSE_WORKSTATION, g_errFile);
         return;
     }
+    if (wsId < 0 || wsId >= g_gksDescription.wsmax.open)
+    {
+        gerrorhand(GERROR_INVALID_WSID, GFN_CLOSE_WORKSTATION, g_errFile);
+        return;
+    }
+    if (wsIsActive(wsId))
+    {
+        gerrorhand(GERROR_WS_IS_ACTIVE, GFN_CLOSE_WORKSTATION, g_errFile);
+        return;
+    }
+    if (!wsIsOpen(wsId))
+    {
+        gerrorhand(GERROR_WS_NOT_OPEN, GFN_CLOSE_WORKSTATION, g_errFile);
+        return;
+    }
 
-    g_opState = GGKOP;
-    g_gksState.openWs[0] = -1;
+    std::stable_partition(&g_gksState.openWs[0], &g_gksState.openWs[g_gksState.numOpenWs],
+        [wsId](Gint value) { return value != wsId; });
+    --g_gksState.numOpenWs;
+    g_gksState.openWs[g_gksState.numOpenWs] = -1;
+    if (g_gksState.numOpenWs == 0)
+    {
+        g_opState = GGKOP;
+    }
 }
 
 void gactivatews(Gint wsId)
@@ -870,9 +908,25 @@ void gactivatews(Gint wsId)
         gerrorhand(GERROR_NOT_STATE_WSOP_WSAC, GFN_ACTIVATE_WORKSTATION, g_errFile);
         return;
     }
+    if (wsId < 0 || wsId >= g_gksDescription.wsmax.open)
+    {
+        gerrorhand(GERROR_INVALID_WSID, GFN_ACTIVATE_WORKSTATION, g_errFile);
+        return;
+    }
+    if (!wsIsOpen(wsId))
+    {
+        gerrorhand(GERROR_WS_NOT_OPEN, GFN_ACTIVATE_WORKSTATION, g_errFile);
+        return;
+    }
+    if (wsIsActive(wsId))
+    {
+        gerrorhand(GERROR_WS_IS_ACTIVE, GFN_ACTIVATE_WORKSTATION, g_errFile);
+        return;
+    }
 
+    g_gksState.activeWs[g_gksState.numActiveWs] = wsId;
+    ++g_gksState.numActiveWs;
     g_opState = GWSAC;
-    g_gksState.activeWs[0] = wsId;
 }
 
 void gclearws(Gint wsId, Gclrflag flag)
@@ -892,9 +946,12 @@ void gdeactivatews(Gint wsId)
         return;
     }
 
-    g_opState = GWSOP;
-
-    g_gksState.activeWs[0] = -1;
+    --g_gksState.numActiveWs;
+    g_gksState.activeWs[g_gksState.numActiveWs] = -1;
+    if (g_gksState.numActiveWs == 0)
+    {
+        g_opState = GWSOP;
+    }
 }
 
 void gupdatews(Gint wsId, Gregen flag)

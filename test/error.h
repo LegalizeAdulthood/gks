@@ -9,8 +9,8 @@
 
 struct Error
 {
-    Gint errNum;
-    Gint function;
+    GError errNum;
+    GFunction function;
 };
 
 extern std::vector<Error> g_recordedErrors;
