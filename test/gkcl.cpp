@@ -454,11 +454,21 @@ TEST_CASE("GKS closed", "[errors]")
         Gint wsId{0};
         Gint status{};
 
+        SECTION("ginqcolorindices")
+        {
+            Gint index{1};
+            Gcobundl value{};
+            ginqcolorrep(wsId, index, &value, &status);
+
+            REQUIRE(status == GERROR_NOT_STATE_WSOP_WSAC_SGOP);
+        }
         SECTION("ginqcolorrep")
         {
             Gint index{1};
             Gcobundl value{};
             ginqcolorrep(wsId, index, &value, &status);
+
+            REQUIRE(status == GERROR_NOT_STATE_WSOP_WSAC_SGOP);
         }
         SECTION("ginqtextextent")
         {
@@ -468,13 +478,22 @@ TEST_CASE("GKS closed", "[errors]")
 
             REQUIRE(status == GERROR_NOT_STATE_WSOP_WSAC_SGOP);
         }
+        SECTION("ginqwsconntype")
+        {
+            Gwsct ct{};
+            Gint buffSize{};
+            Gint numCts{};
+            ginqwsconntype(wsId + 1, buffSize, &numCts, &ct, &status);
+
+            REQUIRE(status == GERROR_NOT_STATE_WSOP_WSAC_SGOP);
+        }
         SECTION("ginqwstran")
         {
             struct Gwsti transform{};
             ginqwstran(wsId, &transform, &status);
-        }
 
-        REQUIRE(status == GERROR_NOT_STATE_WSOP_WSAC_SGOP);
+            REQUIRE(status == GERROR_NOT_STATE_WSOP_WSAC_SGOP);
+        }
     }
 
     SECTION("gsetcolorrep")

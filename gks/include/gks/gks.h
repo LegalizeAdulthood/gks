@@ -416,6 +416,7 @@ void gclearws(Gint wsId, Gclrflag flag);
 void gdeactivatews(Gint wsId);
 void gupdatews(Gint wsId, Gregen flag);
 
+void ginqcolorindices(Gint wsId, Gint sizeIndices, Gint start, Gintlist *indices, Gint *numIndices, Gint *errorStatus);
 void ginqcolorrep(Gint wsId, Gint index, Gcobundl *value, Gint *errorStatus);
 void ginqtextextent(Gint wsId, Gpoint *pos, const Gchar *text, Gextent *value, Gint *errorStatus);
 void ginqwsconntype(Gint wsId, Gint buffSize, Gint *ctSize, Gwsct *ct, Gint *errorStatus);

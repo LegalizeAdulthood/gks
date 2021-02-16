@@ -1460,6 +1460,19 @@ TEST_CASE("initial workstation dependent attribute values", "[workstation]")
         REQUIRE(ct.conn == connId);
         REQUIRE(ct.type == wsType);
     }
+    SECTION("color indices")
+    {
+        Gint colors[16]{-1};
+        Gint numIndices{};
+        Gintlist indices{numOf(colors), colors};
+        Gint status{-1};
+        ginqcolorindices(wsId, numOf(colors), 0, &indices, &numIndices, &status);
+
+        REQUIRE(status == GERROR_NONE);
+        REQUIRE(numIndices == 2);
+        REQUIRE(colors[0] == 0);
+        REQUIRE(colors[1] == 1);
+    }
 
     gclosews(wsId);
     gclosegks();
@@ -1514,6 +1527,16 @@ TEST_CASE("workstation dependent attribute error handling", "[workstation]")
         REQUIRE(current.red == 0.0f);
         REQUIRE(current.green == 0.0f);
         REQUIRE(current.blue == 0.0f);
+    }
+    SECTION("color indices")
+    {
+        Gint colors[16]{};
+        Gint numIndices{};
+        Gintlist indices{};
+        Gint status{-1};
+        ginqcolorindices(wsId + 1, numOf(colors), 0, &indices, &numIndices, &status);
+
+        REQUIRE(status == GERROR_WS_NOT_OPEN);
     }
     SECTION("connection and type")
     {

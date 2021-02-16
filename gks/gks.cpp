@@ -1122,6 +1122,27 @@ void gupdatews(Gint wsId, Gregen flag)
 
 ////////////////////////////////////////////////////////////////
 
+void ginqcolorindices(Gint wsId, Gint sizeIndices, Gint start, Gintlist *indices, Gint *numIndices, Gint *errorStatus)
+{
+    if (g_opState == GGKCL)
+    {
+        *errorStatus = GERROR_NOT_STATE_WSOP_WSAC_SGOP;
+        return;
+    }
+    if (!wsIsOpen(wsId))
+    {
+        *errorStatus = GERROR_WS_NOT_OPEN;
+        return;
+    }
+
+    *numIndices = 2;
+    for (int i = 0; i < *numIndices; ++i)
+    {
+        indices->integers[i] = i;
+    }
+    *errorStatus = GERROR_NONE;
+}
+
 void ginqcolorrep(Gint wsId, Gint index, Gcobundl *value, Gint *errorStatus)
 {
     getWorkstationValue(value, g_wsState[0].colorTable[index], errorStatus,
@@ -1132,7 +1153,7 @@ void ginqcolorrep(Gint wsId, Gint index, Gcobundl *value, Gint *errorStatus)
 
 void ginqtextextent(Gint wsId, Gpoint *pos, const Gchar *text, Gextent *value, Gint *errorStatus)
 {
-    if (g_opState == GGKCL)
+    if (g_opState == GGKCL || g_opState == GGKOP)
     {
         *errorStatus = GERROR_NOT_STATE_WSOP_WSAC_SGOP;
         return;
@@ -1143,6 +1164,11 @@ void ginqtextextent(Gint wsId, Gpoint *pos, const Gchar *text, Gextent *value, G
 
 void ginqwsconntype(Gint wsId, Gint buffSize, Gint *ctSize, Gwsct *ct, Gint *errorStatus)
 {
+    if (g_opState == GGKCL || g_opState == GGKOP)
+    {
+        *errorStatus = GERROR_NOT_STATE_WSOP_WSAC_SGOP;
+        return;
+    }
     if (!wsIsOpen(wsId))
     {
         *errorStatus = GERROR_WS_NOT_OPEN;

@@ -105,6 +105,53 @@ TEST_CASE("GKS open")
         requireError(GERROR_NOT_STATE_WSAC_SGOP, GFN_TEXT);
     }
 
+    SECTION("inquire")
+    {
+        Gint wsId{0};
+        Gint status{};
+
+        SECTION("ginqcolorindices")
+        {
+            Gint index{1};
+            Gcobundl value{};
+            ginqcolorrep(wsId, index, &value, &status);
+
+            REQUIRE(status == GERROR_NOT_STATE_WSOP_WSAC_SGOP);
+        }
+        SECTION("ginqcolorrep")
+        {
+            Gint index{1};
+            Gcobundl value{};
+            ginqcolorrep(wsId, index, &value, &status);
+
+            REQUIRE(status == GERROR_NOT_STATE_WSOP_WSAC_SGOP);
+        }
+        SECTION("ginqtextextent")
+        {
+            Gpoint pos{};
+            Gextent value{};
+            ginqtextextent(wsId, &pos, "Hello, world!", &value, &status);
+
+            REQUIRE(status == GERROR_NOT_STATE_WSOP_WSAC_SGOP);
+        }
+        SECTION("ginqwsconntype")
+        {
+            Gwsct ct{};
+            Gint buffSize{};
+            Gint numCts{};
+            ginqwsconntype(wsId + 1, buffSize, &numCts, &ct, &status);
+
+            REQUIRE(status == GERROR_NOT_STATE_WSOP_WSAC_SGOP);
+        }
+        SECTION("ginqwstran")
+        {
+            struct Gwsti transform{};
+            ginqwstran(wsId, &transform, &status);
+
+            REQUIRE(status == GERROR_NOT_STATE_WSOP_WSAC_SGOP);
+        }
+    }
+
     SECTION("gsetcolorrep")
     {
         Gint wsId{0};
