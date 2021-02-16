@@ -408,7 +408,8 @@ TEST_CASE("GKS closed", "[errors]")
     }
     SECTION("gsetwswindow")
     {
-        gsetwswindow(0, nullptr);
+        Glimit value{0.0f, 1.0f, 0.0f, 1.0f};
+        gsetwswindow(0, &value);
 
         requireError(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_SET_WORKSTATION_WINDOW);
     }

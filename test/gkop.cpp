@@ -117,7 +117,7 @@ TEST_CASE("GKS open")
     SECTION("gsetwswindow")
     {
         Gint wsId{0};
-        Glimit window{};
+        Glimit window{0.0f, 1.0f, 0.0f, 1.0f};
         gsetwswindow(wsId, &window);
 
         requireError(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_SET_WORKSTATION_WINDOW);

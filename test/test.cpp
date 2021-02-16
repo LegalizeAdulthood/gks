@@ -1453,7 +1453,7 @@ TEST_CASE("workstation dependent attribute error handling", "[workstation]")
     Gint wsType{GWSTYPE_TEK4105};
     gopenws(wsId, connId, wsType);
 
-    SECTION("color representation")
+    SECTION("color representation bad index")
     {
         struct Gcobundl rep{0.5f, 0.5f, 0.5f};
         gsetcolorrep(wsId, -1, &rep);
@@ -1466,6 +1466,26 @@ TEST_CASE("workstation dependent attribute error handling", "[workstation]")
         REQUIRE(current.red == 0.0f);
         REQUIRE(current.green == 0.0f);
         REQUIRE(current.blue == 0.0f);
+    }
+    SECTION("window")
+    {
+        Glimit window{0.0f, 1.0f, 0.0f, 1.0f};
+
+        SECTION("invalid rectangle")
+        {
+            SECTION("x range")
+            {
+                window.xmin = 2.0f;
+            }
+            SECTION("y range")
+            {
+                window.ymin = 2.0f;
+            }
+
+            gsetwswindow(wsId, &window);
+
+            requireError(GERROR_INVALID_RECT, GFN_SET_WORKSTATION_WINDOW);
+        }
     }
 
     gclosews(wsId);

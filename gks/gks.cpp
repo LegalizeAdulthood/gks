@@ -2,7 +2,7 @@
 #include <gks/gkserror.h>
 
 #include <algorithm>
-#include <cstring>
+#include <functional>
 
 template <typename T, size_t N>
 Gint numOf(T (&ary)[N])
@@ -379,11 +379,17 @@ void inquireGKSValue(Gint *errorStatus, const T &body)
 }
 
 template <typename T>
-void setGksValue(T &dest, T source, GFunction fn)
+void setGksValue(T &dest, T source, GFunction fn,
+    const std::function<GError()> &check = [] { return GERROR_NONE; })
 {
     if (g_opState == GGKCL)
     {
         gerrorhand(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, fn, g_errFile);
+        return;
+    }
+    if (const GError error = check())
+    {
+        gerrorhand(error, fn, g_errFile);
         return;
     }
 
@@ -403,11 +409,17 @@ void setGksValue(T &dest, T *source, GFunction fn)
 }
 
 template <typename T>
-void getWorkstationValue(T *dest, const T &source, Gint *errorStatus)
+void getWorkstationValue(T *dest, const T &source, Gint *errorStatus,
+    const std::function<GError()> &check = [] { return GERROR_NONE; })
 {
     if (g_opState == GGKCL || g_opState == GGKOP)
     {
         *errorStatus = GERROR_NOT_STATE_WSOP_WSAC_SGOP;
+        return;
+    }
+    if (const GError error = check())
+    {
+        *errorStatus = error;
         return;
     }
 
@@ -416,11 +428,17 @@ void getWorkstationValue(T *dest, const T &source, Gint *errorStatus)
 }
 
 template <typename T>
-void setWorkstationValue(T &dest, const T *source, GFunction fn)
+void setWorkstationValue(T &dest, const T *source, GFunction fn,
+    const std::function<GError()> &check = [] { return GERROR_NONE; })
 {
     if (g_opState == GGKCL || g_opState == GGKOP)
     {
         gerrorhand(GERROR_NOT_STATE_WSOP_WSAC_SGOP, fn, g_errFile);
+        return;
+    }
+    if (const Gint error = check())
+    {
+        gerrorhand(error, fn, g_errFile);
         return;
     }
 
@@ -727,13 +745,10 @@ void ginqlinefacil(Gwstype wsType, Gint buffSize, Gint *numLineTypes, Glnfac *va
 
 void gselntran(Gint value)
 {
-    if (value < 0 || value > g_gksDescription.numTrans)
-    {
-        gerrorhand(GERROR_INVALID_TRAN_NUM, GFN_SELECT_NORMALIZATION_TRANSFORMATION, g_errFile);
-        return;
-    }
-
-    setGksValue(g_gksState.currentTransform, value, GFN_SELECT_NORMALIZATION_TRANSFORMATION);
+    setGksValue(g_gksState.currentTransform, value, GFN_SELECT_NORMALIZATION_TRANSFORMATION,
+        [value] {
+            return value < 0 || value > g_gksDescription.numTrans ? GERROR_INVALID_TRAN_NUM : GERROR_NONE;
+        });
 }
 
 void gsetasf(Gasfs *value)
@@ -743,13 +758,10 @@ void gsetasf(Gasfs *value)
 
 void gsetcharexpan(Gfloat value)
 {
-    if (value <= 0.0f)
-    {
-        gerrorhand(GERROR_CHAR_EXPANSION_NOT_POSITIVE, GFN_SET_CHARACTER_EXPANSION_FACTOR, g_errFile);
-        return;
-    }
-
-    setGksValue(g_gksState.currentCharExpandFactor, value, GFN_SET_CHARACTER_EXPANSION_FACTOR);
+    setGksValue(g_gksState.currentCharExpandFactor, value, GFN_SET_CHARACTER_EXPANSION_FACTOR,
+        [value] {
+            return value <= 0.0f ? GERROR_CHAR_EXPANSION_NOT_POSITIVE : GERROR_NONE;
+        });
 }
 
 void gsetcharheight(Gfloat value)
@@ -1137,23 +1149,34 @@ void gupdatews(Gint wsId, Gregen flag)
 
 void ginqcolorrep(Gint wsId, Gint index, Gcobundl *value, Gint *errorStatus)
 {
-    getWorkstationValue(value, g_wsState[0].colorTable[index], errorStatus);
+    getWorkstationValue(value, g_wsState[0].colorTable[index], errorStatus,
+        [wsId] {
+            return wsIsOpen(wsId) ? GERROR_NONE : GERROR_WS_NOT_OPEN;
+        });
 }
 
 void ginqwstran(Gint wsId, Gwsti *value, Gint *errorStatus)
 {
-    getWorkstationValue(value, g_wsState[0].transform, errorStatus);
+    getWorkstationValue(value, g_wsState[wsId].transform, errorStatus,
+        [wsId] {
+            return wsIsOpen(wsId) ? GERROR_NONE : GERROR_WS_NOT_OPEN;
+        });
 }
 
 void gsetcolorrep(Gint wsId, Gint index, Gcobundl *value)
 {
-    if (index < 0 || index > 1)
-    {
-        gerrorhand(GERROR_INVALID_COLOR_INDEX, GFN_SET_COLOR_REPRESENTATION, g_errFile);
-        return;
-    }
-
-    setWorkstationValue(g_wsState[0].colorTable[index], value, GFN_SET_COLOR_REPRESENTATION);
+    setWorkstationValue(g_wsState[wsId].colorTable[index], value, GFN_SET_COLOR_REPRESENTATION,
+        [wsId, index]{
+            if (!wsIsOpen(wsId))
+            {
+                return GERROR_WS_NOT_OPEN;
+            }
+            if (index < 0 || index > 1)
+            {
+                return GERROR_INVALID_COLOR_INDEX;
+            }
+            return GERROR_NONE;
+        });
 }
 
 void gsetwsviewport(Gint wsId, Glimit *value)
@@ -1163,7 +1186,18 @@ void gsetwsviewport(Gint wsId, Glimit *value)
 
 void gsetwswindow(Gint wsId, Glimit *value)
 {
-    setWorkstationValue(g_wsState[0].transform.current.w, value, GFN_SET_WORKSTATION_WINDOW);
+    setWorkstationValue(g_wsState[0].transform.current.w, value, GFN_SET_WORKSTATION_WINDOW,
+        [wsId, value]{
+            if (!wsIsOpen(wsId))
+            {
+                return GERROR_WS_NOT_OPEN;
+            }
+            if (!rectIsValid(value))
+            {
+                return GERROR_INVALID_RECT;
+            }
+            return GERROR_NONE;
+        });
 }
 
 void gcellarray(Grect *rect, Gidim *dims, Gint *colors)
