@@ -477,6 +477,8 @@ inline bool rectIsWithinUnitSquare(const Glimit *rect)
 
 }
 
+////////////////////////////////////////////////////////////////
+
 void gerrorlog(Gint errNum, Gint funcName, Gfile *errFile)
 {
     fprintf(errFile, "GKS error %d in function %d\n", errNum, funcName);
@@ -490,6 +492,8 @@ void gescape(Gint function, Gescin *indata, Gint bufsize, Gescout *outdata, Gint
         return;
     }
 }
+
+////////////////////////////////////////////////////////////////
 
 void gopengks(Gfile *errfile, Glong memory)
 {
@@ -520,6 +524,8 @@ void gclosegks()
 
     g_opState = GGKCL;
 }
+
+////////////////////////////////////////////////////////////////
 
 void ginqasf(Gasfs *value, Gint *errorStatus)
 {
@@ -750,6 +756,8 @@ void ginqlinefacil(Gwstype wsType, Gint buffSize, Gint *numLineTypes, Glnfac *va
         });
 }
 
+////////////////////////////////////////////////////////////////
+
 void gselntran(Gint value)
 {
     setGksValue(g_gksState.currentTransform, value, GFN_SELECT_NORMALIZATION_TRANSFORMATION,
@@ -947,6 +955,8 @@ void gsetwindow(Gint tranId, Glimit *value)
         });
 }
 
+////////////////////////////////////////////////////////////////
+
 void gopenws(Gint wsId, const Gconn *connId, Gwstype wsType)
 {
     if (g_opState == GGKCL)
@@ -1015,6 +1025,8 @@ void gclosews(Gint wsId)
         g_opState = GGKOP;
     }
 }
+
+////////////////////////////////////////////////////////////////
 
 void gactivatews(Gint wsId)
 {
@@ -1108,12 +1120,25 @@ void gupdatews(Gint wsId, Gregen flag)
     }
 }
 
+////////////////////////////////////////////////////////////////
+
 void ginqcolorrep(Gint wsId, Gint index, Gcobundl *value, Gint *errorStatus)
 {
     getWorkstationValue(value, g_wsState[0].colorTable[index], errorStatus,
         [wsId] {
             return wsIsOpen(wsId) ? GERROR_NONE : GERROR_WS_NOT_OPEN;
         });
+}
+
+void ginqtextextent(Gint wsId, Gpoint *pos, const Gchar *text, Gextent *value, Gint *errorStatus)
+{
+    if (g_opState == GGKCL)
+    {
+        *errorStatus = GERROR_NOT_STATE_WSOP_WSAC_SGOP;
+        return;
+    }
+
+    *errorStatus = GERROR_NONE;
 }
 
 void ginqwsconntype(Gint wsId, Gint buffSize, Gint *ctSize, Gwsct *ct, Gint *errorStatus)
@@ -1137,6 +1162,8 @@ void ginqwstran(Gint wsId, Gwsti *value, Gint *errorStatus)
             return wsIsOpen(wsId) ? GERROR_NONE : GERROR_WS_NOT_OPEN;
         });
 }
+
+////////////////////////////////////////////////////////////////
 
 void gsetcolorrep(Gint wsId, Gint index, Gcobundl *value)
 {
@@ -1193,6 +1220,8 @@ void gsetwswindow(Gint wsId, Glimit *value)
             return GERROR_NONE;
         });
 }
+
+////////////////////////////////////////////////////////////////
 
 void gcellarray(Grect *rect, Gidim *dims, Gint *colors)
 {
@@ -1267,4 +1296,3 @@ void gtext(Gpoint *start, const Gchar *text)
         return;
     }
 }
-

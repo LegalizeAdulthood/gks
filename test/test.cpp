@@ -312,6 +312,7 @@ TEST_CASE("open workstation", "[workstation]")
         Gint status{-1};
         ginqwstran(wsId, &transform, &status);
 
+        REQUIRE(status == GERROR_NONE);
         REQUIRE(transform.wstus == GNOTPENDING);
         REQUIRE(transform.current.v.xmin == xmin);
         REQUIRE(transform.current.v.xmax == xmax);
@@ -331,11 +332,21 @@ TEST_CASE("open workstation", "[workstation]")
         Gint status{-1};
         ginqwstran(wsId, &transform, &status);
 
+        REQUIRE(status == GERROR_NONE);
         REQUIRE(transform.wstus == GNOTPENDING);
         REQUIRE(transform.current.w.xmin == xmin);
         REQUIRE(transform.current.w.xmax == xmax);
         REQUIRE(transform.current.w.ymin == ymin);
         REQUIRE(transform.current.w.ymax == ymax);
+    }
+    SECTION("text extent")
+    {
+        Gpoint pos{0.1f, 0.1f};
+        Gextent value{};
+        Gint status{};
+        ginqtextextent(wsId, &pos, "Hello, World!", &value, &status);
+
+        REQUIRE(status == GERROR_NONE);
     }
 
     gclosews(wsId);

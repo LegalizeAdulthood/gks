@@ -449,22 +449,30 @@ TEST_CASE("GKS closed", "[errors]")
         requireError(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_UPDATE_WORKSTATION);
     }
 
-    SECTION("ginqcolorrep")
+    SECTION("inquire")
     {
         Gint wsId{0};
-        Gint index{1};
-        Gcobundl value{};
         Gint status{};
-        ginqcolorrep(wsId, index, &value, &status);
 
-        REQUIRE(status == GERROR_NOT_STATE_WSOP_WSAC_SGOP);
-    }
-    SECTION("ginqwstran")
-    {
-        Gint wsId{0};
-        struct Gwsti transform{};
-        Gint status{-1};
-        ginqwstran(wsId, &transform, &status);
+        SECTION("ginqcolorrep")
+        {
+            Gint index{1};
+            Gcobundl value{};
+            ginqcolorrep(wsId, index, &value, &status);
+        }
+        SECTION("ginqtextextent")
+        {
+            Gpoint pos{};
+            Gextent value{};
+            ginqtextextent(wsId, &pos, "Hello, world!", &value, &status);
+
+            REQUIRE(status == GERROR_NOT_STATE_WSOP_WSAC_SGOP);
+        }
+        SECTION("ginqwstran")
+        {
+            struct Gwsti transform{};
+            ginqwstran(wsId, &transform, &status);
+        }
 
         REQUIRE(status == GERROR_NOT_STATE_WSOP_WSAC_SGOP);
     }

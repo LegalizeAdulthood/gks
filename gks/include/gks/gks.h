@@ -218,6 +218,21 @@ typedef union Gescout
     Guesc_odatarec esc_odatarec;
 } Gescout;
 
+typedef struct Gpoint
+{
+    Gfloat x;
+    Gfloat y;
+} Gpoint;
+
+typedef struct Gextent
+{
+    Gpoint concat;
+    Gpoint corner_1;
+    Gpoint corner_2;
+    Gpoint corner_3;
+    Gpoint corner_4;
+} Gextent;
+
 typedef struct Gintlist
 {
     Gint number;
@@ -247,12 +262,6 @@ typedef union Ggdprec
 {
     Ggdp_datarec gugdp_datarec;
 } Ggdprec;
-
-typedef struct Gpoint
-{
-    Gfloat x;
-    Gfloat y;
-} Gpoint;
 
 typedef struct Gipoint
 {
@@ -408,6 +417,7 @@ void gdeactivatews(Gint wsId);
 void gupdatews(Gint wsId, Gregen flag);
 
 void ginqcolorrep(Gint wsId, Gint index, Gcobundl *value, Gint *errorStatus);
+void ginqtextextent(Gint wsId, Gpoint *pos, const Gchar *text, Gextent *value, Gint *errorStatus);
 void ginqwsconntype(Gint wsId, Gint buffSize, Gint *ctSize, Gwsct *ct, Gint *errorStatus);
 void ginqwstran(Gint wsId, Gwsti *value, Gint *errorStatus);
 
