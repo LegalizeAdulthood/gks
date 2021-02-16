@@ -352,9 +352,11 @@ static GWSState g_wsState[1];
 namespace
 {
 
+const std::function<GError()> noError = [] { return GERROR_NONE; };
+
 template <typename T>
 void inquireGKSValue(T *dest, const T &source, Gint *errorStatus,
-    const std::function<GError()> &check = [] { return GERROR_NONE; })
+    const std::function<GError()> &check = noError)
 {
     if (g_opState == GGKCL)
     {
@@ -372,11 +374,16 @@ void inquireGKSValue(T *dest, const T &source, Gint *errorStatus,
 }
 
 template <typename T>
-void inquireGKSValue(Gint *errorStatus, const T &body)
+void inquireGKSValue(Gint *errorStatus, const T &body, const std::function<GError()> &check = noError)
 {
     if (g_opState == GGKCL)
     {
         *errorStatus = GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP;
+        return;
+    }
+    if (const GError error = check())
+    {
+        *errorStatus = error;
         return;
     }
 
@@ -386,7 +393,7 @@ void inquireGKSValue(Gint *errorStatus, const T &body)
 
 template <typename T>
 void setGksValue(T &dest, T source, GFunction fn,
-    const std::function<GError()> &check = [] { return GERROR_NONE; })
+    const std::function<GError()> &check = noError)
 {
     if (g_opState == GGKCL)
     {
@@ -404,7 +411,7 @@ void setGksValue(T &dest, T source, GFunction fn,
 
 template <typename T>
 void setGksValue(T &dest, T *source, GFunction fn,
-    const std::function<GError()> &check = [] { return GERROR_NONE; })
+    const std::function<GError()> &check = noError)
 {
     if (g_opState == GGKCL)
     {
@@ -422,7 +429,7 @@ void setGksValue(T &dest, T *source, GFunction fn,
 
 template <typename T>
 void getWorkstationValue(T *dest, const T &source, Gint *errorStatus,
-    const std::function<GError()> &check = [] { return GERROR_NONE; })
+    const std::function<GError()> &check = noError)
 {
     if (g_opState == GGKCL || g_opState == GGKOP)
     {
@@ -441,7 +448,7 @@ void getWorkstationValue(T *dest, const T &source, Gint *errorStatus,
 
 template <typename T>
 void setWorkstationValue(T &dest, const T *source, GFunction fn,
-    const std::function<GError()> &check = [] { return GERROR_NONE; })
+    const std::function<GError()> &check = noError)
 {
     if (g_opState == GGKCL || g_opState == GGKOP)
     {
@@ -756,7 +763,7 @@ void ginqfillfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gflfac *value
 void ginqlinefacil(Gwstype wsType, Gint buffSize, Gint *numLineTypes, Glnfac *value, Gint *errorStatus)
 {
     inquireGKSValue(errorStatus,
-        [=] {
+        [wsType, numLineTypes, value] {
             const GWSDesc *desc = &g_wsDesc[wsType-1];
             *numLineTypes = desc->lineFacilities.types.number;
             for (int i = 0; i < desc->lineFacilities.types.number; ++i)
@@ -768,6 +775,9 @@ void ginqlinefacil(Gwstype wsType, Gint buffSize, Gint *numLineTypes, Glnfac *va
             value->min_width = desc->lineFacilities.min_width;
             value->max_width = desc->lineFacilities.max_width;
             value->predefined = desc->lineFacilities.predefined;
+        },
+        [wsType] {
+            return !wsTypeIsValid(wsType) ? GERROR_INVALID_WSTYPE : GERROR_NONE;
         });
 }
 

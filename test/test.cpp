@@ -1212,13 +1212,6 @@ TEST_CASE("global attribute error handling", "[gks]")
         REQUIRE(value.x == 0.0f);
         REQUIRE(value.y == 1.0f);
     }
-    SECTION("display space size")
-    {
-        Gdspsize value{};
-        ginqdisplaysize(GWSTYPE_TEK4105 + 1, &value, &status);
-
-        REQUIRE(status == GERROR_INVALID_WSTYPE);
-    }
     SECTION("fill area color")
     {
         gsetfillcolorind(-1);
@@ -1458,6 +1451,28 @@ TEST_CASE("global attribute error handling", "[gks]")
             }
 
             requireError(GERROR_INVALID_RECT, GFN_SET_WINDOW);
+        }
+    }
+
+    SECTION("workstation type attributes")
+    {
+        Gwstype badWsType{GWSTYPE_TEK4105 + 1};
+
+        SECTION("display space size")
+        {
+            Gdspsize value{};
+            ginqdisplaysize(badWsType, &value, &status);
+
+            REQUIRE(status == GERROR_INVALID_WSTYPE);
+        }
+        SECTION("line facilities")
+        {
+            Gint lineTypes[10]{};
+            Gint numLineTypes{};
+            Glnfac value{};
+            ginqlinefacil(badWsType, numOf(lineTypes), &numLineTypes, &value, &status);
+
+            REQUIRE(status == GERROR_INVALID_WSTYPE);
         }
     }
 
