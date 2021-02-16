@@ -475,6 +475,22 @@ TEST_CASE("GKS closed", "[errors]")
         requireError(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_SET_COLOR_REPRESENTATION);
     }
 
+    SECTION("gcellarray")
+    {
+        struct Grect rect =
+        {
+            {0.25f, 0.75f},
+            {0.75f, 0.25f}
+        };
+        struct Gidim dim =
+        {
+            128, 128
+        };
+        Gint colors[] = { 0, 1 };
+        gcellarray(&rect, &dim, colors);
+
+        requireError(GERROR_NOT_STATE_WSAC_SGOP, GFN_CELL_ARRAY);
+    }
     SECTION("gfillarea")
     {
         gfillarea(0, nullptr);

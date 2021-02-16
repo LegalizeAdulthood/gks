@@ -33,6 +33,35 @@ TEST_CASE("workstation open")
 
         requireError(GERROR_NOT_STATE_WSAC, GFN_DEACTIVATE_WORKSTATION);
     }
+
+    SECTION("gcellarray")
+    {
+        struct Grect rect =
+        {
+            {0.25f, 0.75f},
+            {0.75f, 0.25f}
+        };
+        struct Gidim dim =
+        {
+            128, 128
+        };
+        Gint colors[] = { 0, 1 };
+        gcellarray(&rect, &dim, colors);
+
+        requireError(GERROR_NOT_STATE_WSAC_SGOP, GFN_CELL_ARRAY);
+    }
+    SECTION("gfillarea")
+    {
+        gfillarea(0, nullptr);
+
+        requireError(GERROR_NOT_STATE_WSAC_SGOP, GFN_FILL_AREA);
+    }
+    SECTION("ggdp")
+    {
+        ggdp(0, nullptr, 0, nullptr);
+
+        requireError(GERROR_NOT_STATE_WSAC_SGOP, GFN_GDP);
+    }
     SECTION("gpolyline")
     {
         gpolyline(0, nullptr);
@@ -50,18 +79,6 @@ TEST_CASE("workstation open")
         gtext(nullptr, nullptr);
 
         requireError(GERROR_NOT_STATE_WSAC_SGOP, GFN_TEXT);
-    }
-    SECTION("gfillarea")
-    {
-        gfillarea(0, nullptr);
-
-        requireError(GERROR_NOT_STATE_WSAC_SGOP, GFN_FILL_AREA);
-    }
-    SECTION("ggdp")
-    {
-        ggdp(0, nullptr, 0, nullptr);
-
-        requireError(GERROR_NOT_STATE_WSAC_SGOP, GFN_GDP);
     }
 
     gclosews(wsId);

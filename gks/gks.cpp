@@ -1020,6 +1020,16 @@ void gsetwswindow(Gint wsId, Glimit *value)
 
 void gcellarray(Grect *rect, Gidim *dims, Gint *colors)
 {
+    if (g_opState != GWSAC && g_opState != GSGOP)
+    {
+        gerrorhand(GERROR_NOT_STATE_WSAC_SGOP, GFN_CELL_ARRAY, g_errFile);
+        return;
+    }
+    if (dims->x_dim < 1 || dims->y_dim < 1)
+    {
+        gerrorhand(GERROR_INVALID_COLOR_DIMENSIONS, GFN_CELL_ARRAY, g_errFile);
+        return;
+    }
 }
 
 void gfillarea(Gint numPoints, Gpoint *points)
@@ -1027,6 +1037,11 @@ void gfillarea(Gint numPoints, Gpoint *points)
     if (g_opState != GWSAC && g_opState != GSGOP)
     {
         gerrorhand(GERROR_NOT_STATE_WSAC_SGOP, GFN_FILL_AREA, g_errFile);
+        return;
+    }
+    if (numPoints < 3)
+    {
+        gerrorhand(GERROR_INVALID_NUM_POINTS, GFN_FILL_AREA, g_errFile);
         return;
     }
 }
@@ -1047,6 +1062,11 @@ void gpolyline(Gint numPoints, Gpoint *points)
         gerrorhand(GERROR_NOT_STATE_WSAC_SGOP, GFN_POLYLINE, g_errFile);
         return;
     }
+    if (numPoints < 2)
+    {
+        gerrorhand(GERROR_INVALID_NUM_POINTS, GFN_POLYLINE, g_errFile);
+        return;
+    }
 }
 
 void gpolymarker(Gint numPoints, Gpoint *points)
@@ -1054,6 +1074,11 @@ void gpolymarker(Gint numPoints, Gpoint *points)
     if (g_opState != GWSAC && g_opState != GSGOP)
     {
         gerrorhand(GERROR_NOT_STATE_WSAC_SGOP, GFN_POLYMARKER, g_errFile);
+        return;
+    }
+    if (numPoints < 1)
+    {
+        gerrorhand(GERROR_INVALID_NUM_POINTS, GFN_POLYMARKER, g_errFile);
         return;
     }
 }

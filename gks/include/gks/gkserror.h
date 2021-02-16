@@ -149,6 +149,7 @@ typedef enum GError
 typedef enum GFunction
 {
     GFN_ACTIVATE_WORKSTATION = 1,
+    GFN_CELL_ARRAY,
     GFN_CLEAR_WORKSTATION,
     GFN_CLOSE_GKS,
     GFN_CLOSE_WORKSTATION,

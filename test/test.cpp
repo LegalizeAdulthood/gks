@@ -670,6 +670,77 @@ TEST_CASE("Output primitives", "[output]")
     gclosegks();
 }
 
+TEST_CASE("output primitive error handling", "[output]")
+{
+    g_recordedErrors.clear();
+    gopengks(stderr, 0L);
+    Gint wsId{0};
+    const Gchar *connId{"tek4105"};
+    Gint wsType{GWSTYPE_TEK4105};
+    gopenws(wsId, connId, wsType);
+    gactivatews(wsId);
+    Gpoint points[] = 
+    {
+        {0.25f, 0.25f},
+        {0.50f, 0.25f},
+        {0.50f, 0.50f},
+        {0.25f, 0.50f}
+    };
+
+    SECTION("polyline with too few points")
+    {
+        gpolyline(1, points);
+
+        requireError(GERROR_INVALID_NUM_POINTS, GFN_POLYLINE);
+    }
+    SECTION("polymarker with too few points")
+    {
+        gpolymarker(0, points);
+
+        requireError(GERROR_INVALID_NUM_POINTS, GFN_POLYMARKER);
+    }
+    SECTION("fill area with too few points")
+    {
+        gfillarea(2, points);
+
+        requireError(GERROR_INVALID_NUM_POINTS, GFN_FILL_AREA);
+    }
+    SECTION("cell array")
+    {
+        struct Grect rect =
+        {
+            {0.25f, 0.75f},
+            {0.75f, 0.25f}
+        };
+        SECTION("invalid x dimension")
+        {
+            struct Gidim dim =
+            {
+                0, 1
+            };
+            Gint colors[] = { 0, 1 };
+            gcellarray(&rect, &dim, colors);
+
+            requireError(GERROR_INVALID_COLOR_DIMENSIONS, GFN_CELL_ARRAY);
+        }
+    }
+    SECTION("Generalized Drawing Primitive")
+    {
+        struct Gpoint points[] =
+        {
+            {0.1f, 0.1f},
+            {0.2f, 0.2f}
+        };
+        Gint gdpId = 1;
+        Ggdprec data{};
+        ggdp(sizeof(points)/sizeof(points[0]), points, gdpId, &data);
+    }
+
+    gdeactivatews(wsId);
+    gclosews(wsId);
+    gclosegks();
+}
+
 TEST_CASE("Initial global attribute values", "[output]")
 {
     gopengks(stderr, 0L);
