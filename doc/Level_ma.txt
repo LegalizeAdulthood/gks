@@ -5,6 +5,7 @@ Level ma
 [X] Open GKS
 [X] Close GKS
 
+[X] Inquire Aspect Source Flags
 [X] Inquire Character Base Vector
 [X] Inquire Character Expansion Factor
 [X] Inquire Character Height
@@ -13,7 +14,6 @@ Level ma
 [X] Inquire Character Width
 [X] Inquire Clipping
 [X] Inquire Current Normalization Transformation Number
-[X] Inquire Display Space Size
 [X] Inquire Fill Area Color Index
 [X] Inquire Fill Area Index
 [X] Inquire Fill Area Interior Style
@@ -29,6 +29,12 @@ Level ma
 [X] Inquire Marker Size Scale Factor
 [X] Inquire Marker Type
 [X] Inquire Normalization Transform
+[ ] Inquire Pattern Height Vector
+    void ginqpatheight(Gpoint *value, Gint *errorStatus);
+[ ] Inquire Pattern Reference Point
+    void ginqpatrefpt(Gpoint *value, Gint *errorStatus);
+[ ] Inquire Pattern Width Vector
+    void ginqpatwidth(Gpoint *value, Gint *errorStatus);
 [X] Inquire Text Alignment
 [X] Inquire Text Color Index
 [X] Inquire Text Font and Precision
@@ -59,22 +65,23 @@ Level ma
 [X] Update Workstation
 
 [X] Inquire Color Facilities
-[X] Inquire Color Representation
+[X] Inquire Display Space Size
 [X] Inquire Fill Area Facilities
 [X] Inquire Line Facilities
-[ ] Inquire List of Color Indices
-[ ] Inquire Marker Facilities
-[ ] Inquire Maximum Length of Workstation State Tables
-[ ] Inquire Text Extent
-[ ] Inquire Text Facilities
-[ ] Inquire Workstation Connection and Type
-[ ] Inquire Workstation Transformation
+[X] Inquire Marker Facilities
+[X] Inquire Maximum Length of Workstation State Tables
+[X] Inquire Text Facilities
 
-[ ] Set Color Representation
+[X] Inquire Color Representation
+[X] Inquire List of Color Indices
+[X] Inquire Text Extent
+[X] Inquire Workstation Connection and Type
+[X] Inquire Workstation Transformation
+[X] Set Color Representation
 [X] Set Workstation Viewport
 [X] Set Workstation Window
 
-[X] Fill Area
-[X] Polyline
-[X] Polymarker
-[X] Text
+[-] Fill Area
+[-] Polyline
+[-] Polymarker
+[-] Text
