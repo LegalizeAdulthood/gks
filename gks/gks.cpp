@@ -81,7 +81,8 @@ struct GGKSState
     Gint currentFillStyleIndex;
     Gint currentFillColorIndex;
     Gint currentFillIndex;
-    Gpoint currentPatternSize;
+    Gpoint currentPatWidthVec;
+    Gpoint currentPatHeightVec;
     Gpoint currentPatternRef;
     // attribute source flags
     Gasfs asfs;
@@ -130,7 +131,8 @@ static GGKSState g_initialGksState =
     1,
     1,
     1,
-    {1.0f, 1.0f},
+    {1.0f, 0.0f},
+    {0.0f, 1.0f},
     {0.0f, 0.0f},
     // aspect source flags
     {
@@ -762,14 +764,19 @@ void ginqopst(Gopst *value)
     *value = g_opState;
 }
 
+void ginqpatheight(Gpoint *value, Gint *errorStatus)
+{
+    inquireGKSValue(value, g_gksState.currentPatHeightVec, errorStatus);
+}
+
 void ginqpatrefpt(Gpoint *value, Gint *errorStatus)
 {
     inquireGKSValue(value, g_gksState.currentPatternRef, errorStatus);
 }
 
-void ginqpatsize(Gpoint *value, Gint *errorStatus)
+void ginqpatwidth(Gpoint *value, Gint *errorStatus)
 {
-    inquireGKSValue(value, g_gksState.currentPatternSize, errorStatus);
+    inquireGKSValue(value, g_gksState.currentPatWidthVec, errorStatus);
 }
 
 void ginqtextalign(Gtxalign *value, Gint *errorStatus)

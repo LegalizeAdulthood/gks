@@ -167,15 +167,20 @@ TEST_CASE("GKS closed", "[errors]")
             Gint numIds{0};
             ginqopenws(idList.number, start, &idList, &numIds, &status);
         }
+        SECTION("ginqpatheight")
+        {
+            Gpoint value{};
+            ginqpatheight(&value, &status);
+        }
         SECTION("ginqpatrefpt")
         {
             Gpoint refPt{};
             ginqpatrefpt(&refPt, &status);
         }
-        SECTION("ginqpatsize")
+        SECTION("ginqpatwidth")
         {
             Gpoint value{};
-            ginqpatsize(&value, &status);
+            ginqpatwidth(&value, &status);
         }
         SECTION("ginqtextalign")
         {

@@ -29,12 +29,9 @@ Level ma
 [X] Inquire Marker Size Scale Factor
 [X] Inquire Marker Type
 [X] Inquire Normalization Transform
-[ ] Inquire Pattern Height Vector
-    void ginqpatheight(Gpoint *value, Gint *errorStatus);
-[ ] Inquire Pattern Reference Point
-    void ginqpatrefpt(Gpoint *value, Gint *errorStatus);
-[ ] Inquire Pattern Width Vector
-    void ginqpatwidth(Gpoint *value, Gint *errorStatus);
+[X] Inquire Pattern Height Vector
+[X] Inquire Pattern Reference Point
+[X] Inquire Pattern Width Vector
 [X] Inquire Text Alignment
 [X] Inquire Text Color Index
 [X] Inquire Text Font and Precision

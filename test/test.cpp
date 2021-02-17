@@ -909,7 +909,7 @@ TEST_CASE("output primitive error handling", "[output]")
     gclosegks();
 }
 
-TEST_CASE("Initial global attribute values", "[output]")
+TEST_CASE("initial GKS state list values", "[output]")
 {
     gopengks(stderr, 0L);
     Gint value{-1};
@@ -1055,13 +1055,21 @@ TEST_CASE("Initial global attribute values", "[output]")
 
         REQUIRE(value == 1);
     }
-    SECTION("pattern size is (1,1)")
+    SECTION("pattern height is (0,1)")
     {
-        Gpoint size{};
-        ginqpatsize(&size, &status);
+        Gpoint vec{};
+        ginqpatheight(&vec, &status);
 
-        REQUIRE(size.x == 1.0f);
-        REQUIRE(size.y == 1.0f);
+        REQUIRE(vec.x == 0.0f);
+        REQUIRE(vec.y == 1.0f);
+    }
+    SECTION("pattern width is (1,0)")
+    {
+        Gpoint vec{};
+        ginqpatwidth(&vec, &status);
+
+        REQUIRE(vec.x == 1.0f);
+        REQUIRE(vec.y == 0.0f);
     }
     SECTION("pattern reference point is (0,0)")
     {
