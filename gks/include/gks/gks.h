@@ -352,6 +352,16 @@ typedef struct Gwsmax
     Gint assoc;
 } Gwsmax;
 
+typedef struct Gwstables
+{
+    Gint line;
+    Gint mark;
+    Gint text;
+    Gint fill;
+    Gint pat;
+    Gint color;
+} Gwstables;
+
 typedef struct Gwsti
 {
     Gwstus wstus;
@@ -407,6 +417,7 @@ void ginqfillfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gflfac *value
 void ginqlinefacil(Gwstype wsType, Gint buffSize, Gint *numLineTypes, Glnfac *value, Gint *errorStatus);
 void ginqmarkerfacil(Gwstype wsType, Gint buffSIze, Gint *numMarkerTypes, Gmkfac *value, Gint *errorStatus);
 void ginqtextfacil(Gwstype wsType, Gint buffSize, Gint *numFontPrecs, Gtxfac *value, Gint *errorStatus);
+void ginqmaxwssttables(Gwstype wsType, Gwstables *value, Gint *errorStatus);
 
 void gselntran(Gint value);
 void gsetasf(Gasfs *value);

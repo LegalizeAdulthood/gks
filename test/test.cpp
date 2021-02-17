@@ -262,6 +262,19 @@ TEST_CASE("workstation description table", "[workstation]")
         REQUIRE(facil.fp_list[0].font == 1);
         REQUIRE(facil.fp_list[0].prec == GP_STRING);
     }
+    SECTION("workstation state table lengths")
+    {
+        Gwstables tables{-1, -1, -1, -1, -1, -1};
+        ginqmaxwssttables(wsType, &tables, &status);
+
+        REQUIRE(status == GERROR_NONE);
+        REQUIRE(tables.line == 0);
+        REQUIRE(tables.mark == 0);
+        REQUIRE(tables.text == 0);
+        REQUIRE(tables.fill == 0);
+        REQUIRE(tables.pat == 0);
+        REQUIRE(tables.color == 16);
+    }
 
     gclosegks();
 }
@@ -326,6 +339,13 @@ TEST_CASE("workstation description table error handling", "[workstation]")
         Gtxfac facil{};
         facil.fp_list = fontPrec;
         ginqtextfacil(badWsType, buffSize, &numFontPrec, &facil, &status);
+
+        REQUIRE(status == GERROR_INVALID_WSTYPE);
+    }
+    SECTION("workstation state table lengths")
+    {
+        Gwstables tables{-1, -1, -1, -1, -1, -1};
+        ginqmaxwssttables(badWsType, &tables, &status);
 
         REQUIRE(status == GERROR_INVALID_WSTYPE);
     }

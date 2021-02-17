@@ -231,6 +231,12 @@ TEST_CASE("GKS closed", "[errors]")
             Glnfac value{};
             ginqlinefacil(GWSTYPE_TEK4105, numOf(lineTypes), &numLineTypes, &value, &status);
         }
+        SECTION("ginqmaxwssttables")
+        {
+            Gwstables tables{-1, -1, -1, -1, -1, -1};
+            ginqmaxwssttables(GWSTYPE_TEK4105, &tables, &status);
+        }
+
         SECTION("ginqwsmaxnum")
         {
             Gwsmax value{};

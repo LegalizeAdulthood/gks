@@ -172,13 +172,21 @@ struct GWSDesc
     // default deferral mode
     // default implicit regeneration mode
 
+    // num line bundles
+    // num marker bundles
+    // num text bundles
+    // num fill area bundles
+    // num pattern bundles
+    // num color bundles
+    Gwstables tableSizes;
+
     // num available line types
     // list of available line types
     // num available line widths
     // nominal line width
     // minimum line width
     // maximum line width
-    // num line bundles
+    // num predefined line bundles
     Glnfac lineFacilities;
 
     // line bundles
@@ -306,6 +314,15 @@ static const GWSDesc g_wsDesc[MAX_WS_TYPES] =
             GDC_OTHER,
             {1.0f, 1.0f},
             {640, 480}
+        },
+        // Gwstables bundle table sizes
+        {
+            0,      // line
+            0,      // marker
+            0,      // text
+            0,      // fill area
+            0,      // pattern
+            16      // color
         },
         // Glnfac line facilities
         {
@@ -866,6 +883,12 @@ void ginqtextfacil(Gwstype wsType, Gint buffSize, Gint *numFontPrecs, Gtxfac *va
             value->max_exp = facil.max_exp;
             value->predefined = facil.predefined;
         },
+        [wsType] { return checkWsType(wsType); });
+}
+
+void ginqmaxwssttables(Gwstype wsType, Gwstables *value, Gint *errorStatus)
+{
+    inquireGKSValue(value, g_wsDesc[wsType-1].tableSizes, errorStatus,
         [wsType] { return checkWsType(wsType); });
 }
 
