@@ -326,6 +326,19 @@ typedef struct Gtxfp
     Gtxprec prec;
 } Gtxfp;
 
+typedef struct Gtxfac
+{
+    Gint fps;
+    Gtxfp *fp_list;
+    Gint heights;
+    Gfloat min_ht;
+    Gfloat max_ht;
+    Gint expansions;
+    Gfloat min_exp;
+    Gfloat max_exp;
+    Gint predefined;
+} Gtxfac;
+
 typedef struct Gwsct
 {
     const Gconn *conn;
@@ -388,11 +401,12 @@ void ginqtextfontprec(Gtxfp *value, Gint *errorStatus);
 void ginqtextind(Gint *value, Gint *errorStatus);
 void ginqwsmaxnum(Gwsmax *value, Gint *errorStatus);
 
-void ginqcolorfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gcofac *value, Gint *errorStatus);
+void ginqcolorfacil(Gwstype wsType, Gint buffSize, Gint *numColorIndices, Gcofac *value, Gint *errorStatus);
 void ginqdisplaysize(Gwstype wsType, Gdspsize *value, Gint *errorStatus);
 void ginqfillfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gflfac *value, Gint *errorStatus);
 void ginqlinefacil(Gwstype wsType, Gint buffSize, Gint *numLineTypes, Glnfac *value, Gint *errorStatus);
 void ginqmarkerfacil(Gwstype wsType, Gint buffSIze, Gint *numMarkerTypes, Gmkfac *value, Gint *errorStatus);
+void ginqtextfacil(Gwstype wsType, Gint buffSize, Gint *numFontPrecs, Gtxfac *value, Gint *errorStatus);
 
 void gselntran(Gint value);
 void gsetasf(Gasfs *value);

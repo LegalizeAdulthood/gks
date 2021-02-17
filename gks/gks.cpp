@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <numeric>
 
 template <typename T, size_t N>
 Gint numOf(T (&ary)[N])
@@ -198,6 +199,7 @@ struct GWSDesc
     //  - marker type
     //  - marker size scale factor
     //  - marker color index
+
     // num text font/prec pairs
     // list of text font/prec pairs
     // num available character expansion factors
@@ -207,6 +209,8 @@ struct GWSDesc
     // minimum character height
     // maximum character height
     // num predefined text bundles
+    Gtxfac textFacilities;
+
     // text bundles
     //  - text font/prec
     //  - character expansion factor
@@ -288,35 +292,61 @@ static Gint g_availMarkerTypes[] =
     GMK_DIAGONAL_CROSS
 };
 
+static Gtxfp g_availTextFontPrecs[] =
+{
+    {1, GP_STRING}
+};
+
 static const GWSDesc g_wsDesc[MAX_WS_TYPES] =
 {
     // Tektronix 4105
     {
+        // Gdspsize display space size
         {
             GDC_OTHER,
-            { 1.0f, 1.0f },
-            { 640, 480 }
+            {1.0f, 1.0f},
+            {640, 480}
         },
+        // Glnfac line facilities
         {
-            { numOf(g_availLineTypes), g_availLineTypes },
+            {numOf(g_availLineTypes), g_availLineTypes},
             1,
             1.0f,
             1.0f,
             1.0f,
             1
         },
+        // Gmkfac marker facilities
         {
-            { numOf(g_availMarkerTypes), g_availMarkerTypes },
+            {numOf(g_availMarkerTypes), g_availMarkerTypes},
             1,
             1.0f,
             1.0f,
             1.0f,
             1
         },
+        // Gtxfac text facilities
+        {
+            numOf(g_availTextFontPrecs),
+            g_availTextFontPrecs,
+            1,
+            1.0f,
+            1.0f,
+            1,
+            1.0f,
+            1.0f,
+            1
+        },
+
+        // num available fill area interior styles, fill area style indices
         numOf(g_availFillAreaIntStyles), g_availFillAreaIntStyles,
+        // available fill area hatch styles
         { 0, nullptr },
+        // num fill area bundles
         1,
-        { 16, GCOLOR, 16 }
+
+        // Gcofac color facilities
+        {16, GCOLOR, 16}
     }
 };
 
@@ -490,6 +520,11 @@ inline bool wsTypeIsValid(Gwstype wsType)
     return std::find(std::cbegin(g_wsTypes), end, wsType) != end;
 }
 
+inline GError checkWsType(Gwstype wsType)
+{
+    return wsTypeIsValid(wsType) ? GERROR_NONE : GERROR_INVALID_WSTYPE;
+}
+
 inline bool wsIsOpen(Gint wsId)
 {
     const Gint *const end = std::cend(g_gksState.openWs);
@@ -576,10 +611,7 @@ void ginqavailwstypes(Gint bufSize, Gint start, Gintlist *wsTypes, Gint *numType
     inquireGKSValue(errorStatus, [=] {
             *numTypes = g_gksDescription.numWsTypes;
             wsTypes->number = *numTypes;
-            for (int i = 0; i < g_gksDescription.numWsTypes; ++i)
-            {
-                wsTypes->integers[i] = g_gksDescription.wsTypes[i];
-            }
+            std::copy_n(g_gksDescription.wsTypes, g_gksDescription.numWsTypes, wsTypes->integers);
         });
 }
 
@@ -748,79 +780,93 @@ void ginqwsmaxnum(Gwsmax *value, Gint *errorStatus)
     inquireGKSValue(value, g_gksDescription.wsmax, errorStatus);
 }
 
-void ginqcolorfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gcofac *value, Gint *errorStatus)
+////////////////////////////////////////////////////////////////
+
+void ginqcolorfacil(Gwstype wsType, Gint buffSize, Gint *numColorIndices, Gcofac *value, Gint *errorStatus)
 {
-    inquireGKSValue(value, g_wsDesc[wsType-1].colorFacilities, errorStatus);
+    inquireGKSValue(errorStatus, 
+        [wsType, numColorIndices, value] {
+            *numColorIndices = g_wsDesc[wsType-1].colorFacilities.colors;
+            *value = g_wsDesc[wsType-1].colorFacilities;
+        },
+        [wsType] { return checkWsType(wsType); });
 }
 
 void ginqdisplaysize(Gwstype wsType, Gdspsize *value, Gint *errorStatus)
 {
     inquireGKSValue(value, g_wsDesc[wsType-1].displaySpaceSize, errorStatus,
-        [wsType] {
-            return !wsTypeIsValid(wsType) ? GERROR_INVALID_WSTYPE : GERROR_NONE;
-        });
+        [wsType] { return checkWsType(wsType); });
 }
 
 void ginqfillfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gflfac *value, Gint *errorStatus)
 {
     inquireGKSValue(errorStatus,
-        [=] {
+        [wsType, facilSize, value] {
             const GWSDesc *desc = &g_wsDesc[wsType - 1];
             value->n_interiors = desc->numAvailFillAreaIntStyles;
-            for (int i = 0; i < desc->numAvailFillAreaIntStyles; ++i)
-            {
-                value->interiors[i] = desc->availFillAreaIntStyles[i];
-            }
+            std::copy_n(desc->availFillAreaIntStyles, desc->numAvailFillAreaIntStyles, value->interiors);
             *facilSize = desc->availFillAreaHatchStyles.number;
-            for (int i = 0; i < desc->availFillAreaHatchStyles.number; ++i)
-            {
-                value->hatches[i] = desc->availFillAreaHatchStyles.integers[i];
-            }
+            std::copy_n(desc->availFillAreaHatchStyles.integers, desc->availFillAreaHatchStyles.number, value->hatches);
             value->predefined = desc->numFillAreaBundles;
-        });
+        },
+        [wsType] { return checkWsType(wsType); });
 }
 
 void ginqlinefacil(Gwstype wsType, Gint buffSize, Gint *numLineTypes, Glnfac *value, Gint *errorStatus)
 {
     inquireGKSValue(errorStatus,
-        [wsType, numLineTypes, value] {
-            const GWSDesc &desc = g_wsDesc[wsType-1];
-            *numLineTypes = desc.lineFacilities.types.number;
-            for (int i = 0; i < desc.lineFacilities.types.number; ++i)
-            {
-                value->types.integers[i] = desc.lineFacilities.types.integers[i];
-            }
-            value->widths = desc.lineFacilities.widths;
-            value->nom_width = desc.lineFacilities.nom_width;
-            value->min_width = desc.lineFacilities.min_width;
-            value->max_width = desc.lineFacilities.max_width;
-            value->predefined = desc.lineFacilities.predefined;
+        [wsType, buffSize, numLineTypes, value] {
+            const Glnfac &facil = g_wsDesc[wsType-1].lineFacilities;
+            *numLineTypes = facil.types.number;
+            const int numToCopy = std::min(buffSize, facil.types.number);
+            std::copy_n(facil.types.integers, numToCopy, value->types.integers);
+            value->widths = facil.widths;
+            value->nom_width = facil.nom_width;
+            value->min_width = facil.min_width;
+            value->max_width = facil.max_width;
+            value->predefined = facil.predefined;
         },
-        [wsType] {
-            return !wsTypeIsValid(wsType) ? GERROR_INVALID_WSTYPE : GERROR_NONE;
-        });
+        [wsType] { return checkWsType(wsType); });
 }
 
-void ginqmarkerfacil(Gwstype wsType, Gint buffSIze, Gint *numMarkerTypes, Gmkfac *value, Gint *errorStatus)
+void ginqmarkerfacil(Gwstype wsType, Gint buffSize, Gint *numMarkerTypes, Gmkfac *value, Gint *errorStatus)
 {
     inquireGKSValue(errorStatus,
-        [wsType, numMarkerTypes, value] {
+        [wsType, buffSize, numMarkerTypes, value] {
             const GWSDesc &desc = g_wsDesc[wsType-1];
             const Gmkfac &facil = desc.markerFacilities;
             *numMarkerTypes = facil.types.number;
-            for (int i = 0; i < facil.types.number; ++i)
-            {
-                value->types.integers[i] = facil.types.integers[i];
-            }
+            const int numToCopy = std::min(buffSize, facil.types.number);
+            value->types.number = numToCopy;
+            std::copy_n(facil.types.integers, numToCopy, value->types.integers);
             value->sizes = facil.sizes;
             value->nom_size = facil.nom_size;
             value->min_size = facil.min_size;
             value->max_size = facil.max_size;
             value->predefined = facil.predefined;
         },
-        [wsType] {
-            return !wsTypeIsValid(wsType) ? GERROR_INVALID_WSTYPE : GERROR_NONE;
-        });
+        [wsType] { return checkWsType(wsType); });
+}
+
+void ginqtextfacil(Gwstype wsType, Gint buffSize, Gint *numFontPrecs, Gtxfac *value, Gint *errorStatus)
+{
+    inquireGKSValue(errorStatus,
+        [wsType, buffSize, numFontPrecs, value] {
+            const GWSDesc &desc = g_wsDesc[wsType-1];
+            const Gtxfac &facil = desc.textFacilities;
+            *numFontPrecs = facil.fps;
+            const int numToCopy = std::min(buffSize, facil.fps);
+            value->fps = numToCopy;
+            std::copy_n(facil.fp_list, numToCopy, value->fp_list);
+            value->heights = facil.heights;
+            value->min_ht = facil.min_ht;
+            value->max_ht = facil.max_ht;
+            value->expansions = facil.expansions;
+            value->min_exp = facil.min_exp;
+            value->max_exp = facil.max_exp;
+            value->predefined = facil.predefined;
+        },
+        [wsType] { return checkWsType(wsType); });
 }
 
 ////////////////////////////////////////////////////////////////
@@ -1203,10 +1249,7 @@ void ginqcolorindices(Gint wsId, Gint sizeIndices, Gint start, Gintlist *indices
     }
 
     *numIndices = 2;
-    for (int i = 0; i < *numIndices; ++i)
-    {
-        indices->integers[i] = i;
-    }
+    std::iota(indices->integers, indices->integers + *numIndices, 0);
     *errorStatus = GERROR_NONE;
 }
 

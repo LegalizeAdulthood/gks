@@ -168,13 +168,18 @@ TEST_CASE("GKS state list", "[gks]")
 TEST_CASE("workstation description table", "[workstation]")
 {
     gopengks(stderr, 0L);
+    const Gwstype wsType{GWSTYPE_TEK4105};
     Gint status{-1};
 
     SECTION("color facilities")
     {
         Gcofac facil{};
-        ginqcolorfacil(GWSTYPE_TEK4105, 0, NULL, &facil, &status);
+        Gint buffSize{};
+        Gint numColors{};
+        ginqcolorfacil(wsType, buffSize, &numColors, &facil, &status);
 
+        REQUIRE(status == GERROR_NONE);
+        REQUIRE(numColors == 16);
         REQUIRE(facil.colors == 16);
         REQUIRE(facil.coavail == GCOLOR);
         REQUIRE(facil.predefined == 16);
@@ -182,8 +187,9 @@ TEST_CASE("workstation description table", "[workstation]")
     SECTION("display space size")
     {
         Gdspsize size{};
-        ginqdisplaysize(GWSTYPE_TEK4105, &size, &status);
+        ginqdisplaysize(wsType, &size, &status);
 
+        REQUIRE(status == GERROR_NONE);
         REQUIRE(size.units == GDC_OTHER);
         REQUIRE(size.raster.x == 640);
         REQUIRE(size.raster.y == 480);
@@ -196,15 +202,133 @@ TEST_CASE("workstation description table", "[workstation]")
         facil.interiors = interiorStyles;
         facil.hatches = hatchStyles;
         Gint numAvailHatches{};
-        ginqfillfacil(GWSTYPE_TEK4105, numOf(hatchStyles), &numAvailHatches, &facil, &status);
+        ginqfillfacil(wsType, numOf(hatchStyles), &numAvailHatches, &facil, &status);
 
+        REQUIRE(status == GERROR_NONE);
         REQUIRE(facil.n_interiors == 1);
         REQUIRE(facil.interiors[0] == GHOLLOW);
         REQUIRE(facil.predefined == 1);
         REQUIRE(numAvailHatches == 0);
     }
+    SECTION("line facilities")
+    {
+        Gint lineTypes[10]{};
+        Gint numLineTypes{};
+        Glnfac facil{};
+        facil.types.number = numOf(lineTypes);
+        facil.types.integers = lineTypes;
+        ginqlinefacil(wsType, numOf(lineTypes), &numLineTypes, &facil, &status);
 
-    REQUIRE(status == 0);
+        REQUIRE(status == GERROR_NONE);
+        REQUIRE(numLineTypes >= 1);
+        REQUIRE(std::find(std::begin(lineTypes), std::end(lineTypes), GLN_SOLID) != std::end(lineTypes));
+        REQUIRE(facil.widths == 1);
+        REQUIRE(facil.nom_width == 1.0f);
+        REQUIRE(facil.min_width == 1.0f);
+        REQUIRE(facil.max_width == 1.0f);
+    }
+    SECTION("marker facilities")
+    {
+        Gint markerTypes[10]{};
+        Gint numMarkerTypes{};
+        Gmkfac facil{};
+        facil.types.number = numOf(markerTypes);
+        facil.types.integers = markerTypes;
+        ginqmarkerfacil(wsType, numOf(markerTypes), &numMarkerTypes, &facil, &status);
+
+        REQUIRE(status == GERROR_NONE);
+        REQUIRE(numMarkerTypes >= 5);
+        Gint expectedTypes[]{GMK_DOT, GMK_PLUS, GMK_STAR, GMK_CIRCLE, GMK_DIAGONAL_CROSS};
+        std::sort(std::begin(expectedTypes), std::end(expectedTypes));
+        std::sort(markerTypes, markerTypes + numMarkerTypes);
+        REQUIRE(std::equal(markerTypes, markerTypes + numMarkerTypes, std::begin(expectedTypes)));
+        REQUIRE(facil.sizes == 1);
+        REQUIRE(facil.nom_size == 1.0f);
+        REQUIRE(facil.min_size == 1.0f);
+        REQUIRE(facil.max_size == 1.0f);
+    }
+    SECTION("text facilities")
+    {
+        Gtxfp fontPrec[10]{};
+        Gint buffSize{numOf(fontPrec)};
+        Gint numFontPrec{};
+        Gtxfac facil{};
+        facil.fp_list = fontPrec;
+        ginqtextfacil(wsType, buffSize, &numFontPrec, &facil, &status);
+
+        REQUIRE(status == GERROR_NONE);
+        REQUIRE(numFontPrec == 1);
+        REQUIRE(facil.fps == 1);
+        REQUIRE(facil.fp_list[0].font == 1);
+        REQUIRE(facil.fp_list[0].prec == GP_STRING);
+    }
+
+    gclosegks();
+}
+
+TEST_CASE("workstation description table error handling", "[workstation]")
+{
+    gopengks(stderr, 0L);
+    const Gwstype badWsType{GWSTYPE_TEK4105 + 1};
+    Gint status{-1};
+
+    SECTION("color facilities")
+    {
+        Gcofac facil{};
+        Gint buffSize{};
+        Gint numColors{};
+        ginqcolorfacil(badWsType, buffSize, &numColors, &facil, &status);
+
+        REQUIRE(status == GERROR_INVALID_WSTYPE);
+    }
+    SECTION("display space size")
+    {
+        Gdspsize size{};
+        ginqdisplaysize(badWsType, &size, &status);
+
+        REQUIRE(status == GERROR_INVALID_WSTYPE);
+    }
+    SECTION("fill area facilities")
+    {
+        Gflinter interiorStyles[4]{};
+        Gint hatchStyles[10]{};
+        Gflfac facil{};
+        facil.interiors = interiorStyles;
+        facil.hatches = hatchStyles;
+        Gint numAvailHatches{};
+        ginqfillfacil(badWsType, numOf(hatchStyles), &numAvailHatches, &facil, &status);
+
+        REQUIRE(status == GERROR_INVALID_WSTYPE);
+    }
+    SECTION("line facilities")
+    {
+        Gint lineTypes[10]{};
+        Gint numLineTypes{};
+        Glnfac value{};
+        ginqlinefacil(badWsType, numOf(lineTypes), &numLineTypes, &value, &status);
+
+        REQUIRE(status == GERROR_INVALID_WSTYPE);
+    }
+    SECTION("marker facilities")
+    {
+        Gint markerTypes[10]{};
+        Gint numMarkerTypes{};
+        Gmkfac value{};
+        ginqmarkerfacil(badWsType, numOf(markerTypes), &numMarkerTypes, &value, &status);
+
+        REQUIRE(status == GERROR_INVALID_WSTYPE);
+    }
+    SECTION("text facilities")
+    {
+        Gtxfp fontPrec[10]{};
+        Gint buffSize{numOf(fontPrec)};
+        Gint numFontPrec{};
+        Gtxfac facil{};
+        facil.fp_list = fontPrec;
+        ginqtextfacil(badWsType, buffSize, &numFontPrec, &facil, &status);
+
+        REQUIRE(status == GERROR_INVALID_WSTYPE);
+    }
 
     gclosegks();
 }
@@ -1451,37 +1575,6 @@ TEST_CASE("global attribute error handling", "[gks]")
             }
 
             requireError(GERROR_INVALID_RECT, GFN_SET_WINDOW);
-        }
-    }
-
-    SECTION("workstation type attributes")
-    {
-        Gwstype badWsType{GWSTYPE_TEK4105 + 1};
-
-        SECTION("display space size")
-        {
-            Gdspsize value{};
-            ginqdisplaysize(badWsType, &value, &status);
-
-            REQUIRE(status == GERROR_INVALID_WSTYPE);
-        }
-        SECTION("line facilities")
-        {
-            Gint lineTypes[10]{};
-            Gint numLineTypes{};
-            Glnfac value{};
-            ginqlinefacil(badWsType, numOf(lineTypes), &numLineTypes, &value, &status);
-
-            REQUIRE(status == GERROR_INVALID_WSTYPE);
-        }
-        SECTION("marker facilities")
-        {
-            Gint markerTypes[10]{};
-            Gint numMarkerTypes{};
-            Gmkfac value{};
-            ginqmarkerfacil(badWsType, numOf(markerTypes), &numMarkerTypes, &value, &status);
-
-            REQUIRE(status == GERROR_INVALID_WSTYPE);
         }
     }
 
