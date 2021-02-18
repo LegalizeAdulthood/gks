@@ -1107,13 +1107,10 @@ void gopenws(Gint wsId, const Gconn *connId, Gwstype wsType)
         gerrorhand(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, GFN_OPEN_WORKSTATION, g_errFile);
         return;
     }
+    if (!wsTypeIsValid(wsType))
     {
-        const Gwstype *const end = &g_gksDescription.wsTypes[g_gksDescription.numWsTypes];
-        if (std::find(&g_gksDescription.wsTypes[0], end, wsType) == end)
-        {
-            gerrorhand(GERROR_INVALID_WSTYPE, GFN_OPEN_WORKSTATION, g_errFile);
-            return;
-        }
+        gerrorhand(GERROR_INVALID_WSTYPE, GFN_OPEN_WORKSTATION, g_errFile);
+        return;
     }
     if (wsId < 0 || wsId >= g_gksDescription.wsmax.open)
     {
