@@ -23,6 +23,7 @@ misc_target(FILES
 )
 misc_group_sources("CMake Scripts" FILES
     "cmake/misc_target.cmake"
+    "cmake/set_cxx_standard.cmake"
     "cmake/target_folder.cmake")
 misc_group_sources("Editing" FILES
     ".clang-format"
