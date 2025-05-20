@@ -1,7 +1,6 @@
-find_package(Catch2 REQUIRED)
+find_package(Catch2 CONFIG REQUIRED)
 
-add_executable(test
-    main.cpp
+add_executable(test-gks
     test.cpp
     error.h
     error.cpp
@@ -10,6 +9,7 @@ add_executable(test
     wsop.cpp
     wsac.cpp
     )
-target_link_libraries(test PUBLIC gks Catch2::Catch2)
+target_link_libraries(test-gks PUBLIC gks Catch2::Catch2WithMain)
+target_folder(test-gks "Tests")
 
-add_custom_command(TARGET test POST_BUILD COMMAND test)
+add_custom_command(TARGET test-gks POST_BUILD COMMAND test-gks)

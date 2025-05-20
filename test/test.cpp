@@ -2,7 +2,7 @@
 
 #include <gks/gks.h>
 
-#include <catch2/catch.hpp>
+#include <catch.hpp>
 
 #include <cstdio>
 #include <string>

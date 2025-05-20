@@ -1,0 +1,112 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 23,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "project-name-preset",
+      "hidden": true,
+      "description": "Sets the project name based on the preset",
+      "cacheVariables": {
+        "GKS_PROJECT_NAME": {
+          "type": "STRING",
+          "value": "GKS ${presetName}"
+        }
+      }
+    },
+    {
+      "name": "sibling-build-preset",
+      "hidden": true,
+      "description": "Use a sibling directory for the build based on the preset name",
+      "binaryDir": "${sourceDir}/../build-${presetName}"
+    },
+    {
+      "name": "vcpkg",
+      "hidden": true,
+      "description": "Configure the toolchain for vcpkg",
+      "toolchainFile": "${sourceDir}/vcpkg/scripts/buildsystems/vcpkg.cmake"
+    },
+
+    {
+      "name": "default",
+      "displayName": "Configure with default settings",
+      "inherits": [ "sibling-build-preset", "project-name-preset", "vcpkg" ]
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "default",
+      "displayName": "Build with default settings",
+      "configurePreset": "default"
+    }
+  ],
+  "testPresets": [
+    {
+      "name": "settings",
+      "hidden": true,
+      "description": "Common test preset settings",
+      "output": {
+        "outputOnFailure": true
+      }
+    },
+    {
+      "name": "default",
+      "displayName": "Test with default settings",
+      "inherits": [ "settings" ],
+      "configurePreset": "default"
+    },
+    {
+      "name": "ci-linux",
+      "displayName": "Test with default settings but suppress tests on linux CI that have goofy google mocks",
+      "description": "Suppress some tests that don't currently pass on linux due to weirdness with google mock",
+      "inherits": [ "settings" ],
+      "configurePreset": "default",
+      "filter": {
+        "exclude": {
+          "name": "NNTPConnectedTest\\.server_init_(ok|posting_prohibited|(temporarily|permanently)_unavailable)"
+        }
+      }
+    }
+  ],
+  "workflowPresets": [
+    {
+      "name": "default",
+      "displayName": "Workflow with default settings: configure, build and test",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "default"
+        },
+        {
+          "type": "build",
+          "name": "default"
+        },
+        {
+          "type": "test",
+          "name": "default"
+        }
+      ]
+    },
+    {
+      "name": "ci-linux",
+      "displayName": "Workflow with settings for continuous integratoin on linux: configure, build and test",
+      "steps": [
+        {
+          "type": "configure",
+          "name": "default"
+        },
+        {
+          "type": "build",
+          "name": "default"
+        },
+        {
+          "type": "test",
+          "name": "ci-linux"
+        }
+      ]
+    }
+  ]
+}

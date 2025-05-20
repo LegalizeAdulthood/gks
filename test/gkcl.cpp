@@ -3,7 +3,7 @@
 #include <gks/gks.h>
 #include <gks/gkserror.h>
 
-#include <catch2/catch.hpp>
+#include <catch.hpp>
 
 namespace
 {
