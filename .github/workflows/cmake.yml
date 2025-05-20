@@ -1,0 +1,26 @@
+name: CMake
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ macos-latest, ubuntu-latest, windows-latest ]
+
+    runs-on: ${{matrix.os}}
+
+    steps:
+    - uses: actions/checkout@v4.1.1
+      with:
+        submodules: true
+
+    - name: CMake version
+      run: cmake --version
+
+    - name: CMake workflow
+      run: cmake --workflow --preset default
