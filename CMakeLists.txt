@@ -5,9 +5,12 @@ project(${GKS_PROJECT_NAME} VERSION 1.0.0 LANGUAGES CXX)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 include(misc_target)
+include(set_cxx_standard)
 include(target_folder)
 
 include(CTest)
+
+set_cxx_standard(17)
 
 add_subdirectory(gks)
 if(BUILD_TESTING)
