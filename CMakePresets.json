@@ -21,7 +21,7 @@
       "name": "sibling-build-preset",
       "hidden": true,
       "description": "Use a sibling directory for the build based on the preset name",
-      "binaryDir": "${sourceDir}/../build-${presetName}"
+      "binaryDir": "${sourceDir}/../build-gks-${presetName}"
     },
     {
       "name": "vcpkg",
