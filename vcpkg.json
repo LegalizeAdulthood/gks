@@ -1,7 +1,7 @@
 {
-"name": "gks",
-"version": "1.0.0.0",
-"dependencies": [
-"catch2"
-]
+  "name": "gks",
+  "version": "1.0.0.0",
+  "dependencies": [
+    "catch2"
+  ]
 }
