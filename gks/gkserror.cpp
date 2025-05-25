@@ -1,9 +1,10 @@
 #include <gks/gks.h>
 #include <gks/gkserror.h>
 
-void gerrorhand(Gint errNum, Gint funcName, Gfile *errFile)
+Gint gerrorhand(Gint errNum, Gint funcName, Gfile *errFile)
 {
     gerrorlog(errNum, funcName, errFile);
+    return GERROR_NONE;
 }
 
 static struct

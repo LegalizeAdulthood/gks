@@ -48,13 +48,13 @@ TEST_CASE("Error handling", "[gks]")
 TEST_CASE("GKS state list", "[gks]")
 {
     gopengks(stderr, 0L);
-    Gint status{-1};
 
     SECTION("GKS level")
     {
         Glevel level{};
-        ginqlevelgks(&level, &status);
+        const Gint err = ginqlevelgks(&level);
 
+        REQUIRE(err == GERROR_NONE);
         REQUIRE(level == GLMA);
     }
     SECTION("Availale workstation types")
@@ -68,7 +68,7 @@ TEST_CASE("GKS state list", "[gks]")
         }
         Gintlist wsTypes{0, wsTypeValues};
         Gint numAvailTypes{};
-        ginqavailwstypes(numWsTypes, start, &wsTypes, &numAvailTypes, &status);
+        ginqavailwstypes(numWsTypes, start, &wsTypes, &numAvailTypes);
 
         REQUIRE(numAvailTypes == 1);
         REQUIRE(wsTypes.number == 1);
@@ -77,14 +77,14 @@ TEST_CASE("GKS state list", "[gks]")
     SECTION("Number of normalization transforms")
     {
         Gint numTransforms{-1};
-        ginqmaxntrannum(&numTransforms, &status);
+        ginqmaxntrannum(&numTransforms);
 
         REQUIRE(numTransforms == 2);
     }
     SECTION("Normalization transform zero is identity")
     {
         Gtran transform{};
-        ginqntran(1, &transform, &status);
+        ginqntran(1, &transform);
 
         REQUIRE(transform.w.xmin == 0.0f);
         REQUIRE(transform.w.xmax == 1.0f);
@@ -106,7 +106,7 @@ TEST_CASE("GKS state list", "[gks]")
         gsetviewport(tranId, &viewport);
 
         Gtran transform{};
-        ginqntran(tranId, &transform, &status);
+        ginqntran(tranId, &transform);
         REQUIRE(transform.v.xmin == xmin);
         REQUIRE(transform.v.xmax == xmax);
         REQUIRE(transform.v.ymin == ymin);
@@ -123,7 +123,7 @@ TEST_CASE("GKS state list", "[gks]")
         gsetwindow(tranId, &window);
 
         Gtran transform{};
-        ginqntran(tranId, &transform, &status);
+        ginqntran(tranId, &transform);
         REQUIRE(transform.w.xmin == xmin);
         REQUIRE(transform.w.xmax == xmax);
         REQUIRE(transform.w.ymin == ymin);
@@ -132,7 +132,7 @@ TEST_CASE("GKS state list", "[gks]")
     SECTION("Maximum workstation numbers")
     {
         Gwsmax value{};
-        ginqwsmaxnum(&value, &status);
+        ginqwsmaxnum(&value);
 
         REQUIRE(value.open == 1);
         REQUIRE(value.active == 1);
@@ -141,7 +141,7 @@ TEST_CASE("GKS state list", "[gks]")
     SECTION("Initial clipping indicator")
     {
         Gcliprect clipping{};
-        ginqclip(&clipping, &status);
+        ginqclip(&clipping);
 
         REQUIRE(clipping.ind == GCLIP);
         REQUIRE(clipping.rec.xmin == 0.0f);
@@ -155,12 +155,10 @@ TEST_CASE("GKS state list", "[gks]")
         Gint ids[numBuffIds]{};
         Gintlist idList{numBuffIds, ids};
         Gint numIds{-1};
-        ginqopenws(numBuffIds, 0, &idList, &numIds, &status);
+        ginqopenws(numBuffIds, 0, &idList, &numIds);
 
         REQUIRE(numIds == 0);
     }
-
-    REQUIRE(status == 0);
 
     gclosegks();
 }
@@ -169,14 +167,13 @@ TEST_CASE("workstation description table", "[workstation]")
 {
     gopengks(stderr, 0L);
     const Gwstype wsType{GWSTYPE_TEK4105};
-    Gint status{-1};
 
     SECTION("color facilities")
     {
         Gcofac facil{};
         Gint buffSize{};
         Gint numColors{};
-        ginqcolorfacil(wsType, buffSize, &numColors, &facil, &status);
+        const Gint status = ginqcolorfacil(wsType, buffSize, &numColors, &facil);
 
         REQUIRE(status == GERROR_NONE);
         REQUIRE(numColors == 16);
@@ -187,7 +184,7 @@ TEST_CASE("workstation description table", "[workstation]")
     SECTION("display space size")
     {
         Gdspsize size{};
-        ginqdisplaysize(wsType, &size, &status);
+        const Gint status = ginqdisplaysize(wsType, &size);
 
         REQUIRE(status == GERROR_NONE);
         REQUIRE(size.units == GDC_OTHER);
@@ -202,7 +199,7 @@ TEST_CASE("workstation description table", "[workstation]")
         facil.interiors = interiorStyles;
         facil.hatches = hatchStyles;
         Gint numAvailHatches{};
-        ginqfillfacil(wsType, numOf(hatchStyles), &numAvailHatches, &facil, &status);
+        const Gint status = ginqfillfacil(wsType, numOf(hatchStyles), &numAvailHatches, &facil);
 
         REQUIRE(status == GERROR_NONE);
         REQUIRE(facil.n_interiors == 1);
@@ -217,7 +214,7 @@ TEST_CASE("workstation description table", "[workstation]")
         Glnfac facil{};
         facil.types.number = numOf(lineTypes);
         facil.types.integers = lineTypes;
-        ginqlinefacil(wsType, numOf(lineTypes), &numLineTypes, &facil, &status);
+        const Gint status = ginqlinefacil(wsType, numOf(lineTypes), &numLineTypes, &facil);
 
         REQUIRE(status == GERROR_NONE);
         REQUIRE(numLineTypes >= 1);
@@ -234,7 +231,7 @@ TEST_CASE("workstation description table", "[workstation]")
         Gmkfac facil{};
         facil.types.number = numOf(markerTypes);
         facil.types.integers = markerTypes;
-        ginqmarkerfacil(wsType, numOf(markerTypes), &numMarkerTypes, &facil, &status);
+        const Gint status = ginqmarkerfacil(wsType, numOf(markerTypes), &numMarkerTypes, &facil);
 
         REQUIRE(status == GERROR_NONE);
         REQUIRE(numMarkerTypes >= 5);
@@ -254,7 +251,7 @@ TEST_CASE("workstation description table", "[workstation]")
         Gint numFontPrec{};
         Gtxfac facil{};
         facil.fp_list = fontPrec;
-        ginqtextfacil(wsType, buffSize, &numFontPrec, &facil, &status);
+        const Gint status = ginqtextfacil(wsType, buffSize, &numFontPrec, &facil);
 
         REQUIRE(status == GERROR_NONE);
         REQUIRE(numFontPrec == 1);
@@ -265,7 +262,7 @@ TEST_CASE("workstation description table", "[workstation]")
     SECTION("workstation state table lengths")
     {
         Gwstables tables{-1, -1, -1, -1, -1, -1};
-        ginqmaxwssttables(wsType, &tables, &status);
+        const Gint status = ginqmaxwssttables(wsType, &tables);
 
         REQUIRE(status == GERROR_NONE);
         REQUIRE(tables.line == 0);
@@ -290,14 +287,14 @@ TEST_CASE("workstation description table error handling", "[workstation]")
         Gcofac facil{};
         Gint buffSize{};
         Gint numColors{};
-        ginqcolorfacil(badWsType, buffSize, &numColors, &facil, &status);
+        status = ginqcolorfacil(badWsType, buffSize, &numColors, &facil);
 
         REQUIRE(status == GERROR_INVALID_WSTYPE);
     }
     SECTION("display space size")
     {
         Gdspsize size{};
-        ginqdisplaysize(badWsType, &size, &status);
+        status = ginqdisplaysize(badWsType, &size);
 
         REQUIRE(status == GERROR_INVALID_WSTYPE);
     }
@@ -309,7 +306,7 @@ TEST_CASE("workstation description table error handling", "[workstation]")
         facil.interiors = interiorStyles;
         facil.hatches = hatchStyles;
         Gint numAvailHatches{};
-        ginqfillfacil(badWsType, numOf(hatchStyles), &numAvailHatches, &facil, &status);
+        status = ginqfillfacil(badWsType, numOf(hatchStyles), &numAvailHatches, &facil);
 
         REQUIRE(status == GERROR_INVALID_WSTYPE);
     }
@@ -318,7 +315,7 @@ TEST_CASE("workstation description table error handling", "[workstation]")
         Gint lineTypes[10]{};
         Gint numLineTypes{};
         Glnfac value{};
-        ginqlinefacil(badWsType, numOf(lineTypes), &numLineTypes, &value, &status);
+        status = ginqlinefacil(badWsType, numOf(lineTypes), &numLineTypes, &value);
 
         REQUIRE(status == GERROR_INVALID_WSTYPE);
     }
@@ -327,7 +324,7 @@ TEST_CASE("workstation description table error handling", "[workstation]")
         Gint markerTypes[10]{};
         Gint numMarkerTypes{};
         Gmkfac value{};
-        ginqmarkerfacil(badWsType, numOf(markerTypes), &numMarkerTypes, &value, &status);
+        status = ginqmarkerfacil(badWsType, numOf(markerTypes), &numMarkerTypes, &value);
 
         REQUIRE(status == GERROR_INVALID_WSTYPE);
     }
@@ -338,14 +335,14 @@ TEST_CASE("workstation description table error handling", "[workstation]")
         Gint numFontPrec{};
         Gtxfac facil{};
         facil.fp_list = fontPrec;
-        ginqtextfacil(badWsType, buffSize, &numFontPrec, &facil, &status);
+        status = ginqtextfacil(badWsType, buffSize, &numFontPrec, &facil);
 
         REQUIRE(status == GERROR_INVALID_WSTYPE);
     }
     SECTION("workstation state table lengths")
     {
         Gwstables tables{-1, -1, -1, -1, -1, -1};
-        ginqmaxwssttables(badWsType, &tables, &status);
+        status = ginqmaxwssttables(badWsType, &tables);
 
         REQUIRE(status == GERROR_INVALID_WSTYPE);
     }
@@ -360,8 +357,8 @@ TEST_CASE("set clipping indicator", "[gks]")
     gsetclip(GNOCLIP);
 
     Gcliprect clipping{};
-    Gint status{-1};
-    ginqclip(&clipping, &status);
+    const Gint status = ginqclip(&clipping);
+    REQUIRE(status == GERROR_NONE);
     REQUIRE(clipping.ind == GNOCLIP);
 
     gclosegks();
@@ -405,10 +402,10 @@ TEST_CASE("open workstation", "[workstation]")
     }
     SECTION("initial workstation transformation is identity")
     {
-        struct Gwsti transform{};
-        Gint status{-1};
-        ginqwstran(wsId, &transform, &status);
+        Gwsti transform{};
+        const Gint status = ginqwstran(wsId, &transform);
 
+        REQUIRE(status== GERROR_NONE);
         REQUIRE(transform.wstus == GNOTPENDING);
         REQUIRE(transform.request.v.xmin == 0.0f);
         REQUIRE(transform.request.v.xmax == 1.0f);
@@ -431,8 +428,7 @@ TEST_CASE("open workstation", "[workstation]")
     {
         Gint numCt{};
         Gwsct ct{};
-        Gint status{};
-        ginqwsconntype(wsId, 1, &numCt, &ct, &status);
+        const Gint status = ginqwsconntype(wsId, 1, &numCt, &ct);
 
         REQUIRE(status == GERROR_NONE);
         REQUIRE(numCt == 1);
@@ -449,12 +445,11 @@ TEST_CASE("open workstation", "[workstation]")
         const Gfloat xmax = 0.4f;
         const Gfloat ymin = 0.3f;
         const Gfloat ymax = 0.5f;
-        struct Glimit viewport{xmin, xmax, ymin, ymax};
+        Glimit viewport{xmin, xmax, ymin, ymax};
         gsetwsviewport(wsId, &viewport);
 
-        struct Gwsti transform{};
-        Gint status{-1};
-        ginqwstran(wsId, &transform, &status);
+        Gwsti transform{};
+        const Gint status = ginqwstran(wsId, &transform);
 
         REQUIRE(status == GERROR_NONE);
         REQUIRE(transform.wstus == GNOTPENDING);
@@ -469,12 +464,11 @@ TEST_CASE("open workstation", "[workstation]")
         const Gfloat xmax = 0.4f;
         const Gfloat ymin = 0.3f;
         const Gfloat ymax = 0.5f;
-        struct Glimit window{xmin, xmax, ymin, ymax};
+        Glimit window{xmin, xmax, ymin, ymax};
         gsetwswindow(wsId, &window);
 
-        struct Gwsti transform{};
-        Gint status{-1};
-        ginqwstran(wsId, &transform, &status);
+        Gwsti transform{};
+        const Gint status = ginqwstran(wsId, &transform);
 
         REQUIRE(status == GERROR_NONE);
         REQUIRE(transform.wstus == GNOTPENDING);
@@ -487,8 +481,7 @@ TEST_CASE("open workstation", "[workstation]")
     {
         Gpoint pos{0.1f, 0.1f};
         Gextent value{};
-        Gint status{};
-        ginqtextextent(wsId, &pos, "Hello, World!", &value, &status);
+        const Gint status = ginqtextextent(wsId, &pos, "Hello, World!", &value);
 
         REQUIRE(status == GERROR_NONE);
     }
@@ -809,12 +802,12 @@ TEST_CASE("Output primitives", "[output]")
     }
     SECTION("Cell Array")
     {
-        struct Grect rect =
+        Grect rect =
         {
         {0.25f, 0.75f},
         {0.75f, 0.25f}
         };
-        struct Gidim dim =
+        Gidim dim =
         {
         128, 128
         };
@@ -823,7 +816,7 @@ TEST_CASE("Output primitives", "[output]")
     }
     SECTION("Generalized Drawing Primitive")
     {
-        struct Gpoint points[] =
+        Gpoint points[] =
         {
         {0.1f, 0.1f},
         {0.2f, 0.2f}
@@ -875,14 +868,14 @@ TEST_CASE("output primitive error handling", "[output]")
     }
     SECTION("cell array")
     {
-        struct Grect rect =
+        Grect rect =
         {
             {0.25f, 0.75f},
             {0.75f, 0.25f}
         };
         SECTION("invalid x dimension")
         {
-            struct Gidim dim =
+            Gidim dim =
             {
                 0, 1
             };
@@ -894,7 +887,7 @@ TEST_CASE("output primitive error handling", "[output]")
     }
     SECTION("Generalized Drawing Primitive")
     {
-        struct Gpoint points[] =
+        Gpoint points[] =
         {
             {0.1f, 0.1f},
             {0.2f, 0.2f}
@@ -917,58 +910,58 @@ TEST_CASE("initial GKS state list values", "[output]")
 
     SECTION("line type is 1 (solid)")
     {
-        ginqlinetype(&value, &status);
+        status = ginqlinetype(&value);
 
         REQUIRE(value == GLN_SOLID);
     }
     SECTION("line color index is 1")
     {
-        ginqlinecolorind(&value, &status);
+        status = ginqlinecolorind(&value);
 
         REQUIRE(value == 1);
     }
     SECTION("line index is 1")
     {
-        ginqlineind(&value, &status);
+        status = ginqlineind(&value);
 
         REQUIRE(value == 1);
     }
     SECTION("marker type is 3 (star)")
     {
-        ginqmarkertype(&value, &status);
+        status = ginqmarkertype(&value);
 
         REQUIRE(value == GMK_STAR);
     }
     SECTION("marker size is 1", "[output]")
     {
         Gfloat size{};
-        ginqmarkersize(&size, &status);
+        status = ginqmarkersize(&size);
 
         REQUIRE(size == 1.0f);
     }
     SECTION("marker color index is 1")
     {
-        ginqmarkercolorind(&value, &status);
+        status = ginqmarkercolorind(&value);
 
         REQUIRE(value == 1);
     }
     SECTION("marker index is 1")
     {
-        ginqmarkerind(&value, &status);
+        status = ginqmarkerind(&value);
 
         REQUIRE(value == 1);
     }
     SECTION("text height is 0.01", "[output]")
     {
         Gfloat height{};
-        ginqcharheight(&height, &status);
+        status = ginqcharheight(&height);
 
         REQUIRE(height == 0.01f);
     }
     SECTION("char base vector is (1.00")
     {
         Gpoint base{-1.0f, -1.0f};
-        ginqcharbase(&base, &status);
+        status = ginqcharbase(&base);
 
         REQUIRE(base.x == 1.0f);
         REQUIRE(base.y == 0.0f);
@@ -976,7 +969,7 @@ TEST_CASE("initial GKS state list values", "[output]")
     SECTION("char up vector is (0,1)")
     {
         Gpoint up{-1.0f, -1.0f};
-        ginqcharup(&up, &status);
+        status = ginqcharup(&up);
 
         REQUIRE(up.x == 0.0f);
         REQUIRE(up.y == 1.0f);
@@ -984,26 +977,26 @@ TEST_CASE("initial GKS state list values", "[output]")
     SECTION("character width is 0.01")
     {
         Gfloat width{-1.0f};
-        ginqcharwidth(&width, &status);
+        status = ginqcharwidth(&width);
 
         REQUIRE(width == 0.01f);
     }
     SECTION("text color index is 1")
     {
-        ginqtextcolorind(&value, &status);
+        status = ginqtextcolorind(&value);
 
         REQUIRE(value == 1);
     }
     SECTION("text index is 1", "[output]")
     {
-        ginqtextind(&value, &status);
+        status = ginqtextind(&value);
 
         REQUIRE(value == 1);
     }
     SECTION("text alignment is normal")
     {
         Gtxalign align{};
-        ginqtextalign(&align, &status);
+        status = ginqtextalign(&align);
 
         REQUIRE(align.hor == GAH_NORMAL);
         REQUIRE(align.ver == GAV_NORMAL);
@@ -1011,7 +1004,7 @@ TEST_CASE("initial GKS state list values", "[output]")
     SECTION("text font and precision is (1, string)")
     {
         Gtxfp fontPrec{};
-        ginqtextfontprec(&fontPrec, &status);
+        status = ginqtextfontprec(&fontPrec);
 
         REQUIRE(fontPrec.font == 1);
         REQUIRE(fontPrec.prec == GP_STRING);
@@ -1019,46 +1012,46 @@ TEST_CASE("initial GKS state list values", "[output]")
     SECTION("char expansion factor is 1.0")
     {
         Gfloat expandFactor{};
-        ginqcharexpan(&expandFactor, &status);
+        status = ginqcharexpan(&expandFactor);
 
         REQUIRE(expandFactor == 1.0f);
     }
     SECTION("char spacing is 0.0")
     {
         Gfloat spacing{-1.0f};
-        ginqcharspace(&spacing, &status);
+        status = ginqcharspace(&spacing);
 
         REQUIRE(spacing == 0.0f);
     }
     SECTION("fill area interior style is HOLLOW")
     {
         Gflinter style{GSOLID};
-        ginqfillstyle(&style, &status);
+        status = ginqfillstyle(&style);
 
         REQUIRE(style == GHOLLOW);
     }
     SECTION("fill area interior style index is 1", "[output]")
     {
-        ginqfillstyleind(&value, &status);
+        status = ginqfillstyleind(&value);
 
         REQUIRE(value == 1);
     }
     SECTION("fill area color index is 1")
     {
-        ginqfillcolorind(&value, &status);
+        status = ginqfillcolorind(&value);
 
         REQUIRE(value == 1);
     }
     SECTION("fill area index is 1")
     {
-        ginqfillind(&value, &status);
+        status = ginqfillind(&value);
 
         REQUIRE(value == 1);
     }
     SECTION("pattern height is (0,1)")
     {
         Gpoint vec{};
-        ginqpatheight(&vec, &status);
+        status = ginqpatheight(&vec);
 
         REQUIRE(vec.x == 0.0f);
         REQUIRE(vec.y == 1.0f);
@@ -1066,7 +1059,7 @@ TEST_CASE("initial GKS state list values", "[output]")
     SECTION("pattern width is (1,0)")
     {
         Gpoint vec{};
-        ginqpatwidth(&vec, &status);
+        status = ginqpatwidth(&vec);
 
         REQUIRE(vec.x == 1.0f);
         REQUIRE(vec.y == 0.0f);
@@ -1074,7 +1067,7 @@ TEST_CASE("initial GKS state list values", "[output]")
     SECTION("pattern reference point is (0,0)")
     {
         Gpoint refPt{1.0f, 1.0f};
-        ginqpatrefpt(&refPt, &status);
+        status = ginqpatrefpt(&refPt);
 
         REQUIRE(refPt.x == 0.0f);
         REQUIRE(refPt.y == 0.0f);
@@ -1082,7 +1075,7 @@ TEST_CASE("initial GKS state list values", "[output]")
     SECTION("attribute source flags")
     {
         Gasfs asfs{};
-        ginqasf(&asfs, &status);
+        status = ginqasf(&asfs);
 
         REQUIRE(asfs.ln_type == GINDIVIDUAL);
         REQUIRE(asfs.ln_width == GINDIVIDUAL);
@@ -1101,12 +1094,12 @@ TEST_CASE("initial GKS state list values", "[output]")
     SECTION("current normalization transform is 0")
     {
         Gint transform{-1};
-        ginqcurrntrannum(&transform, &status);
+        status = ginqcurrntrannum(&transform);
 
         REQUIRE(transform == 0);
     }
 
-    REQUIRE(status == 0);
+    REQUIRE(status == GERROR_NONE);
 
     gclosegks();
 }
@@ -1119,7 +1112,7 @@ TEST_CASE("Set global attribute values", "[output]")
 
     SECTION("aspect source flags")
     {
-        struct Gasfs asfs =
+        Gasfs asfs =
         {
             GBUNDLED,
             GINDIVIDUAL,
@@ -1135,10 +1128,10 @@ TEST_CASE("Set global attribute values", "[output]")
             GINDIVIDUAL,
             GBUNDLED,
         };
-        gsetasf(&asfs);
+        status = gsetasf(&asfs);
 
-        struct Gasfs current{};
-        ginqasf(&current, &status);
+        Gasfs current{};
+        ginqasf(&current);
         REQUIRE(current.ln_type == asfs.ln_type);
         REQUIRE(current.ln_width == asfs.ln_width);
         REQUIRE(current.ln_color == asfs.ln_color);
@@ -1156,10 +1149,10 @@ TEST_CASE("Set global attribute values", "[output]")
     SECTION("char expansion factor")
     {
         const Gfloat expan{0.5f};
-        gsetcharexpan(expan);
+        status = gsetcharexpan(expan);
 
         Gfloat current{};
-        ginqcharexpan(&current, &status);
+        ginqcharexpan(&current);
         REQUIRE(current == expan);
     }
     SECTION("char height")
@@ -1167,7 +1160,7 @@ TEST_CASE("Set global attribute values", "[output]")
         gsetcharheight(0.5f);
 
         Gfloat charHeight{-1.0f};
-        ginqcharheight(&charHeight, &status);
+        status = ginqcharheight(&charHeight);
         REQUIRE(charHeight == 0.5f);
     }
     SECTION("char spacing")
@@ -1176,7 +1169,7 @@ TEST_CASE("Set global attribute values", "[output]")
         gsetcharspace(space);
 
         Gfloat current{};
-        ginqcharspace(&current, &status);
+        status = ginqcharspace(&current);
         REQUIRE(current == space);
     }
     SECTION("char up vector")
@@ -1185,7 +1178,7 @@ TEST_CASE("Set global attribute values", "[output]")
         gsetcharup(&up);
 
         Gpoint current{};
-        ginqcharup(&current, &status);
+        status = ginqcharup(&current);
         REQUIRE(current.x == up.x);
         REQUIRE(current.y == up.y);
     }
@@ -1193,57 +1186,57 @@ TEST_CASE("Set global attribute values", "[output]")
     {
         gsetfillcolorind(0);
 
-        ginqfillcolorind(&value, &status);
+        status = ginqfillcolorind(&value);
         REQUIRE(value == 0);
     }
     SECTION("fill area index")
     {
         gsetfillind(1);
 
-        ginqfillind(&value, &status);
+        status = ginqfillind(&value);
         REQUIRE(value == 1);
     }
     SECTION("fill area interior style")
     {
         gsetfillstyle(GSOLID);
 
-        enum Gflinter current{};
-        ginqfillstyle(&current, &status);
+        Gflinter current{};
+        status = ginqfillstyle(&current);
         REQUIRE(current == GSOLID);
     }
     SECTION("fill area interior style index")
     {
         gsetfillstyleind(2);
 
-        ginqfillstyleind(&value, &status);
+        status = ginqfillstyleind(&value);
         REQUIRE(value == 2);
     }
     SECTION("line type")
     {
         gsetlinetype(GLN_DASHED);
 
-        ginqlinetype(&value, &status);
+        status = ginqlinetype(&value);
         REQUIRE(value == GLN_DASHED);
     }
     SECTION("line color index")
     {
         gsetlinecolorind(1);
 
-        ginqlinecolorind(&value, &status);
+        status = ginqlinecolorind(&value);
         REQUIRE(value == 1);
     }
     SECTION("line index")
     {
         gsetlineind(1);
 
-        ginqlineind(&value, &status);
+        status = ginqlineind(&value);
         REQUIRE(value == 1);
     }
     SECTION("marker type")
     {
         gsetmarkertype(GMK_DIAGONAL_CROSS);
 
-        ginqmarkertype(&value, &status);
+        status = ginqmarkertype(&value);
         REQUIRE(value == GMK_DIAGONAL_CROSS);
     }
     SECTION("marker size")
@@ -1251,7 +1244,7 @@ TEST_CASE("Set global attribute values", "[output]")
         gsetmarkersize(2.0f);
 
         Gfloat size{-1.0f};
-        ginqmarkersize(&size, &status);
+        status = ginqmarkersize(&size);
         REQUIRE(size == 2.0f);
     }
     SECTION("marker color index")
@@ -1259,7 +1252,7 @@ TEST_CASE("Set global attribute values", "[output]")
         Gint index{1};
         gsetmarkercolorind(index);
 
-        ginqmarkercolorind(&value, &status);
+        status = ginqmarkercolorind(&value);
         REQUIRE(value == index);
     }
     SECTION("marker index")
@@ -1267,7 +1260,7 @@ TEST_CASE("Set global attribute values", "[output]")
         Gint index{1};
         gsetmarkerind(index);
 
-        ginqmarkerind(&value, &status);
+        status = ginqmarkerind(&value);
         REQUIRE(value == index);
     }
     SECTION("normalization transform")
@@ -1275,7 +1268,7 @@ TEST_CASE("Set global attribute values", "[output]")
         gselntran(1);
 
         Gint transform{0};
-        ginqcurrntrannum(&transform, &status);
+        status = ginqcurrntrannum(&transform);
         REQUIRE(transform == 1);
     }
     SECTION("text alignment")
@@ -1284,7 +1277,7 @@ TEST_CASE("Set global attribute values", "[output]")
         gsettextalign(&align);
 
         Gtxalign current{};
-        ginqtextalign(&current, &status);
+        status = ginqtextalign(&current);
         REQUIRE(current.hor == align.hor);
         REQUIRE(current.ver == align.ver);
     }
@@ -1293,7 +1286,7 @@ TEST_CASE("Set global attribute values", "[output]")
         const Gint color{0};
         gsettextcolorind(color);
 
-        ginqtextcolorind(&value, &status);
+        status = ginqtextcolorind(&value);
         REQUIRE(value == color);
     }
     SECTION("text font and precision")
@@ -1302,7 +1295,7 @@ TEST_CASE("Set global attribute values", "[output]")
         gsettextfontprec(&font);
 
         Gtxfp current{};
-        ginqtextfontprec(&current, &status);
+        status = ginqtextfontprec(&current);
         REQUIRE(current.font == font.font);
         REQUIRE(current.prec == font.prec);
     }
@@ -1311,11 +1304,11 @@ TEST_CASE("Set global attribute values", "[output]")
         const Gint index{1};
         gsettextind(index);
 
-        ginqtextind(&value, &status);
+        status = ginqtextind(&value);
         REQUIRE(value == index);
     }
 
-    REQUIRE(status == 0);
+    REQUIRE(status == GERROR_NONE);
 
     gclosegks();
 }
@@ -1332,7 +1325,7 @@ TEST_CASE("global attribute error handling", "[gks]")
 
         requireError(GERROR_CHAR_EXPANSION_NOT_POSITIVE, GFN_SET_CHARACTER_EXPANSION_FACTOR);
         Gfloat value{};
-        ginqcharexpan(&value, &status);
+        status = ginqcharexpan(&value);
         REQUIRE(status == GERROR_NONE);
         REQUIRE(value == 1.0f);
     }
@@ -1340,16 +1333,16 @@ TEST_CASE("global attribute error handling", "[gks]")
     {
         SECTION("zero")
         {
-            gsetcharheight(0.0f);
+            status = gsetcharheight(0.0f);
         }
         SECTION("negative")
         {
-            gsetcharheight(-1.0f);
+            status = gsetcharheight(-1.0f);
         }
 
         requireError(GERROR_CHAR_HEIGHT_NOT_POSITIVE, GFN_SET_CHARACTER_HEIGHT);
         Gfloat value{-1.0f};
-        ginqcharheight(&value, &status);
+        status = ginqcharheight(&value);
         REQUIRE(status == GERROR_NONE);
         REQUIRE(value == 0.01f);
     }
@@ -1360,7 +1353,7 @@ TEST_CASE("global attribute error handling", "[gks]")
 
         requireError(GERROR_CHAR_UP_LENGTH_ZERO, GFN_SET_CHARACTER_UP_VECTOR);
         Gpoint value{};
-        ginqcharup(&value, &status);
+        status = ginqcharup(&value);
         REQUIRE(value.x == 0.0f);
         REQUIRE(value.y == 1.0f);
     }
@@ -1370,7 +1363,7 @@ TEST_CASE("global attribute error handling", "[gks]")
 
         requireError(GERROR_INVALID_COLOR_INDEX, GFN_SET_FILL_AREA_COLOR_INDEX);
         Gint value{};
-        ginqfillcolorind(&value, &status);
+        status = ginqfillcolorind(&value);
         REQUIRE(status == GERROR_NONE);
         REQUIRE(value == 1);
     }
@@ -1380,7 +1373,7 @@ TEST_CASE("global attribute error handling", "[gks]")
 
         requireError(GERROR_INVALID_FILL_INDEX, GFN_SET_FILL_AREA_INDEX);
         Gint value{};
-        ginqfillind(&value, &status);
+        status = ginqfillind(&value);
         REQUIRE(status == GERROR_NONE);
         REQUIRE(value == 1);
     }
@@ -1390,7 +1383,7 @@ TEST_CASE("global attribute error handling", "[gks]")
 
         requireError(GERROR_FILL_STYLE_ZERO, GFN_SET_FILL_AREA_INTERIOR_STYLE);
         Gint value{};
-        ginqfillstyleind(&value, &status);
+        status = ginqfillstyleind(&value);
         REQUIRE(status == GERROR_NONE);
         REQUIRE(value == 1);
     }
@@ -1398,16 +1391,16 @@ TEST_CASE("global attribute error handling", "[gks]")
     {
         SECTION("too small")
         {
-            gsetlinecolorind(-1);
+            status = gsetlinecolorind(-1);
         }
         SECTION("too large")
         {
-            gsetlinecolorind(2);
+            status = gsetlinecolorind(2);
         }
 
         requireError(GERROR_INVALID_COLOR_INDEX, GFN_SET_POLYLINE_COLOR_INDEX);
         Gint value{};
-        ginqlinecolorind(&value, &status);
+        status = ginqlinecolorind(&value);
         REQUIRE(status == GERROR_NONE);
         REQUIRE(value == 1);
     }
@@ -1417,7 +1410,7 @@ TEST_CASE("global attribute error handling", "[gks]")
 
         requireError(GERROR_INVALID_LINE_INDEX, GFN_SET_POLYLINE_INDEX);
         Gint value{};
-        ginqlineind(&value, &status);
+        status = ginqlineind(&value);
         REQUIRE(status == GERROR_NONE);
         REQUIRE(value == 1);
     }
@@ -1427,7 +1420,7 @@ TEST_CASE("global attribute error handling", "[gks]")
 
         requireError(GERROR_LINE_TYPE_ZERO, GFN_SET_LINETYPE);
         Gint value{};
-        ginqlinetype(&value, &status);
+        status = ginqlinetype(&value);
         REQUIRE(status == GERROR_NONE);
         REQUIRE(value == 1);
     }
@@ -1435,16 +1428,16 @@ TEST_CASE("global attribute error handling", "[gks]")
     {
         SECTION("too small")
         {
-            gsetmarkercolorind(-1);
+            status = gsetmarkercolorind(-1);
         }
         SECTION("too large")
         {
-            gsetmarkercolorind(2);
+            status = gsetmarkercolorind(2);
         }
 
         requireError(GERROR_INVALID_COLOR_INDEX, GFN_SET_POLYMARKER_COLOR_INDEX);
         Gint value{};
-        ginqmarkercolorind(&value, &status);
+        status = ginqmarkercolorind(&value);
         REQUIRE(status == GERROR_NONE);
         REQUIRE(value == 1);
     }
@@ -1454,7 +1447,7 @@ TEST_CASE("global attribute error handling", "[gks]")
 
         requireError(GERROR_INVALID_MARKER_INDEX, GFN_SET_POLYMARKER_INDEX);
         Gint value{};
-        ginqmarkerind(&value, &status);
+        status = ginqmarkerind(&value);
         REQUIRE(status == GERROR_NONE);
         REQUIRE(value == 1);
     }
@@ -1464,7 +1457,7 @@ TEST_CASE("global attribute error handling", "[gks]")
 
         requireError(GERROR_NEGATIVE_MARKER_SIZE, GFN_SET_MARKER_SIZE_SCALE_FACTOR);
         Gfloat value{};
-        ginqmarkersize(&value, &status);
+        status = ginqmarkersize(&value);
         REQUIRE(status == GERROR_NONE);
         REQUIRE(value == 1.0f);
     }
@@ -1474,7 +1467,7 @@ TEST_CASE("global attribute error handling", "[gks]")
 
         requireError(GERROR_MARKER_TYPE_ZERO, GFN_SET_MARKER_TYPE);
         Gint value{};
-        ginqmarkertype(&value, &status);
+        status = ginqmarkertype(&value);
         REQUIRE(status == GERROR_NONE);
         REQUIRE(value == GMK_STAR);
     }
@@ -1482,12 +1475,12 @@ TEST_CASE("global attribute error handling", "[gks]")
     {
         SECTION("too small")
         {
-            gselntran(-1);
+            status = gselntran(-1);
         }
         SECTION("too large")
         {
             Gint maxTranNum{};
-            ginqmaxntrannum(&maxTranNum, &status);
+            status = ginqmaxntrannum(&maxTranNum);
             REQUIRE(status == GERROR_NONE);
 
             gselntran(maxTranNum + 1);
@@ -1495,7 +1488,7 @@ TEST_CASE("global attribute error handling", "[gks]")
 
         requireError(GERROR_INVALID_TRAN_NUM, GFN_SELECT_NORMALIZATION_TRANSFORMATION);
         Gint value{};
-        ginqcurrntrannum(&value, &status);
+        status = ginqcurrntrannum(&value);
         REQUIRE(status == GERROR_NONE);
         REQUIRE(value == 0);
     }
@@ -1505,7 +1498,7 @@ TEST_CASE("global attribute error handling", "[gks]")
 
         requireError(GERROR_INVALID_COLOR_INDEX, GFN_SET_TEXT_COLOR_INDEX);
         Gint value{};
-        ginqtextcolorind(&value, &status);
+        status = ginqtextcolorind(&value);
         REQUIRE(status == GERROR_NONE);
         REQUIRE(value == 1);
     }
@@ -1516,7 +1509,7 @@ TEST_CASE("global attribute error handling", "[gks]")
 
         requireError(GERROR_TEXT_FONT_ZERO, GFN_SET_TEXT_FONT_AND_PRECISION);
         Gtxfp value{};
-        ginqtextfontprec(&value, &status);
+        status = ginqtextfontprec(&value);
         REQUIRE(status == GERROR_NONE);
         REQUIRE(value.font == 1);
     }
@@ -1526,7 +1519,7 @@ TEST_CASE("global attribute error handling", "[gks]")
 
         requireError(GERROR_INVALID_TEXT_INDEX, GFN_SET_TEXT_INDEX);
         Gint value{};
-        ginqtextind(&value, &status);
+        status = ginqtextind(&value);
         REQUIRE(status == GERROR_NONE);
         REQUIRE(value == 1);
     }
@@ -1544,12 +1537,12 @@ TEST_CASE("global attribute error handling", "[gks]")
             SECTION("x range")
             {
                 Glimit viewport{1.0f, 0.0f, 0.0f, 1.0f};
-                gsetviewport(1, &viewport);
+                status = gsetviewport(1, &viewport);
             }
             SECTION("y range")
             {
                 Glimit viewport{0.0f, 1.0f, 1.0f, 0.0f};
-                gsetviewport(1, &viewport);
+                status = gsetviewport(1, &viewport);
             }
 
             requireError(GERROR_INVALID_RECT, GFN_SET_VIEWPORT);
@@ -1575,7 +1568,7 @@ TEST_CASE("global attribute error handling", "[gks]")
                 viewport.ymax = 2.0f;
             }
 
-            gsetviewport(1, &viewport);
+            status = gsetviewport(1, &viewport);
 
             requireError(GERROR_VIEWPORT_NOT_IN_NDC, GFN_SET_VIEWPORT);
         }
@@ -1585,7 +1578,7 @@ TEST_CASE("global attribute error handling", "[gks]")
         SECTION("invalid index")
         {
             Glimit window{0.0f, 1.0f, 0.0f, 1.0f};
-            gsetwindow(0, &window);
+            status = gsetwindow(0, &window);
 
             requireError(GERROR_INVALID_TRAN_NUM, GFN_SET_WINDOW);
         }
@@ -1594,12 +1587,12 @@ TEST_CASE("global attribute error handling", "[gks]")
             SECTION("x range")
             {
                 Glimit window{1.0f, 0.0f, 0.0f, 1.0f};
-                gsetwindow(1, &window);
+                status = gsetwindow(1, &window);
             }
             SECTION("y range")
             {
                 Glimit window{0.0f, 1.0f, 1.0f, 0.0f};
-                gsetwindow(1, &window);
+                status = gsetwindow(1, &window);
             }
 
             requireError(GERROR_INVALID_RECT, GFN_SET_WINDOW);
@@ -1621,8 +1614,7 @@ TEST_CASE("initial workstation dependent attribute values", "[workstation]")
     {
         Gwsct ct{};
         Gint numCt{};
-        Gint status{};
-        ginqwsconntype(wsId, 0, &numCt, &ct, &status);
+        const Gint status = ginqwsconntype(wsId, 0, &numCt, &ct);
         REQUIRE(status == GERROR_NONE);
         REQUIRE(ct.conn == connId);
         REQUIRE(ct.type == wsType);
@@ -1632,8 +1624,7 @@ TEST_CASE("initial workstation dependent attribute values", "[workstation]")
         Gint colors[16]{-1};
         Gint numIndices{};
         Gintlist indices{numOf(colors), colors};
-        Gint status{-1};
-        ginqcolorindices(wsId, numOf(colors), 0, &indices, &numIndices, &status);
+        const Gint status = ginqcolorindices(wsId, numOf(colors), 0, &indices, &numIndices);
 
         REQUIRE(status == GERROR_NONE);
         REQUIRE(numIndices == 2);
@@ -1656,12 +1647,11 @@ TEST_CASE("set workstation dependent attribute values", "[output]")
 
     SECTION("color representation")
     {
-        struct Gcobundl rep{0.5f, 0.5f, 0.5f};
+        Gcobundl rep{0.5f, 0.5f, 0.5f};
         gsetcolorrep(wsId, 0, &rep);
 
-        struct Gcobundl current{};
-        Gint status{};
-        ginqcolorrep(wsId, 0, &current, &status);
+        Gcobundl current{};
+        const Gint status = ginqcolorrep(wsId, 0, &current);
         REQUIRE(status == GERROR_NONE);
         REQUIRE(current.red == rep.red);
         REQUIRE(current.green == rep.green);
@@ -1686,8 +1676,7 @@ TEST_CASE("workstation dependent attribute error handling", "[workstation]")
         Gint colors[16]{};
         Gint numIndices{};
         Gintlist indices{};
-        Gint status{-1};
-        ginqcolorindices(wsId + 1, numOf(colors), 0, &indices, &numIndices, &status);
+        const Gint status = ginqcolorindices(wsId + 1, numOf(colors), 0, &indices, &numIndices);
 
         REQUIRE(status == GERROR_WS_NOT_OPEN);
     }
@@ -1695,17 +1684,16 @@ TEST_CASE("workstation dependent attribute error handling", "[workstation]")
     {
         Gint index{1};
         Gcobundl value{};
-        Gint status{};
 
         SECTION("workstation not open")
         {
-            ginqcolorrep(wsId + 1, index, &value, &status);
+            const Gint status = ginqcolorrep(wsId + 1, index, &value);
 
             REQUIRE(status == GERROR_WS_NOT_OPEN);
         }
         SECTION("bad color index")
         {
-            ginqcolorrep(wsId, -1, &value, &status);
+            const Gint status = ginqcolorrep(wsId, -1, &value);
 
             REQUIRE(status == GERROR_INVALID_COLOR_INDEX);
         }
@@ -1715,28 +1703,25 @@ TEST_CASE("workstation dependent attribute error handling", "[workstation]")
         Gwsct ct{};
         Gint buffSize{};
         Gint numCts{};
-        Gint status{};
-        ginqwsconntype(wsId + 1, buffSize, &numCts, &ct, &status);
+        const Gint status = ginqwsconntype(wsId + 1, buffSize, &numCts, &ct);
 
         REQUIRE(status == GERROR_WS_NOT_OPEN);
     }
     SECTION("get workstation transformation ws not open")
     {
-        struct Gwsti transform{};
-        Gint status{};
-        ginqwstran(wsId + 1, &transform, &status);
+        Gwsti transform{};
+        const Gint status = ginqwstran(wsId + 1, &transform);
 
         REQUIRE(status == GERROR_WS_NOT_OPEN);
     }
     SECTION("set color representation bad index")
     {
-        struct Gcobundl rep{0.5f, 0.5f, 0.5f};
+        Gcobundl rep{0.5f, 0.5f, 0.5f};
         gsetcolorrep(wsId, -1, &rep);
 
         requireError(GERROR_INVALID_COLOR_INDEX, GFN_SET_COLOR_REPRESENTATION);
-        struct Gcobundl current{};
-        Gint status{};
-        ginqcolorrep(wsId, 0, &current, &status);
+        Gcobundl current{};
+        const Gint status = ginqcolorrep(wsId, 0, &current);
         REQUIRE(status == GERROR_NONE);
         REQUIRE(current.red == 0.0f);
         REQUIRE(current.green == 0.0f);

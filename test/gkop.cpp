@@ -56,12 +56,12 @@ TEST_CASE("GKS open")
 
     SECTION("gcellarray")
     {
-        struct Grect rect =
+        Grect rect =
         {
             {0.25f, 0.75f},
             {0.75f, 0.25f}
         };
-        struct Gidim dim =
+        Gidim dim =
         {
             128, 128
         };
@@ -114,7 +114,7 @@ TEST_CASE("GKS open")
         {
             Gint index{1};
             Gcobundl value{};
-            ginqcolorrep(wsId, index, &value, &status);
+            status = ginqcolorrep(wsId, index, &value);
 
             REQUIRE(status == GERROR_NOT_STATE_WSOP_WSAC_SGOP);
         }
@@ -122,7 +122,7 @@ TEST_CASE("GKS open")
         {
             Gint index{1};
             Gcobundl value{};
-            ginqcolorrep(wsId, index, &value, &status);
+            status = ginqcolorrep(wsId, index, &value);
 
             REQUIRE(status == GERROR_NOT_STATE_WSOP_WSAC_SGOP);
         }
@@ -130,7 +130,7 @@ TEST_CASE("GKS open")
         {
             Gpoint pos{};
             Gextent value{};
-            ginqtextextent(wsId, &pos, "Hello, world!", &value, &status);
+            status = ginqtextextent(wsId, &pos, "Hello, world!", &value);
 
             REQUIRE(status == GERROR_NOT_STATE_WSOP_WSAC_SGOP);
         }
@@ -139,14 +139,14 @@ TEST_CASE("GKS open")
             Gwsct ct{};
             Gint buffSize{};
             Gint numCts{};
-            ginqwsconntype(wsId + 1, buffSize, &numCts, &ct, &status);
+            status = ginqwsconntype(wsId + 1, buffSize, &numCts, &ct);
 
             REQUIRE(status == GERROR_NOT_STATE_WSOP_WSAC_SGOP);
         }
         SECTION("ginqwstran")
         {
-            struct Gwsti transform{};
-            ginqwstran(wsId, &transform, &status);
+            Gwsti transform{};
+            status = ginqwstran(wsId, &transform);
 
             REQUIRE(status == GERROR_NOT_STATE_WSOP_WSAC_SGOP);
         }

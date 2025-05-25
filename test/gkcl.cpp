@@ -34,7 +34,7 @@ TEST_CASE("GKS closed", "[errors]")
         SECTION("ginqasf")
         {
             Gasfs value{};
-            ginqasf(&value, &status);
+            status = ginqasf(&value);
         }
         SECTION("ginqavailwstypes")
         {
@@ -47,117 +47,117 @@ TEST_CASE("GKS closed", "[errors]")
             }
             Gintlist wsTypes{0, wsTypeValues};
             Gint numAvailTypes{};
-            ginqavailwstypes(numWsTypes, start, &wsTypes, &numAvailTypes, &status);
+            status = ginqavailwstypes(numWsTypes, start, &wsTypes, &numAvailTypes);
         }
         SECTION("ginqcharexpan")
         {
             Gfloat value{};
-            ginqcharexpan(&value, &status);
+            status = ginqcharexpan(&value);
         }
         SECTION("ginqcharbase")
         {
             Gpoint value{};
-            ginqcharbase(&value, &status);
+            status = ginqcharbase(&value);
         }
         SECTION("ginqcharheight")
         {
             Gfloat value{};
-            ginqcharheight(&value, &status);
+            status = ginqcharheight(&value);
         }
         SECTION("ginqcharspace")
         {
             Gfloat value{};
-            ginqcharspace(&value, &status);
+            status = ginqcharspace(&value);
         }
         SECTION("ginqcharwidth")
         {
             Gfloat value{};
-            ginqcharwidth(&value, &status);
+            status = ginqcharwidth(&value);
         }
         SECTION("ginqcharup")
         {
             Gpoint value{};
-            ginqcharup(&value, &status);
+            status = ginqcharup(&value);
         }
         SECTION("ginqclip")
         {
             Gcliprect clipping{};
-            ginqclip(&clipping, &status);
+            status = ginqclip(&clipping);
         }
         SECTION("ginqcurrntrannum")
         {
             Gint transform{-1};
-            ginqcurrntrannum(&transform, &status);
+            status = ginqcurrntrannum(&transform);
         }
         SECTION("ginqfillcolorind")
         {
             Gint value{};
-            ginqfillcolorind(&value, &status);
+            status = ginqfillcolorind(&value);
         }
         SECTION("ginqfillind")
         {
             Gint value{};
-            ginqfillind(&value, &status);
+            status = ginqfillind(&value);
         }
         SECTION("ginqfillstyle")
         {
             Gflinter value{};
-            ginqfillstyle(&value, &status);
+            status = ginqfillstyle(&value);
         }
         SECTION("ginqfillstyleind")
         {
             Gint value{};
-            ginqfillstyleind(&value, &status);
+            status = ginqfillstyleind(&value);
         }
         SECTION("ginqlevelgks")
         {
             Glevel level{};
-            ginqlevelgks(&level, &status);
+            status = ginqlevelgks(&level);
         }
         SECTION("ginqlinecolorind")
         {
             Gint value{};
-            ginqlinecolorind(&value, &status);
+            status = ginqlinecolorind(&value);
         }
         SECTION("ginqlineind")
         {
             Gint value{};
-            ginqlineind(&value, &status);
+            status = ginqlineind(&value);
         }
         SECTION("ginqlinetype")
         {
             Gint value{};
-            ginqlinetype(&value, &status);
+            status = ginqlinetype(&value);
         }
         SECTION("ginqmarkercolorind")
         {
             Gint value{};
-            ginqmarkercolorind(&value, &status);
+            status = ginqmarkercolorind(&value);
         }
         SECTION("ginqmarkerind")
         {
             Gint value{};
-            ginqmarkerind(&value, &status);
+            status = ginqmarkerind(&value);
         }
         SECTION("ginqmarkersize")
         {
             Gfloat value{};
-            ginqmarkersize(&value, &status);
+            status = ginqmarkersize(&value);
         }
         SECTION("ginqmarkertype")
         {
             Gint value{};
-            ginqmarkertype(&value, &status);
+            status = ginqmarkertype(&value);
         }
         SECTION("ginqmaxntrannum")
         {
             Gint value{};
-            ginqmaxntrannum(&value, &status);
+            status = ginqmaxntrannum(&value);
         }
         SECTION("ginqntran")
         {
             Gtran value{};
-            ginqntran(0, &value, &status);
+            status = ginqntran(0, &value);
         }
         SECTION("ginqopenws")
         {
@@ -165,52 +165,52 @@ TEST_CASE("GKS closed", "[errors]")
             Gintlist idList{static_cast<Gint>(ids.size()), ids.data()};
             Gint start{0};
             Gint numIds{0};
-            ginqopenws(idList.number, start, &idList, &numIds, &status);
+            status = ginqopenws(idList.number, start, &idList, &numIds);
         }
         SECTION("ginqpatheight")
         {
             Gpoint value{};
-            ginqpatheight(&value, &status);
+            status = ginqpatheight(&value);
         }
         SECTION("ginqpatrefpt")
         {
             Gpoint refPt{};
-            ginqpatrefpt(&refPt, &status);
+            status = ginqpatrefpt(&refPt);
         }
         SECTION("ginqpatwidth")
         {
             Gpoint value{};
-            ginqpatwidth(&value, &status);
+            status = ginqpatwidth(&value);
         }
         SECTION("ginqtextalign")
         {
             Gtxalign value{};
-            ginqtextalign(&value, &status);
+            status = ginqtextalign(&value);
         }
         SECTION("ginqtextcolorind")
         {
             Gint value{};
-            ginqtextcolorind(&value, &status);
+            status = ginqtextcolorind(&value);
         }
         SECTION("ginqtextfontprec")
         {
             Gtxfp value{};
-            ginqtextfontprec(&value, &status);
+            status = ginqtextfontprec(&value);
         }
         SECTION("ginqtextind")
         {
             Gint value{};
-            ginqtextind(&value, &status);
+            status = ginqtextind(&value);
         }
         SECTION("ginqcolorfacil")
         {
             Gcofac facil{};
-            ginqcolorfacil(GWSTYPE_TEK4105, 0, NULL, &facil, &status);
+            status = ginqcolorfacil(GWSTYPE_TEK4105, 0, NULL, &facil);
         }
         SECTION("ginqdisplaysize")
         {
             Gdspsize value{};
-            ginqdisplaysize(GWSTYPE_TEK4105, &value, &status);
+            status = ginqdisplaysize(GWSTYPE_TEK4105, &value);
         }
         SECTION("ginqfillfacil")
         {
@@ -220,32 +220,32 @@ TEST_CASE("GKS closed", "[errors]")
             facil.interiors = interiorStyles;
             facil.hatches = hatchStyles;
             Gint numAvailHatches{};
-            ginqfillfacil(GWSTYPE_TEK4105, numOf(hatchStyles), &numAvailHatches, &facil, &status);
+            status = ginqfillfacil(GWSTYPE_TEK4105, numOf(hatchStyles), &numAvailHatches, &facil);
         }
         SECTION("ginqlinefacil")
         {
             Gint lineTypes[10]{};
             Gint numLineTypes{};
             Glnfac value{};
-            ginqlinefacil(GWSTYPE_TEK4105, numOf(lineTypes), &numLineTypes, &value, &status);
+            status = ginqlinefacil(GWSTYPE_TEK4105, numOf(lineTypes), &numLineTypes, &value);
         }
         SECTION("ginqmarkerfacil")
         {
             Gint lineTypes[10]{};
             Gint numLineTypes{};
             Glnfac value{};
-            ginqlinefacil(GWSTYPE_TEK4105, numOf(lineTypes), &numLineTypes, &value, &status);
+            status = ginqlinefacil(GWSTYPE_TEK4105, numOf(lineTypes), &numLineTypes, &value);
         }
         SECTION("ginqmaxwssttables")
         {
             Gwstables tables{-1, -1, -1, -1, -1, -1};
-            ginqmaxwssttables(GWSTYPE_TEK4105, &tables, &status);
+            status = ginqmaxwssttables(GWSTYPE_TEK4105, &tables);
         }
 
         SECTION("ginqwsmaxnum")
         {
             Gwsmax value{};
-            ginqwsmaxnum(&value, &status);
+            status = ginqwsmaxnum(&value);
         }
 
         REQUIRE(status == GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP);
@@ -476,7 +476,7 @@ TEST_CASE("GKS closed", "[errors]")
         {
             Gint index{1};
             Gcobundl value{};
-            ginqcolorrep(wsId, index, &value, &status);
+            status = ginqcolorrep(wsId, index, &value);
 
             REQUIRE(status == GERROR_NOT_STATE_WSOP_WSAC_SGOP);
         }
@@ -484,7 +484,7 @@ TEST_CASE("GKS closed", "[errors]")
         {
             Gint index{1};
             Gcobundl value{};
-            ginqcolorrep(wsId, index, &value, &status);
+            status = ginqcolorrep(wsId, index, &value);
 
             REQUIRE(status == GERROR_NOT_STATE_WSOP_WSAC_SGOP);
         }
@@ -492,7 +492,7 @@ TEST_CASE("GKS closed", "[errors]")
         {
             Gpoint pos{};
             Gextent value{};
-            ginqtextextent(wsId, &pos, "Hello, world!", &value, &status);
+            status = ginqtextextent(wsId, &pos, "Hello, world!", &value);
 
             REQUIRE(status == GERROR_NOT_STATE_WSOP_WSAC_SGOP);
         }
@@ -501,14 +501,14 @@ TEST_CASE("GKS closed", "[errors]")
             Gwsct ct{};
             Gint buffSize{};
             Gint numCts{};
-            ginqwsconntype(wsId + 1, buffSize, &numCts, &ct, &status);
+            status = ginqwsconntype(wsId + 1, buffSize, &numCts, &ct);
 
             REQUIRE(status == GERROR_NOT_STATE_WSOP_WSAC_SGOP);
         }
         SECTION("ginqwstran")
         {
-            struct Gwsti transform{};
-            ginqwstran(wsId, &transform, &status);
+            Gwsti transform{};
+            status = ginqwstran(wsId, &transform);
 
             REQUIRE(status == GERROR_NOT_STATE_WSOP_WSAC_SGOP);
         }
@@ -526,12 +526,12 @@ TEST_CASE("GKS closed", "[errors]")
 
     SECTION("gcellarray")
     {
-        struct Grect rect =
+        Grect rect =
         {
             {0.25f, 0.75f},
             {0.75f, 0.25f}
         };
-        struct Gidim dim =
+        Gidim dim =
         {
             128, 128
         };
