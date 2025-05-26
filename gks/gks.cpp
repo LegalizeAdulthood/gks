@@ -424,14 +424,16 @@ namespace
 const std::function<GError()> noError = [] { return GERROR_NONE; };
 
 template <typename T>
-GError inquireGKSValue(T *dest, const T &source, const std::function<GError()> &check = noError)
+GError inquireGKSValue(T *dest, const T &source, GFunction fn, const std::function<GError()> &check = noError)
 {
     if (g_opState == GGKCL)
     {
+        gerrorhand(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, fn, g_errFile);
         return GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP;
     }
     if (const GError error = check())
     {
+        gerrorhand(error, fn, g_errFile);
         return error;
     }
 
@@ -440,14 +442,16 @@ GError inquireGKSValue(T *dest, const T &source, const std::function<GError()> &
 }
 
 template <typename T>
-GError inquireGKSValue(const T &body, const std::function<GError()> &check = noError)
+GError inquireGKSValue(const T &body, GFunction fn, const std::function<GError()> &check = noError)
 {
     if (g_opState == GGKCL)
     {
+        gerrorhand(GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP, fn, g_errFile);
         return GERROR_NOT_STATE_GKOP_WSOP_WSAC_SGOP;
     }
     if (const GError error = check())
     {
+        gerrorhand(error, fn, g_errFile);
         return error;
     }
 
@@ -492,14 +496,16 @@ Gint setGksValue(T &dest, T *source, GFunction fn, const std::function<GError()>
 }
 
 template <typename T>
-Gint getWorkstationValue(T *dest, const T &source, const std::function<GError()> &check = noError)
+Gint getWorkstationValue(T *dest, const T &source, GFunction fn, const std::function<GError()> &check = noError)
 {
     if (g_opState == GGKCL || g_opState == GGKOP)
     {
+        gerrorhand(GERROR_NOT_STATE_WSOP_WSAC_SGOP, fn, g_errFile);
         return GERROR_NOT_STATE_WSOP_WSAC_SGOP;
     }
     if (const GError error = check())
     {
+        gerrorhand(error, fn, g_errFile);
         return error;
     }
 
@@ -618,7 +624,7 @@ Gint gclosegks()
 
 Gint ginqasf(Gasfs *value)
 {
-    return inquireGKSValue(value, g_gksState.asfs);
+    return inquireGKSValue(value, g_gksState.asfs, GFN_INQUIRE_ASPECT_SOURCE_FLAGS);
 }
 
 Gint ginqavailwstypes(Gint bufSize, Gint start, Gintlist *wsTypes, Gint *numTypes)
@@ -629,37 +635,38 @@ Gint ginqavailwstypes(Gint bufSize, Gint start, Gintlist *wsTypes, Gint *numType
             *numTypes = g_gksDescription.numWsTypes;
             wsTypes->number = *numTypes;
             std::copy_n(g_gksDescription.wsTypes, g_gksDescription.numWsTypes, wsTypes->integers);
-        });
+        },
+        GFN_INQUIRE_AVAILABLE_WORKSTATION_TYPES);
 }
 
 Gint ginqcharexpan(Gfloat *value)
 {
-    return inquireGKSValue(value, g_gksState.currentCharExpandFactor);
+    return inquireGKSValue(value, g_gksState.currentCharExpandFactor, GFN_INQUIRE_CHARACTER_EXPANSION_FACTOR);
 }
 
 Gint ginqcharbase(Gpoint *value)
 {
-    return inquireGKSValue(value, g_gksState.currentCharBase);
+    return inquireGKSValue(value, g_gksState.currentCharBase, GFN_INQUIRE_CHARACTER_BASE);
 }
 
 Gint ginqcharheight(Gfloat *value)
 {
-    return inquireGKSValue(value, g_gksState.currentCharHeight);
+    return inquireGKSValue(value, g_gksState.currentCharHeight, GFN_INQUIRE_CHARACTER_HEIGHT);
 }
 
 Gint ginqcharspace(Gfloat *value)
 {
-    return inquireGKSValue(value, g_gksState.currentCharSpacing);
+    return inquireGKSValue(value, g_gksState.currentCharSpacing, GFN_INQUIRE_CHARACTER_SPACING);
 }
 
 Gint ginqcharwidth(Gfloat *value)
 {
-    return inquireGKSValue(value, g_gksState.currentCharWidth);
+    return inquireGKSValue(value, g_gksState.currentCharWidth, GFN_INQUIRE_CHARACTER_WIDTH);
 }
 
 Gint ginqcharup(Gpoint *value)
 {
-    return inquireGKSValue(value, g_gksState.currentCharUp);
+    return inquireGKSValue(value, g_gksState.currentCharUp, GFN_INQUIRE_CHARACTER_UP_VECTOR);
 }
 
 Gint ginqclip(Gcliprect *value)
@@ -670,87 +677,88 @@ Gint ginqclip(Gcliprect *value)
             value->ind = g_gksState.clipping;
             const Glimit identity = {0.0f, 1.0f, 0.0f, 1.0f};
             value->rec = identity;
-        });
+        },
+        GFN_INQUIRE_CLIPPING);
 }
 
 Gint ginqcurrntrannum(Gint *value)
 {
-    return inquireGKSValue(value, g_gksState.currentTransform);
+    return inquireGKSValue(value, g_gksState.currentTransform, GFN_INQUIRE_CURRENT_NORMALIZATION_TRANSFORMATION_NUMBER);
 }
 
 Gint ginqfillcolorind(Gint *value)
 {
-    return inquireGKSValue(value, g_gksState.currentFillColorIndex);
+    return inquireGKSValue(value, g_gksState.currentFillColorIndex, GFN_INQUIRE_FILL_COLOR_INDEX);
 }
 
 Gint ginqfillind(Gint *value)
 {
-    return inquireGKSValue(value, g_gksState.currentFillIndex);
+    return inquireGKSValue(value, g_gksState.currentFillIndex, GFN_INQUIRE_FILL_INDEX);
 }
 
 Gint ginqfillstyle(Gflinter *value)
 {
-    return inquireGKSValue(value, g_gksState.currentFillStyle);
+    return inquireGKSValue(value, g_gksState.currentFillStyle, GFN_INQUIRE_FILL_STYLE);
 }
 
 Gint ginqfillstyleind(Gint *value)
 {
-    return inquireGKSValue(value, g_gksState.currentFillStyleIndex);
+    return inquireGKSValue(value, g_gksState.currentFillStyleIndex, GFN_INQUIRE_FILL_STYLE_INDEX);
 }
 
 Gint ginqlevelgks(Glevel *value)
 {
-    return inquireGKSValue(value, g_gksDescription.level);
+    return inquireGKSValue(value, g_gksDescription.level, GFN_INQUIRE_LEVEL_OF_GKS);
 }
 
 Gint ginqlinecolorind(Gint *value)
 {
-    return inquireGKSValue(value, g_gksState.currentLineColorIndex);
+    return inquireGKSValue(value, g_gksState.currentLineColorIndex, GFN_INQUIRE_LINE_COLOR_INDEX);
 }
 
 Gint ginqlineind(Gint *value)
 {
-    return inquireGKSValue(value, g_gksState.currentLineIndex);
+    return inquireGKSValue(value, g_gksState.currentLineIndex, GFN_INQUIRE_LINE_INDEX);
 }
 
 Gint ginqlinetype(Gint *value)
 {
-    return inquireGKSValue(value, g_gksState.currentLineType);
+    return inquireGKSValue(value, g_gksState.currentLineType, GFN_INQUIRE_LINE_TYPE);
 }
 
 Gint ginqmarkercolorind(Gint *value)
 {
-    return inquireGKSValue(value, g_gksState.currentMarkerColorIndex);
+    return inquireGKSValue(value, g_gksState.currentMarkerColorIndex, GFN_INQUIRE_MARKER_COLOR_INDEX);
 }
 
 Gint ginqmarkerind(Gint *value)
 {
-    return inquireGKSValue(value, g_gksState.currentMarkerIndex);
+    return inquireGKSValue(value, g_gksState.currentMarkerIndex, GFN_INQUIRE_MARKER_INDEX);
 }
 
 Gint ginqmarkersize(Gfloat *value)
 {
-    return inquireGKSValue(value, g_gksState.currentMarkerSize);
+    return inquireGKSValue(value, g_gksState.currentMarkerSize, GFN_INQUIRE_MARKER_SIZE);
 }
 
 Gint ginqmarkertype(Gint *value)
 {
-    return inquireGKSValue(value, g_gksState.currentMarkerType);
+    return inquireGKSValue(value, g_gksState.currentMarkerType, GFN_INQUIRE_MARKER_TYPE);
 }
 
 Gint ginqmaxntrannum(Gint *value)
 {
-    return inquireGKSValue(value, g_gksDescription.numTrans);
+    return inquireGKSValue(value, g_gksDescription.numTrans, GFN_INQUIRE_MAXIMUM_NORMALIZATION_TRANSFORMATION_NUMBER);
 }
 
 Gint ginqntran(Gint num, Gtran *value)
 {
-    return inquireGKSValue(value, g_gksState.transforms[num - 1]);
+    return inquireGKSValue(value, g_gksState.transforms[num - 1], GFN_INQUIRE_NORMALIZATION_TRANSFORMATION);
 }
 
 Gint ginqopenws(Gint maxIds, Gint start, Gintlist *wsids, Gint *actualIds)
 {
-    return inquireGKSValue([=] { *actualIds = 0; });
+    return inquireGKSValue([=] { *actualIds = 0; }, GFN_INQUIRE_SET_OF_OPEN_WORKSTATION);
 }
 
 Gint ginqopst(Gopst *value)
@@ -761,42 +769,42 @@ Gint ginqopst(Gopst *value)
 
 Gint ginqpatheight(Gpoint *value)
 {
-    return inquireGKSValue(value, g_gksState.currentPatHeightVec);
+    return inquireGKSValue(value, g_gksState.currentPatHeightVec, GFN_INQUIRE_PATTERN_HEGIHT);
 }
 
 Gint ginqpatrefpt(Gpoint *value)
 {
-    return inquireGKSValue(value, g_gksState.currentPatternRef);
+    return inquireGKSValue(value, g_gksState.currentPatternRef, GFN_INQUIRE_PATTERN_REFERENCE_POINT);
 }
 
 Gint ginqpatwidth(Gpoint *value)
 {
-    return inquireGKSValue(value, g_gksState.currentPatWidthVec);
+    return inquireGKSValue(value, g_gksState.currentPatWidthVec, GFN_INQUIRE_PATTERN_WIDTH);
 }
 
 Gint ginqtextalign(Gtxalign *value)
 {
-    return inquireGKSValue(value, g_gksState.currentTextAlign);
+    return inquireGKSValue(value, g_gksState.currentTextAlign, GFN_INQUIRE_TEXT_ALIGNMENT);
 }
 
 Gint ginqtextcolorind(Gint *value)
 {
-    return inquireGKSValue(value, g_gksState.currentTextColorIndex);
+    return inquireGKSValue(value, g_gksState.currentTextColorIndex, GFN_INQUIRE_TEXT_COLOR_INDEX);
 }
 
 Gint ginqtextfontprec(Gtxfp *value)
 {
-    return inquireGKSValue(value, g_gksState.currentTextFontPrec);
+    return inquireGKSValue(value, g_gksState.currentTextFontPrec, GFN_INQUIRE_TEXT_FONT_PRECISION);
 }
 
 Gint ginqtextind(Gint *value)
 {
-    return inquireGKSValue(value, g_gksState.currentTextIndex);
+    return inquireGKSValue(value, g_gksState.currentTextIndex, GFN_INQUIRE_TEXT_INDEX);
 }
 
 Gint ginqwsmaxnum(Gwsmax *value)
 {
-    return inquireGKSValue(value, g_gksDescription.wsmax);
+    return inquireGKSValue(value, g_gksDescription.wsmax, GFN_INQUIRE_WORKSTATION_MAXIMUM_NUMBERS);
 }
 
 ////////////////////////////////////////////////////////////////
@@ -809,12 +817,13 @@ Gint ginqcolorfacil(Gwstype wsType, Gint buffSize, Gint *numColorIndices, Gcofac
             *numColorIndices = g_wsDesc[wsType - 1].colorFacilities.colors;
             *value = g_wsDesc[wsType - 1].colorFacilities;
         },
-        [wsType] { return checkWsType(wsType); });
+        GFN_INQUIRE_COLOR_FACILITIES, [wsType] { return checkWsType(wsType); });
 }
 
 Gint ginqdisplaysize(Gwstype wsType, Gdspsize *value)
 {
-    return inquireGKSValue(value, g_wsDesc[wsType - 1].displaySpaceSize, [wsType] { return checkWsType(wsType); });
+    return inquireGKSValue(value, g_wsDesc[wsType - 1].displaySpaceSize, GFN_INQUIRE_DISPLAY_SPACE_SIZE,
+        [wsType] { return checkWsType(wsType); });
 }
 
 Gint ginqfillfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gflfac *value)
@@ -829,7 +838,7 @@ Gint ginqfillfacil(Gwstype wsType, Gint buffSize, Gint *facilSize, Gflfac *value
             std::copy_n(desc->availFillAreaHatchStyles.integers, desc->availFillAreaHatchStyles.number, value->hatches);
             value->predefined = desc->numFillAreaBundles;
         },
-        [wsType] { return checkWsType(wsType); });
+        GFN_INQUIRE_FILL_FACILITIES, [wsType] { return checkWsType(wsType); });
 }
 
 Gint ginqlinefacil(Gwstype wsType, Gint buffSize, Gint *numLineTypes, Glnfac *value)
@@ -847,7 +856,7 @@ Gint ginqlinefacil(Gwstype wsType, Gint buffSize, Gint *numLineTypes, Glnfac *va
             value->max_width = facil.max_width;
             value->predefined = facil.predefined;
         },
-        [wsType] { return checkWsType(wsType); });
+        GFN_INQUIRE_LINE_FACILITIES, [wsType] { return checkWsType(wsType); });
 }
 
 Gint ginqmarkerfacil(Gwstype wsType, Gint buffSize, Gint *numMarkerTypes, Gmkfac *value)
@@ -867,7 +876,7 @@ Gint ginqmarkerfacil(Gwstype wsType, Gint buffSize, Gint *numMarkerTypes, Gmkfac
             value->max_size = facil.max_size;
             value->predefined = facil.predefined;
         },
-        [wsType] { return checkWsType(wsType); });
+        GFN_INQUIRE_MARKER_FACILITIES, [wsType] { return checkWsType(wsType); });
 }
 
 Gint ginqtextfacil(Gwstype wsType, Gint buffSize, Gint *numFontPrecs, Gtxfac *value)
@@ -889,12 +898,13 @@ Gint ginqtextfacil(Gwstype wsType, Gint buffSize, Gint *numFontPrecs, Gtxfac *va
             value->max_exp = facil.max_exp;
             value->predefined = facil.predefined;
         },
-        [wsType] { return checkWsType(wsType); });
+        GFN_INQUIRE_TEXT_FACILITIES, [wsType] { return checkWsType(wsType); });
 }
 
 Gint ginqmaxwssttables(Gwstype wsType, Gwstables *value)
 {
-    return inquireGKSValue(value, g_wsDesc[wsType - 1].tableSizes, [wsType] { return checkWsType(wsType); });
+    return inquireGKSValue(value, g_wsDesc[wsType - 1].tableSizes,
+        GFN_INQUIRE_MAXIMUM_LENGTH_OF_WORKSTATION_STATE_TABLES, [wsType] { return checkWsType(wsType); });
 }
 
 ////////////////////////////////////////////////////////////////
@@ -1237,12 +1247,12 @@ Gint ginqcolorindices(Gint wsId, Gint sizeIndices, Gint start, Gintlist *indices
 {
     if (g_opState == GGKCL)
     {
-        gerrorhand(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_INQUIRE_LIST_OF_COLOR_INDICES, g_errFile);
+        gerrorhand(GERROR_NOT_STATE_WSOP_WSAC_SGOP, GFN_INQUIRE_COLOR_INDICES, g_errFile);
         return GERROR_NOT_STATE_WSOP_WSAC_SGOP;
     }
     if (!wsIsOpen(wsId))
     {
-        gerrorhand(GERROR_WS_NOT_OPEN, GFN_UPDATE_WORKSTATION, g_errFile);
+        gerrorhand(GERROR_WS_NOT_OPEN, GFN_INQUIRE_COLOR_INDICES, g_errFile);
         return GERROR_WS_NOT_OPEN;
     }
 
@@ -1253,7 +1263,7 @@ Gint ginqcolorindices(Gint wsId, Gint sizeIndices, Gint start, Gintlist *indices
 
 Gint ginqcolorrep(Gint wsId, Gint index, Gcobundl *value)
 {
-    return getWorkstationValue(value, g_wsState[0].colorTable[index],
+    return getWorkstationValue(value, g_wsState[0].colorTable[index], GFN_INQUIRE_COLOR_REPRESENTATION,
         [wsId, index]
         {
             if (!wsIsOpen(wsId))
@@ -1302,8 +1312,8 @@ Gint ginqwsconntype(Gint wsId, Gint buffSize, Gint *ctSize, Gwsct *ct)
 
 Gint ginqwstran(Gint wsId, Gwsti *value)
 {
-    return getWorkstationValue(
-        value, g_wsState[wsId].transform, [wsId] { return wsIsOpen(wsId) ? GERROR_NONE : GERROR_WS_NOT_OPEN; });
+    return getWorkstationValue(value, g_wsState[wsId].transform, GFN_INQUIRE_WORKSTATION_TRANSFORMATION,
+        [wsId] { return wsIsOpen(wsId) ? GERROR_NONE : GERROR_WS_NOT_OPEN; });
 }
 
 ////////////////////////////////////////////////////////////////

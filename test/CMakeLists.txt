@@ -7,7 +7,7 @@ add_executable(test-gks
     test.cpp
     error.h
     error.cpp
-    gkcl.cpp
+    gkcl_test.cpp
     gkop_test.cpp
     wsop.cpp
     wsac.cpp
