@@ -1268,12 +1268,10 @@ Gint ginqcolorrep(Gint wsId, Gint index, Gcobundl *value)
         {
             if (!wsIsOpen(wsId))
             {
-                gerrorhand(GERROR_WS_NOT_OPEN, GFN_INQUIRE_COLOR_REPRESENTATION, g_errFile);
                 return GERROR_WS_NOT_OPEN;
             }
             if (index < 0 || index > 1)
             {
-                gerrorhand(GERROR_INVALID_COLOR_INDEX, GFN_INQUIRE_COLOR_REPRESENTATION, g_errFile);
                 return GERROR_INVALID_COLOR_INDEX;
             }
             return GERROR_NONE;
@@ -1410,10 +1408,13 @@ Gint ggdp(Gint numPoints, Gpoint *points, Gint gdpId, Ggdprec *data)
 {
     if (g_opState != GWSAC && g_opState != GSGOP)
     {
-        gerrorhand(GERROR_NOT_STATE_WSAC_SGOP, GFN_GDP, g_errFile);
+        gerrorhand(GERROR_NOT_STATE_WSAC_SGOP, GFN_GENERALIZED_DRAWING_PRIMITIVE, g_errFile);
         return GERROR_NOT_STATE_WSAC_SGOP;
     }
-    return GERROR_NONE;
+
+    // TODO: implement GDPs
+    gerrorhand(GERROR_INVALID_GDP_ID, GFN_GENERALIZED_DRAWING_PRIMITIVE, g_errFile);
+    return GERROR_INVALID_GDP_ID;
 }
 
 Gint gpolyline(Gint numPoints, Gpoint *points)

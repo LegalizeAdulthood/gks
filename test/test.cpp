@@ -1,496 +1,554 @@
 #include "error.h"
+#include "TestGKSOpen.h"
+#include "TestWSOpen.h"
 
 #include <gks/gks.h>
 
-#include <catch.hpp>
+#include <gtest/gtest.h>
 
+#include <algorithm>
 #include <cstdio>
 #include <string>
 
-TEST_CASE("Initially closed", "[gks]")
+using namespace testing;
+
+TEST(TestGKS, initiallyClosed)
 {
-    REQUIRE(getGksOpState() == GGKCL);
+    ASSERT_EQ(GGKCL, getGksOpState());
 }
 
-TEST_CASE("Opened", "[gks]")
+TEST(TestGKS, opened)
 {
-    gopengks(stderr, 0L);
+    ASSERT_EQ(GERROR_NONE, gopengks(stderr, 0L));
 
-    REQUIRE(getGksOpState() == GGKOP);
+    ASSERT_EQ(GGKOP, getGksOpState());
+
+    ASSERT_EQ(GERROR_NONE, gclosegks());
+}
+
+TEST(TestGKS, openedAndClosed)
+{
+    ASSERT_EQ(GERROR_NONE, gopengks(stderr, 0L));
 
     gclosegks();
+
+    ASSERT_EQ(GGKCL, getGksOpState());
 }
 
-TEST_CASE("Opened and closed", "[gks]")
-{
-    gopengks(stderr, 0L);
-
-    gclosegks();
-
-    REQUIRE(getGksOpState() == GGKCL);
-}
-
-TEST_CASE("Error file must be non-NULL", "[gks]")
+TEST(TestGKS, errorFileMustBeNonNull)
 {
     g_recordedErrors.clear();
 
-    gopengks(nullptr, 0L);
+    const Gint status = gopengks(nullptr, 0L);
 
-    requireError(GERROR_INVALID_ERROR_FILE, GFN_OPEN_GKS);
-    REQUIRE(getGksOpState() == GGKCL);
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_ERROR_FILE, GFN_OPEN_GKS));
+    ASSERT_EQ(GGKCL, getGksOpState());
 }
 
-TEST_CASE("Error handling", "[gks]")
+TEST(TestGKS, errorHandling)
 {
     gerrorhand(GERROR_NOT_STATE_GKCL, GFN_OPEN_GKS, stderr);
+
+    ASSERT_TRUE(expectError(GERROR_NOT_STATE_GKCL, GERROR_NOT_STATE_GKCL, GFN_OPEN_GKS));
+
+    g_recordedErrors.clear();
 }
 
-TEST_CASE("GKS state list", "[gks]")
+TEST_F(TestGKSOpen, gksLevel)
 {
-    gopengks(stderr, 0L);
+    Glevel level{};
 
-    SECTION("GKS level")
-    {
-        Glevel level{};
-        const Gint err = ginqlevelgks(&level);
+    const Gint status = ginqlevelgks(&level);
 
-        REQUIRE(err == GERROR_NONE);
-        REQUIRE(level == GLMA);
-    }
-    SECTION("Availale workstation types")
-    {
-        const Gint numWsTypes{10};
-        Gint start{};
-        int wsTypeValues[numWsTypes];
-        for (int &wsTypeValue : wsTypeValues)
-        {
-            wsTypeValue = -1;
-        }
-        Gintlist wsTypes{0, wsTypeValues};
-        Gint numAvailTypes{};
-        ginqavailwstypes(numWsTypes, start, &wsTypes, &numAvailTypes);
-
-        REQUIRE(numAvailTypes == 1);
-        REQUIRE(wsTypes.number == 1);
-        REQUIRE(wsTypes.integers[0] == GWSTYPE_TEK4105);
-    }
-    SECTION("Number of normalization transforms")
-    {
-        Gint numTransforms{-1};
-        ginqmaxntrannum(&numTransforms);
-
-        REQUIRE(numTransforms == 2);
-    }
-    SECTION("Normalization transform zero is identity")
-    {
-        Gtran transform{};
-        ginqntran(1, &transform);
-
-        REQUIRE(transform.w.xmin == 0.0f);
-        REQUIRE(transform.w.xmax == 1.0f);
-        REQUIRE(transform.w.ymin == 0.0f);
-        REQUIRE(transform.w.ymax == 1.0f);
-        REQUIRE(transform.v.xmin == 0.0f);
-        REQUIRE(transform.v.xmax == 1.0f);
-        REQUIRE(transform.v.ymin == 0.0f);
-        REQUIRE(transform.v.ymax == 1.0f);
-    }
-    SECTION("Set viewport")
-    {
-        const Gint tranId = 1;
-        const Gfloat xmin{0.2f};
-        const Gfloat xmax{0.5f};
-        const Gfloat ymin{0.4f};
-        const Gfloat ymax{0.6f};
-        Glimit viewport{xmin, xmax, ymin, ymax};
-        gsetviewport(tranId, &viewport);
-
-        Gtran transform{};
-        ginqntran(tranId, &transform);
-        REQUIRE(transform.v.xmin == xmin);
-        REQUIRE(transform.v.xmax == xmax);
-        REQUIRE(transform.v.ymin == ymin);
-        REQUIRE(transform.v.ymax == ymax);
-    }
-    SECTION("Set window")
-    {
-        const Gint tranId = 1;
-        const Gfloat xmin{0.2f};
-        const Gfloat xmax{0.5f};
-        const Gfloat ymin{0.4f};
-        const Gfloat ymax{0.6f};
-        Glimit window{xmin, xmax, ymin, ymax};
-        gsetwindow(tranId, &window);
-
-        Gtran transform{};
-        ginqntran(tranId, &transform);
-        REQUIRE(transform.w.xmin == xmin);
-        REQUIRE(transform.w.xmax == xmax);
-        REQUIRE(transform.w.ymin == ymin);
-        REQUIRE(transform.w.ymax == ymax);
-    }
-    SECTION("Maximum workstation numbers")
-    {
-        Gwsmax value{};
-        ginqwsmaxnum(&value);
-
-        REQUIRE(value.open == 1);
-        REQUIRE(value.active == 1);
-        REQUIRE(value.assoc == 0);
-    }
-    SECTION("Initial clipping indicator")
-    {
-        Gcliprect clipping{};
-        ginqclip(&clipping);
-
-        REQUIRE(clipping.ind == GCLIP);
-        REQUIRE(clipping.rec.xmin == 0.0f);
-        REQUIRE(clipping.rec.xmax == 1.0f);
-        REQUIRE(clipping.rec.ymin == 0.0f);
-        REQUIRE(clipping.rec.ymax == 1.0f);
-    }
-    SECTION("Initial set of open workstations is empty")
-    {
-        const Gint numBuffIds = 10;
-        Gint ids[numBuffIds]{};
-        Gintlist idList{numBuffIds, ids};
-        Gint numIds{-1};
-        ginqopenws(numBuffIds, 0, &idList, &numIds);
-
-        REQUIRE(numIds == 0);
-    }
-
-    gclosegks();
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(GLMA, level);
 }
 
-TEST_CASE("workstation description table", "[workstation]")
+TEST_F(TestGKSOpen, availableWorkstationTypes)
 {
-    gopengks(stderr, 0L);
-    const Gwstype wsType{GWSTYPE_TEK4105};
-
-    SECTION("color facilities")
+    const Gint numWsTypes{10};
+    Gint start{};
+    int wsTypeValues[numWsTypes];
+    for (int &wsTypeValue : wsTypeValues)
     {
-        Gcofac facil{};
-        Gint buffSize{};
-        Gint numColors{};
-        const Gint status = ginqcolorfacil(wsType, buffSize, &numColors, &facil);
-
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(numColors == 16);
-        REQUIRE(facil.colors == 16);
-        REQUIRE(facil.coavail == GCOLOR);
-        REQUIRE(facil.predefined == 16);
+        wsTypeValue = -1;
     }
-    SECTION("display space size")
-    {
-        Gdspsize size{};
-        const Gint status = ginqdisplaysize(wsType, &size);
+    Gintlist wsTypes{0, wsTypeValues};
+    Gint numAvailTypes{};
 
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(size.units == GDC_OTHER);
-        REQUIRE(size.raster.x == 640);
-        REQUIRE(size.raster.y == 480);
-    }
-    SECTION("fill area facilities")
-    {
-        Gflinter interiorStyles[4]{};
-        Gint hatchStyles[10]{};
-        Gflfac facil{};
-        facil.interiors = interiorStyles;
-        facil.hatches = hatchStyles;
-        Gint numAvailHatches{};
-        const Gint status = ginqfillfacil(wsType, numOf(hatchStyles), &numAvailHatches, &facil);
+    const Gint status = ginqavailwstypes(numWsTypes, start, &wsTypes, &numAvailTypes);
 
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(facil.n_interiors == 1);
-        REQUIRE(facil.interiors[0] == GHOLLOW);
-        REQUIRE(facil.predefined == 1);
-        REQUIRE(numAvailHatches == 0);
-    }
-    SECTION("line facilities")
-    {
-        Gint lineTypes[10]{};
-        Gint numLineTypes{};
-        Glnfac facil{};
-        facil.types.number = numOf(lineTypes);
-        facil.types.integers = lineTypes;
-        const Gint status = ginqlinefacil(wsType, numOf(lineTypes), &numLineTypes, &facil);
-
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(numLineTypes >= 1);
-        REQUIRE(std::find(std::begin(lineTypes), std::end(lineTypes), GLN_SOLID) != std::end(lineTypes));
-        REQUIRE(facil.widths == 1);
-        REQUIRE(facil.nom_width == 1.0f);
-        REQUIRE(facil.min_width == 1.0f);
-        REQUIRE(facil.max_width == 1.0f);
-    }
-    SECTION("marker facilities")
-    {
-        Gint markerTypes[10]{};
-        Gint numMarkerTypes{};
-        Gmkfac facil{};
-        facil.types.number = numOf(markerTypes);
-        facil.types.integers = markerTypes;
-        const Gint status = ginqmarkerfacil(wsType, numOf(markerTypes), &numMarkerTypes, &facil);
-
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(numMarkerTypes >= 5);
-        Gint expectedTypes[]{GMK_DOT, GMK_PLUS, GMK_STAR, GMK_CIRCLE, GMK_DIAGONAL_CROSS};
-        std::sort(std::begin(expectedTypes), std::end(expectedTypes));
-        std::sort(markerTypes, markerTypes + numMarkerTypes);
-        REQUIRE(std::equal(markerTypes, markerTypes + numMarkerTypes, std::begin(expectedTypes)));
-        REQUIRE(facil.sizes == 1);
-        REQUIRE(facil.nom_size == 1.0f);
-        REQUIRE(facil.min_size == 1.0f);
-        REQUIRE(facil.max_size == 1.0f);
-    }
-    SECTION("text facilities")
-    {
-        Gtxfp fontPrec[10]{};
-        Gint buffSize{numOf(fontPrec)};
-        Gint numFontPrec{};
-        Gtxfac facil{};
-        facil.fp_list = fontPrec;
-        const Gint status = ginqtextfacil(wsType, buffSize, &numFontPrec, &facil);
-
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(numFontPrec == 1);
-        REQUIRE(facil.fps == 1);
-        REQUIRE(facil.fp_list[0].font == 1);
-        REQUIRE(facil.fp_list[0].prec == GP_STRING);
-    }
-    SECTION("workstation state table lengths")
-    {
-        Gwstables tables{-1, -1, -1, -1, -1, -1};
-        const Gint status = ginqmaxwssttables(wsType, &tables);
-
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(tables.line == 0);
-        REQUIRE(tables.mark == 0);
-        REQUIRE(tables.text == 0);
-        REQUIRE(tables.fill == 0);
-        REQUIRE(tables.pat == 0);
-        REQUIRE(tables.color == 16);
-    }
-
-    gclosegks();
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(1, numAvailTypes);
+    ASSERT_EQ(1, wsTypes.number);
+    ASSERT_EQ(GWSTYPE_TEK4105, wsTypes.integers[0]);
 }
 
-TEST_CASE("workstation description table error handling", "[workstation]")
+TEST_F(TestGKSOpen, numberOfNormalizationTransforms)
 {
-    gopengks(stderr, 0L);
-    const Gwstype badWsType{GWSTYPE_TEK4105 + 1};
-    Gint status{-1};
+    Gint numTransforms{-1};
 
-    SECTION("color facilities")
-    {
-        Gcofac facil{};
-        Gint buffSize{};
-        Gint numColors{};
-        status = ginqcolorfacil(badWsType, buffSize, &numColors, &facil);
+    const Gint status = ginqmaxntrannum(&numTransforms);
 
-        REQUIRE(status == GERROR_INVALID_WSTYPE);
-    }
-    SECTION("display space size")
-    {
-        Gdspsize size{};
-        status = ginqdisplaysize(badWsType, &size);
-
-        REQUIRE(status == GERROR_INVALID_WSTYPE);
-    }
-    SECTION("fill area facilities")
-    {
-        Gflinter interiorStyles[4]{};
-        Gint hatchStyles[10]{};
-        Gflfac facil{};
-        facil.interiors = interiorStyles;
-        facil.hatches = hatchStyles;
-        Gint numAvailHatches{};
-        status = ginqfillfacil(badWsType, numOf(hatchStyles), &numAvailHatches, &facil);
-
-        REQUIRE(status == GERROR_INVALID_WSTYPE);
-    }
-    SECTION("line facilities")
-    {
-        Gint lineTypes[10]{};
-        Gint numLineTypes{};
-        Glnfac value{};
-        status = ginqlinefacil(badWsType, numOf(lineTypes), &numLineTypes, &value);
-
-        REQUIRE(status == GERROR_INVALID_WSTYPE);
-    }
-    SECTION("marker facilities")
-    {
-        Gint markerTypes[10]{};
-        Gint numMarkerTypes{};
-        Gmkfac value{};
-        status = ginqmarkerfacil(badWsType, numOf(markerTypes), &numMarkerTypes, &value);
-
-        REQUIRE(status == GERROR_INVALID_WSTYPE);
-    }
-    SECTION("text facilities")
-    {
-        Gtxfp fontPrec[10]{};
-        Gint buffSize{numOf(fontPrec)};
-        Gint numFontPrec{};
-        Gtxfac facil{};
-        facil.fp_list = fontPrec;
-        status = ginqtextfacil(badWsType, buffSize, &numFontPrec, &facil);
-
-        REQUIRE(status == GERROR_INVALID_WSTYPE);
-    }
-    SECTION("workstation state table lengths")
-    {
-        Gwstables tables{-1, -1, -1, -1, -1, -1};
-        status = ginqmaxwssttables(badWsType, &tables);
-
-        REQUIRE(status == GERROR_INVALID_WSTYPE);
-    }
-
-    gclosegks();
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(2, numTransforms);
 }
 
-TEST_CASE("set clipping indicator", "[gks]")
+TEST_F(TestGKSOpen, normalizationTransformZeroIsIdentity)
 {
-    gopengks(stderr, 0L);
+    Gtran transform{};
 
-    gsetclip(GNOCLIP);
+    const Gint status = ginqntran(1, &transform);
 
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(0.0f, transform.w.xmin);
+    ASSERT_EQ(1.0f, transform.w.xmax);
+    ASSERT_EQ(0.0f, transform.w.ymin);
+    ASSERT_EQ(1.0f, transform.w.ymax);
+    ASSERT_EQ(0.0f, transform.v.xmin);
+    ASSERT_EQ(1.0f, transform.v.xmax);
+    ASSERT_EQ(0.0f, transform.v.ymin);
+    ASSERT_EQ(1.0f, transform.v.ymax);
+}
+
+TEST_F(TestGKSOpen, setViewport)
+{
+    const Gint tranId = 1;
+    const Gfloat xmin{0.2f};
+    const Gfloat xmax{0.5f};
+    const Gfloat ymin{0.4f};
+    const Gfloat ymax{0.6f};
+    Glimit viewport{xmin, xmax, ymin, ymax};
+
+    const Gint status = gsetviewport(tranId, &viewport);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    Gtran transform{};
+    ginqntran(tranId, &transform);
+    ASSERT_EQ(xmin, transform.v.xmin);
+    ASSERT_EQ(xmax, transform.v.xmax);
+    ASSERT_EQ(ymin, transform.v.ymin);
+    ASSERT_EQ(ymax, transform.v.ymax);
+}
+
+TEST_F(TestGKSOpen, setWindow)
+{
+    const Gint tranId = 1;
+    const Gfloat xmin{0.2f};
+    const Gfloat xmax{0.5f};
+    const Gfloat ymin{0.4f};
+    const Gfloat ymax{0.6f};
+    Glimit window{xmin, xmax, ymin, ymax};
+
+    const Gint status = gsetwindow(tranId, &window);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    Gtran transform{};
+    ginqntran(tranId, &transform);
+    ASSERT_EQ(xmin, transform.w.xmin);
+    ASSERT_EQ(xmax, transform.w.xmax);
+    ASSERT_EQ(ymin, transform.w.ymin);
+    ASSERT_EQ(ymax, transform.w.ymax);
+}
+
+TEST_F(TestGKSOpen, maximumWorkstationNumbers)
+{
+    Gwsmax value{};
+
+    const Gint status = ginqwsmaxnum(&value);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(1, value.open);
+    ASSERT_EQ(1, value.active);
+    ASSERT_EQ(0, value.assoc);
+}
+
+TEST_F(TestGKSOpen, initialClippingIndicator)
+{
     Gcliprect clipping{};
+
     const Gint status = ginqclip(&clipping);
-    REQUIRE(status == GERROR_NONE);
-    REQUIRE(clipping.ind == GNOCLIP);
 
-    gclosegks();
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(GCLIP, clipping.ind);
+    ASSERT_EQ(0.0f, clipping.rec.xmin);
+    ASSERT_EQ(1.0f, clipping.rec.xmax);
+    ASSERT_EQ(0.0f, clipping.rec.ymin);
+    ASSERT_EQ(1.0f, clipping.rec.ymax);
 }
 
-TEST_CASE("open workstation", "[workstation]")
+TEST_F(TestGKSOpen, initialSetOfOpenWorkstationsIsEmpty)
 {
-    gopengks(stderr, 0L);
-    Gint wsId{0};
-    std::string connId{"tek4105"};
-    Gint wsType{GWSTYPE_TEK4105};
-    gopenws(wsId, connId.c_str(), wsType);
+    const Gint numBuffIds = 10;
+    Gint ids[numBuffIds]{};
+    Gintlist idList{numBuffIds, ids};
+    Gint numIds{-1};
 
-    SECTION("operating state is GSOP")
-    {
-        REQUIRE(getGksOpState() == GWSOP);
-    }
-    SECTION("after activate workstation state is GWSAC")
-    {
-        gactivatews(wsId);
+    const int status = ginqopenws(numBuffIds, 0, &idList, &numIds);
 
-        REQUIRE(getGksOpState() == GWSAC);
-
-        gdeactivatews(wsId);
-    }
-    SECTION("deactivate last activated workstation state is GWSOP")
-    {
-        gactivatews(wsId);
-
-        gdeactivatews(wsId);
-
-        REQUIRE(getGksOpState() == GWSOP);
-    }
-    SECTION("clear workstation")
-    {
-        gactivatews(wsId);
-
-        gclearws(wsId, GALWAYS);
-
-        gdeactivatews(wsId);
-    }
-    SECTION("initial workstation transformation is identity")
-    {
-        Gwsti transform{};
-        const Gint status = ginqwstran(wsId, &transform);
-
-        REQUIRE(status== GERROR_NONE);
-        REQUIRE(transform.wstus == GNOTPENDING);
-        REQUIRE(transform.request.v.xmin == 0.0f);
-        REQUIRE(transform.request.v.xmax == 1.0f);
-        REQUIRE(transform.request.v.ymin == 0.0f);
-        REQUIRE(transform.request.v.ymax == 1.0f);
-        REQUIRE(transform.request.w.xmin == 0.0f);
-        REQUIRE(transform.request.w.xmax == 1.0f);
-        REQUIRE(transform.request.w.ymin == 0.0f);
-        REQUIRE(transform.request.w.ymax == 1.0f);
-        REQUIRE(transform.current.v.xmin == 0.0f);
-        REQUIRE(transform.current.v.xmax == 1.0f);
-        REQUIRE(transform.current.v.ymin == 0.0f);
-        REQUIRE(transform.current.v.ymax == 1.0f);
-        REQUIRE(transform.current.w.xmin == 0.0f);
-        REQUIRE(transform.current.w.xmax == 1.0f);
-        REQUIRE(transform.current.w.ymin == 0.0f);
-        REQUIRE(transform.current.w.ymax == 1.0f);
-    }
-    SECTION("connection id and type")
-    {
-        Gint numCt{};
-        Gwsct ct{};
-        const Gint status = ginqwsconntype(wsId, 1, &numCt, &ct);
-
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(numCt == 1);
-        REQUIRE(ct.conn == connId);
-        REQUIRE(ct.type == wsType);
-    }
-    SECTION("update workstation")
-    {
-        gupdatews(wsId, GPERFORM);
-    }
-    SECTION("set workstation viewport")
-    {
-        const Gfloat xmin = 0.2f;
-        const Gfloat xmax = 0.4f;
-        const Gfloat ymin = 0.3f;
-        const Gfloat ymax = 0.5f;
-        Glimit viewport{xmin, xmax, ymin, ymax};
-        gsetwsviewport(wsId, &viewport);
-
-        Gwsti transform{};
-        const Gint status = ginqwstran(wsId, &transform);
-
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(transform.wstus == GNOTPENDING);
-        REQUIRE(transform.current.v.xmin == xmin);
-        REQUIRE(transform.current.v.xmax == xmax);
-        REQUIRE(transform.current.v.ymin == ymin);
-        REQUIRE(transform.current.v.ymax == ymax);
-    }
-    SECTION("set workstation window")
-    {
-        const Gfloat xmin = 0.2f;
-        const Gfloat xmax = 0.4f;
-        const Gfloat ymin = 0.3f;
-        const Gfloat ymax = 0.5f;
-        Glimit window{xmin, xmax, ymin, ymax};
-        gsetwswindow(wsId, &window);
-
-        Gwsti transform{};
-        const Gint status = ginqwstran(wsId, &transform);
-
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(transform.wstus == GNOTPENDING);
-        REQUIRE(transform.current.w.xmin == xmin);
-        REQUIRE(transform.current.w.xmax == xmax);
-        REQUIRE(transform.current.w.ymin == ymin);
-        REQUIRE(transform.current.w.ymax == ymax);
-    }
-    SECTION("text extent")
-    {
-        Gpoint pos{0.1f, 0.1f};
-        Gextent value{};
-        const Gint status = ginqtextextent(wsId, &pos, "Hello, World!", &value);
-
-        REQUIRE(status == GERROR_NONE);
-    }
-
-    gclosews(wsId);
-    gclosegks();
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(0, numIds);
 }
 
-TEST_CASE("Close last workstation enters GGKOP state", "[workstation]")
+namespace
+{
+
+class TestWorkstationDescTable : public TestGKSOpen
+{
+public:
+    ~TestWorkstationDescTable() override = default;
+
+protected:
+    Gwstype wsType{GWSTYPE_TEK4105};
+};
+
+}
+
+TEST_F(TestWorkstationDescTable, colorFacilities)
+{
+    Gcofac facil{};
+    Gint buffSize{};
+    Gint numColors{};
+
+    const Gint status = ginqcolorfacil(wsType, buffSize, &numColors, &facil);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(16, numColors);
+    ASSERT_EQ(16, facil.colors);
+    ASSERT_EQ(GCOLOR, facil.coavail);
+    ASSERT_EQ(16, facil.predefined);
+}
+
+TEST_F(TestWorkstationDescTable, displaySpaceSize)
+{
+    Gdspsize size{};
+
+    const Gint status = ginqdisplaysize(wsType, &size);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(GDC_OTHER, size.units);
+    ASSERT_EQ(640, size.raster.x);
+    ASSERT_EQ(480, size.raster.y);
+}
+
+TEST_F(TestWorkstationDescTable, fillAreaFacilities)
+{
+    Gflinter interiorStyles[4]{};
+    Gint hatchStyles[10]{};
+    Gflfac facil{};
+    facil.interiors = interiorStyles;
+    facil.hatches = hatchStyles;
+    Gint numAvailHatches{};
+
+    const Gint status = ginqfillfacil(wsType, numOf(hatchStyles), &numAvailHatches, &facil);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(1, facil.n_interiors);
+    ASSERT_EQ(GHOLLOW, facil.interiors[0]);
+    ASSERT_EQ(1, facil.predefined);
+    ASSERT_EQ(0, numAvailHatches);
+}
+
+TEST_F(TestWorkstationDescTable, lineFacilities)
+{
+    Gint lineTypes[10]{};
+    Gint numLineTypes{};
+    Glnfac facil{};
+    facil.types.number = numOf(lineTypes);
+    facil.types.integers = lineTypes;
+
+    const Gint status = ginqlinefacil(wsType, numOf(lineTypes), &numLineTypes, &facil);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_GE(numLineTypes, 1);
+    ASSERT_NE(std::end(lineTypes), std::find(std::begin(lineTypes), std::end(lineTypes), GLN_SOLID));
+    ASSERT_EQ(1, facil.widths);
+    ASSERT_EQ(1.0f, facil.nom_width);
+    ASSERT_EQ(1.0f, facil.min_width);
+    ASSERT_EQ(1.0f, facil.max_width);
+}
+
+TEST_F(TestWorkstationDescTable, markerFacilities)
+{
+    Gint markerTypes[10]{};
+    Gint numMarkerTypes{};
+    Gmkfac facil{};
+    facil.types.number = numOf(markerTypes);
+    facil.types.integers = markerTypes;
+
+    const Gint status = ginqmarkerfacil(wsType, numOf(markerTypes), &numMarkerTypes, &facil);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_GE(numMarkerTypes, 5);
+    Gint expectedTypes[]{GMK_DOT, GMK_PLUS, GMK_STAR, GMK_CIRCLE, GMK_DIAGONAL_CROSS};
+    std::sort(std::begin(expectedTypes), std::end(expectedTypes));
+    std::sort(markerTypes, markerTypes + numMarkerTypes);
+    ASSERT_TRUE(std::equal(markerTypes, markerTypes + numMarkerTypes, std::begin(expectedTypes)));
+    ASSERT_EQ(1, facil.sizes);
+    ASSERT_EQ(1.0f, facil.nom_size);
+    ASSERT_EQ(1.0f, facil.min_size);
+    ASSERT_EQ(1.0f, facil.max_size);
+}
+
+TEST_F(TestWorkstationDescTable, textFacilities)
+{
+    Gtxfp fontPrec[10]{};
+    Gint buffSize{numOf(fontPrec)};
+    Gint numFontPrec{};
+    Gtxfac facil{};
+    facil.fp_list = fontPrec;
+
+    const Gint status = ginqtextfacil(wsType, buffSize, &numFontPrec, &facil);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(1, numFontPrec);
+    ASSERT_EQ(1, facil.fps);
+    ASSERT_EQ(1, facil.fp_list[0].font);
+    ASSERT_EQ(GP_STRING, facil.fp_list[0].prec);
+}
+
+TEST_F(TestWorkstationDescTable, workstationStateTableLengths)
+{
+    Gwstables tables{-1, -1, -1, -1, -1, -1};
+
+    const Gint status = ginqmaxwssttables(wsType, &tables);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(0, tables.line);
+    ASSERT_EQ(0, tables.mark);
+    ASSERT_EQ(0, tables.text);
+    ASSERT_EQ(0, tables.fill);
+    ASSERT_EQ(0, tables.pat);
+    ASSERT_EQ(16, tables.color);
+}
+
+namespace
+{
+
+class TestWorkstationDescTableError : public TestGKSOpen
+{
+public:
+    ~TestWorkstationDescTableError() override = default;
+
+protected:
+    Gwstype badWsType{GWSTYPE_TEK4105 + 1};
+};
+
+} // namespace
+
+TEST_F(TestWorkstationDescTableError, colorFacilities)
+{
+    Gcofac facil{};
+    Gint buffSize{};
+    Gint numColors{};
+
+    const Gint status = ginqcolorfacil(badWsType, buffSize, &numColors, &facil);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_WSTYPE, GFN_INQUIRE_COLOR_FACILITIES));
+}
+
+TEST_F(TestWorkstationDescTableError, displaySpaceSize)
+{
+    Gdspsize size{};
+
+    const Gint status = ginqdisplaysize(badWsType, &size);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_WSTYPE, GFN_INQUIRE_DISPLAY_SPACE_SIZE));
+}
+
+TEST_F(TestWorkstationDescTableError, fillAreaFacilities)
+{
+    Gflinter interiorStyles[4]{};
+    Gint hatchStyles[10]{};
+    Gflfac facil{};
+    facil.interiors = interiorStyles;
+    facil.hatches = hatchStyles;
+    Gint numAvailHatches{};
+
+    const Gint status = ginqfillfacil(badWsType, numOf(hatchStyles), &numAvailHatches, &facil);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_WSTYPE, GFN_INQUIRE_FILL_FACILITIES));
+}
+
+TEST_F(TestWorkstationDescTableError, lineFacilities)
+{
+    Gint lineTypes[10]{};
+    Gint numLineTypes{};
+    Glnfac value{};
+
+    const Gint status = ginqlinefacil(badWsType, numOf(lineTypes), &numLineTypes, &value);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_WSTYPE, GFN_INQUIRE_LINE_FACILITIES));
+}
+
+TEST_F(TestWorkstationDescTableError, markerFacilities)
+{
+    Gint markerTypes[10]{};
+    Gint numMarkerTypes{};
+    Gmkfac value{};
+
+    const Gint status = ginqmarkerfacil(badWsType, numOf(markerTypes), &numMarkerTypes, &value);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_WSTYPE, GFN_INQUIRE_MARKER_FACILITIES));
+}
+
+TEST_F(TestWorkstationDescTableError, textFacilities)
+{
+    Gtxfp fontPrec[10]{};
+    Gint buffSize{numOf(fontPrec)};
+    Gint numFontPrec{};
+    Gtxfac facil{};
+    facil.fp_list = fontPrec;
+
+    const Gint status = ginqtextfacil(badWsType, buffSize, &numFontPrec, &facil);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_WSTYPE, GFN_INQUIRE_TEXT_FACILITIES));
+}
+
+TEST_F(TestWorkstationDescTableError, workstationStateTableLengths)
+{
+    Gwstables tables{-1, -1, -1, -1, -1, -1};
+
+    const Gint status = ginqmaxwssttables(badWsType, &tables);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_WSTYPE, GFN_INQUIRE_MAXIMUM_LENGTH_OF_WORKSTATION_STATE_TABLES));
+}
+
+TEST_F(TestGKSOpen, setClippingIndicator)
+{
+    const Gint status = gsetclip(GNOCLIP);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    Gcliprect clipping{};
+    ASSERT_EQ(GERROR_NONE, ginqclip(&clipping));
+    ASSERT_EQ(GNOCLIP, clipping.ind);
+}
+
+TEST_F(TestWSOpen, operatingStateIsGSOP)
+{
+    ASSERT_EQ(GWSOP, getGksOpState());
+}
+
+TEST_F(TestWSOpen, afterActivateWorkstationStateIsGWSAC)
+{
+    gactivatews(wsId);
+
+    ASSERT_EQ(GWSAC, getGksOpState());
+
+    gdeactivatews(wsId);
+}
+
+TEST_F(TestWSOpen, deactivatelastactivatedworkstationstateisGWSOP)
+{
+    gactivatews(wsId);
+    gdeactivatews(wsId);
+
+    ASSERT_EQ(GWSOP, getGksOpState());
+}
+
+TEST_F(TestWSOpen, clearworkstation)
+{
+    gactivatews(wsId);
+
+    ASSERT_EQ(GERROR_NONE, gclearws(wsId, GALWAYS));
+
+    gdeactivatews(wsId);
+}
+
+TEST_F(TestWSOpen, initialWorkstationTransformationIsIdentity)
+{
+    Gwsti transform{};
+
+    const Gint status = ginqwstran(wsId, &transform);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(GNOTPENDING, transform.wstus);
+    ASSERT_EQ(0.0f, transform.request.v.xmin);
+    ASSERT_EQ(1.0f, transform.request.v.xmax);
+    ASSERT_EQ(0.0f, transform.request.v.ymin);
+    ASSERT_EQ(1.0f, transform.request.v.ymax);
+    ASSERT_EQ(0.0f, transform.request.w.xmin);
+    ASSERT_EQ(1.0f, transform.request.w.xmax);
+    ASSERT_EQ(0.0f, transform.request.w.ymin);
+    ASSERT_EQ(1.0f, transform.request.w.ymax);
+    ASSERT_EQ(0.0f, transform.current.v.xmin);
+    ASSERT_EQ(1.0f, transform.current.v.xmax);
+    ASSERT_EQ(0.0f, transform.current.v.ymin);
+    ASSERT_EQ(1.0f, transform.current.v.ymax);
+    ASSERT_EQ(0.0f, transform.current.w.xmin);
+    ASSERT_EQ(1.0f, transform.current.w.xmax);
+    ASSERT_EQ(0.0f, transform.current.w.ymin);
+    ASSERT_EQ(1.0f, transform.current.w.ymax);
+}
+
+TEST_F(TestWSOpen, connectionIdAndType)
+{
+    Gint numCt{};
+    Gwsct ct{};
+
+    const Gint status = ginqwsconntype(wsId, 1, &numCt, &ct);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(1, numCt);
+    ASSERT_EQ(connId, ct.conn);
+    ASSERT_EQ(wsType, ct.type);
+}
+
+TEST_F(TestWSOpen, updateWorkstation)
+{
+    ASSERT_EQ(GERROR_NONE, gupdatews(wsId, GPERFORM));
+}
+
+TEST_F(TestWSOpen, setWorkstationViewport)
+{
+    const Gfloat xmin = 0.2f;
+    const Gfloat xmax = 0.4f;
+    const Gfloat ymin = 0.3f;
+    const Gfloat ymax = 0.5f;
+    Glimit viewport{xmin, xmax, ymin, ymax};
+
+    ASSERT_EQ(GERROR_NONE, gsetwsviewport(wsId, &viewport));
+
+    Gwsti transform{};
+    ASSERT_EQ(GERROR_NONE, ginqwstran(wsId, &transform));
+    ASSERT_EQ(GNOTPENDING, transform.wstus);
+    ASSERT_EQ(xmin, transform.current.v.xmin);
+    ASSERT_EQ(xmax, transform.current.v.xmax);
+    ASSERT_EQ(ymin, transform.current.v.ymin);
+    ASSERT_EQ(ymax, transform.current.v.ymax);
+}
+
+TEST_F(TestWSOpen, setWorkstationWindow)
+{
+    const Gfloat xmin = 0.2f;
+    const Gfloat xmax = 0.4f;
+    const Gfloat ymin = 0.3f;
+    const Gfloat ymax = 0.5f;
+    Glimit window{xmin, xmax, ymin, ymax};
+
+    const Gint status = gsetwswindow(wsId, &window);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    Gwsti transform{};
+    ASSERT_EQ(GERROR_NONE, ginqwstran(wsId, &transform));
+    ASSERT_EQ(GNOTPENDING, transform.wstus);
+    ASSERT_EQ(xmin, transform.current.w.xmin);
+    ASSERT_EQ(xmax, transform.current.w.xmax);
+    ASSERT_EQ(ymin, transform.current.w.ymin);
+    ASSERT_EQ(ymax, transform.current.w.ymax);
+}
+
+TEST_F(TestWSOpen, textExtent)
+{
+    Gpoint pos{0.1f, 0.1f};
+    Gextent value{};
+
+    const Gint status = ginqtextextent(wsId, &pos, "Hello, World!", &value);
+
+    ASSERT_EQ(GERROR_NONE, status);
+}
+
+TEST(TestWorkstation, closeLastWorkstationEntersGGKOPState)
 {
     gopengks(stderr, 0L);
     Gint wsId{0};
@@ -504,1270 +562,1492 @@ TEST_CASE("Close last workstation enters GGKOP state", "[workstation]")
     Gopst after{};
     ginqopst(&after);
 
-    REQUIRE(before == GWSOP);
-    REQUIRE(after == GGKOP);
+    ASSERT_EQ(GWSOP, before);
+    ASSERT_EQ(GGKOP, after);
 
     gclosegks();
 }
 
-TEST_CASE("open workstation error handling", "[workstation]")
+namespace
 {
-    g_recordedErrors.clear();
-    gopengks(stderr, 0L);
-    REQUIRE(getGksOpState() == GGKOP);
+
+class TestOpenWorkstationError : public TestGKSOpen
+{
+public:
+    ~TestOpenWorkstationError() override = default;
+
+protected:
+    void TearDown() override;
+
     Gint wsId{};
     const Gchar *connId{"tek4105"};
     Gwstype wsType{GWSTYPE_TEK4105};
+};
 
-    SECTION("workstation id negative")
-    {
-        wsId = -1;
-        gopenws(wsId, connId, wsType);
+void TestOpenWorkstationError::TearDown()
+{
+    ASSERT_EQ(GGKOP, getGksOpState());
 
-        requireError(GERROR_INVALID_WSID, GFN_OPEN_WORKSTATION);
-    }
-    SECTION("workstation id too large")
-    {
-        const Gint maxOpenWorkstations{1};
-        wsId = maxOpenWorkstations;
-        gopenws(wsId, connId, wsType);
-
-        requireError(GERROR_INVALID_WSID, GFN_OPEN_WORKSTATION);
-    }
-    SECTION("invalid workstation type")
-    {
-        ++wsType;
-        gopenws(wsId, connId, wsType);
-
-        requireError(GERROR_INVALID_WSTYPE, GFN_OPEN_WORKSTATION);
-    } 
-    SECTION("workstation already open")
-    {
-        gopenws(wsId, connId, wsType);
-        REQUIRE(getGksOpState() == GWSOP);
-
-        gopenws(wsId, connId, wsType);
-
-        requireError(GERROR_WS_IS_OPEN, GFN_OPEN_WORKSTATION);
-
-        gclosews(wsId);
-    }
-
-    REQUIRE(getGksOpState() == GGKOP);
-
-    gclosegks();
+    TestGKSOpen::TearDown();
 }
 
-TEST_CASE("close workstation error handling", "[workstation]")
+} // namespace
+
+TEST_F(TestOpenWorkstationError, workstationIdNegative)
 {
-    g_recordedErrors.clear();
-    gopengks(stderr, 0L);
-    Gint wsId{};
-    const Gchar *connId{"tek4105"};
-    Gwstype wsType{GWSTYPE_TEK4105};
+    wsId = -1;
+
+    const Gint status = gopenws(wsId, connId, wsType);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_WSID, GFN_OPEN_WORKSTATION));
+}
+
+TEST_F(TestOpenWorkstationError, workstationIdTooLarge)
+{
+    const Gint maxOpenWorkstations{1};
+    wsId = maxOpenWorkstations;
+
+    const Gint status = gopenws(wsId, connId, wsType);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_WSID, GFN_OPEN_WORKSTATION));
+}
+
+TEST_F(TestOpenWorkstationError, invalidWorkstationType)
+{
+    ++wsType;
+    const Gint status = gopenws(wsId, connId, wsType);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_WSTYPE, GFN_OPEN_WORKSTATION));
+}
+
+TEST_F(TestOpenWorkstationError, workstationAlreadyOpen)
+{
     gopenws(wsId, connId, wsType);
-    REQUIRE(getGksOpState() == GWSOP);
-    REQUIRE(g_recordedErrors.empty());
+    ASSERT_EQ(GWSOP, getGksOpState());
 
-    SECTION("workstation id negative")
-    {
-        Gint badWsId{-1};
-        gclosews(badWsId);
+    const Gint status = gopenws(wsId, connId, wsType);
 
-        requireError(GERROR_INVALID_WSID, GFN_CLOSE_WORKSTATION);
-    }
-    SECTION("workstation id too large")
-    {
-        const Gint maxOpenWorkstations{1};
-        Gint badWsId{maxOpenWorkstations};
-        gclosews(badWsId);
-
-        requireError(GERROR_INVALID_WSID, GFN_CLOSE_WORKSTATION);
-    }
-    SECTION("workstation is active")
-    {
-        gactivatews(wsId);
-
-        gclosews(wsId);
-
-        requireError(GERROR_WS_IS_ACTIVE, GFN_CLOSE_WORKSTATION);
-
-        gdeactivatews(wsId);
-    }
-
-    REQUIRE(getGksOpState() == GWSOP);
-    gclosews(wsId);
-    gclosegks();
-}
-
-TEST_CASE("activate workstation error handling", "[workstation]")
-{
-    g_recordedErrors.clear();
-    gopengks(stderr, 0L);
-    Gint wsId{};
-    const Gchar *connId{"tek4105"};
-    Gwstype wsType{GWSTYPE_TEK4105};
-    gopenws(wsId, connId, wsType);
-    REQUIRE(getGksOpState() == GWSOP);
-    REQUIRE(g_recordedErrors.empty());
-
-    SECTION("workstation id negative")
-    {
-        Gint badWsId{-1};
-        gactivatews(badWsId);
-
-        requireError(GERROR_INVALID_WSID, GFN_ACTIVATE_WORKSTATION);
-    }
-    SECTION("workstation id too large")
-    {
-        const Gint maxOpenWorkstations{1};
-        Gint badWsId{maxOpenWorkstations};
-        gactivatews(badWsId);
-
-        requireError(GERROR_INVALID_WSID, GFN_ACTIVATE_WORKSTATION);
-    }
-    SECTION("workstation is active")
-    {
-        gactivatews(wsId);
-
-        gactivatews(wsId);
-
-        requireError(GERROR_WS_IS_ACTIVE, GFN_ACTIVATE_WORKSTATION);
-
-        gdeactivatews(wsId);
-    }
-
-    REQUIRE(getGksOpState() == GWSOP);
-    gclosews(wsId);
-    gclosegks();
-}
-
-TEST_CASE("deactivate workstation error handling", "[workstation]")
-{
-    REQUIRE(getGksOpState() == GGKCL);
-    g_recordedErrors.clear();
-    gopengks(stderr, 0L);
-    Gint wsId{};
-    const Gchar *connId{"tek4105"};
-    Gwstype wsType{GWSTYPE_TEK4105};
-    gopenws(wsId, connId, wsType);
-    gactivatews(wsId);
-    REQUIRE(getGksOpState() == GWSAC);
-    REQUIRE(g_recordedErrors.empty());
-
-    SECTION("workstation id negative")
-    {
-        Gint badWsId{-1};
-        gdeactivatews(badWsId);
-
-        requireError(GERROR_INVALID_WSID, GFN_DEACTIVATE_WORKSTATION);
-        REQUIRE(getGksOpState() == GWSAC);
-    }
-    SECTION("workstation id too large")
-    {
-        const Gint maxOpenWorkstations{1};
-        Gint badWsId{maxOpenWorkstations};
-        gdeactivatews(badWsId);
-
-        requireError(GERROR_INVALID_WSID, GFN_DEACTIVATE_WORKSTATION);
-    }
-    SECTION("workstation not activated")
-    {
-        // This test requires support for multiple open workstations
-    }
-
-    REQUIRE(getGksOpState() == GWSAC);
-    gdeactivatews(wsId);
-    gclosews(wsId);
-    gclosegks();
-    REQUIRE(getGksOpState() == GGKCL);
-}
-
-TEST_CASE("clear workstation error handling", "[workstation]")
-{
-    REQUIRE(getGksOpState() == GGKCL);
-    g_recordedErrors.clear();
-    gopengks(stderr, 0L);
-    Gint wsId{};
-    const Gchar *connId{"tek4105"};
-    Gwstype wsType{GWSTYPE_TEK4105};
-    gopenws(wsId, connId, wsType);
-    REQUIRE(getGksOpState() == GWSOP);
-    REQUIRE(g_recordedErrors.empty());
-
-    SECTION("workstation id negative")
-    {
-        Gint badWsId{-1};
-        gclearws(badWsId, GALWAYS);
-
-        requireError(GERROR_INVALID_WSID, GFN_CLEAR_WORKSTATION);
-    }
-    SECTION("workstation id too large")
-    {
-        const Gint maxOpenWorkstations{1};
-        Gint badWsId{maxOpenWorkstations};
-        gclearws(badWsId, GALWAYS);
-
-        requireError(GERROR_INVALID_WSID, GFN_CLEAR_WORKSTATION);
-    }
-    SECTION("workstation not activated")
-    {
-        // This test requires support for multiple open workstations
-    }
+    ASSERT_TRUE(expectError(status, GERROR_WS_IS_OPEN, GFN_OPEN_WORKSTATION));
 
     gclosews(wsId);
-    gclosegks();
-    REQUIRE(getGksOpState() == GGKCL);
 }
 
-TEST_CASE("update workstation error handling", "[workstation]")
+namespace
 {
-    REQUIRE(getGksOpState() == GGKCL);
-    g_recordedErrors.clear();
-    gopengks(stderr, 0L);
-    Gint wsId{};
-    const Gchar *connId{"tek4105"};
-    Gwstype wsType{GWSTYPE_TEK4105};
-    gopenws(wsId, connId, wsType);
-    REQUIRE(getGksOpState() == GWSOP);
-    REQUIRE(g_recordedErrors.empty());
 
-    SECTION("workstation id negative")
-    {
-        Gint badWsId{-1};
-        gupdatews(badWsId, GPERFORM);
+class TestCloseWorkstationError : public TestWSOpen
+{
+public:
+    ~TestCloseWorkstationError() override = default;
 
-        requireError(GERROR_INVALID_WSID, GFN_UPDATE_WORKSTATION);
-    }
-    SECTION("workstation id too large")
-    {
-        const Gint maxOpenWorkstations{1};
-        Gint badWsId{maxOpenWorkstations};
-        gupdatews(badWsId, GPERFORM);
+protected:
+    void SetUp() override;
+    void TearDown() override;
+};
 
-        requireError(GERROR_INVALID_WSID, GFN_UPDATE_WORKSTATION);
-    }
-    SECTION("workstation not open")
-    {
-        // This test requires multiple workstations to be open
-    }
+void TestCloseWorkstationError::SetUp()
+{
+    TestWSOpen::SetUp();
 
-    gclosews(wsId);
-    gclosegks();
-    REQUIRE(getGksOpState() == GGKCL);
+    ASSERT_EQ(GWSOP, getGksOpState());
+    ASSERT_TRUE(g_recordedErrors.empty());
 }
 
-TEST_CASE("Output primitives", "[output]")
+void TestCloseWorkstationError::TearDown()
 {
-    gopengks(stderr, 0L);
-    Gint wsId{0};
-    const Gchar *connId{"tek4105"};
-    Gint wsType{GWSTYPE_TEK4105};
-    gopenws(wsId, connId, wsType);
+    ASSERT_EQ(GWSOP, getGksOpState());
+
+    TestWSOpen::TearDown();
+}
+
+} // namespace
+
+TEST_F(TestCloseWorkstationError, workstationIdNegative)
+{
+    Gint badWsId{-1};
+
+    const Gint status = gclosews(badWsId);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_WSID, GFN_CLOSE_WORKSTATION));
+}
+
+TEST_F(TestCloseWorkstationError, workstationIdTooLarge)
+{
+    const Gint maxOpenWorkstations{1};
+    Gint badWsId{maxOpenWorkstations};
+
+    const Gint status = gclosews(badWsId);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_WSID, GFN_CLOSE_WORKSTATION));
+}
+
+TEST_F(TestCloseWorkstationError, workstationIsActive)
+{
     gactivatews(wsId);
 
-    SECTION("Polyline")
-    {
-        Gpoint points[] =
-        {
-        { 0.0f, 0.5f },
-        { 0.5f, 0.5f }
-        };
-        gpolyline(sizeof(points)/sizeof(points[0]), points);
-    }
-    SECTION("Polymarker")
-    {
-        Gpoint points[] =
-        {
-        { 0.0f, 0.5f },
-        { 0.5f, 0.5f }
-        };
-        gpolymarker(sizeof(points)/sizeof(points[0]), points);
-    }
-    SECTION("Text")
-    {
-        Gpoint start{0.0f, 0.5f};
-        gtext(&start, "Hello, world!");
-    }
-    SECTION("Fill Area")
-    {
-        Gpoint points[] = 
-        {
-        {0.25f, 0.25f},
-        {0.50f, 0.25f},
-        {0.50f, 0.50f},
-        {0.25f, 0.50f}
-        };
-        gfillarea(sizeof(points)/sizeof(points[0]), points);
-    }
-    SECTION("Cell Array")
-    {
-        Grect rect =
-        {
-        {0.25f, 0.75f},
-        {0.75f, 0.25f}
-        };
-        Gidim dim =
-        {
-        128, 128
-        };
-        Gint colors[] = { 0, 1 };
-        gcellarray(&rect, &dim, colors);
-    }
-    SECTION("Generalized Drawing Primitive")
-    {
-        Gpoint points[] =
-        {
-        {0.1f, 0.1f},
-        {0.2f, 0.2f}
-        };
-        Gint gdpId = 1;
-        Ggdprec data{};
-        ggdp(sizeof(points)/sizeof(points[0]), points, gdpId, &data);
-    }
+    const Gint status = gclosews(wsId);
+
+    ASSERT_TRUE(expectError(status, GERROR_WS_IS_ACTIVE, GFN_CLOSE_WORKSTATION));
 
     gdeactivatews(wsId);
-    gclosews(wsId);
-    gclosegks();
 }
 
-TEST_CASE("output primitive error handling", "[output]")
+namespace
 {
-    g_recordedErrors.clear();
-    gopengks(stderr, 0L);
-    Gint wsId{0};
-    const Gchar *connId{"tek4105"};
-    Gint wsType{GWSTYPE_TEK4105};
-    gopenws(wsId, connId, wsType);
+
+class TestActivateWorkstationError : public TestWSOpen
+{
+public:
+    ~TestActivateWorkstationError() override = default;
+
+protected:
+    void SetUp() override;
+    void TearDown() override;
+};
+
+void TestActivateWorkstationError::SetUp()
+{
+    TestWSOpen::SetUp();
+
+    ASSERT_EQ(GWSOP, getGksOpState());
+    ASSERT_TRUE(g_recordedErrors.empty());
+}
+
+void TestActivateWorkstationError::TearDown()
+{
+    ASSERT_EQ(GWSOP, getGksOpState());
+
+    TestWSOpen::TearDown();
+}
+
+} // namespace
+
+TEST_F(TestActivateWorkstationError, workstationIdNegative)
+{
+    Gint badWsId{-1};
+
+    const Gint status = gactivatews(badWsId);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_WSID, GFN_ACTIVATE_WORKSTATION));
+}
+
+TEST_F(TestActivateWorkstationError, workstationIdTooLarge)
+{
+    const Gint maxOpenWorkstations{1};
+    const Gint badWsId{maxOpenWorkstations};
+
+    const Gint status = gactivatews(badWsId);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_WSID, GFN_ACTIVATE_WORKSTATION));
+}
+
+TEST_F(TestActivateWorkstationError, workstationIsActive)
+{
     gactivatews(wsId);
-    Gpoint points[] = 
+
+    const Gint status = gactivatews(wsId);
+
+    ASSERT_TRUE(expectError(status, GERROR_WS_IS_ACTIVE, GFN_ACTIVATE_WORKSTATION));
+
+    gdeactivatews(wsId);
+}
+
+namespace
+{
+
+class TestDeactivateWorkstationError : public TestWSOpen
+{
+public:
+    ~TestDeactivateWorkstationError() override = default;
+
+protected:
+    void SetUp() override;
+    void TearDown() override;
+};
+
+void TestDeactivateWorkstationError::SetUp()
+{
+    TestWSOpen::SetUp();
+
+    ASSERT_EQ(GERROR_NONE, gactivatews(wsId));
+    ASSERT_EQ(GWSAC, getGksOpState());
+    ASSERT_TRUE(g_recordedErrors.empty());
+}
+
+void TestDeactivateWorkstationError::TearDown()
+{
+    ASSERT_EQ(GWSAC, getGksOpState());
+    ASSERT_EQ(GERROR_NONE, gdeactivatews(wsId));
+
+    TestWSOpen::TearDown();
+}
+
+} // namespace
+
+TEST_F(TestDeactivateWorkstationError, workstationIdNegative)
+{
+    Gint badWsId{-1};
+
+    const Gint status = gdeactivatews(badWsId);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_WSID, GFN_DEACTIVATE_WORKSTATION));
+    ASSERT_EQ(GWSAC, getGksOpState());
+}
+
+TEST_F(TestDeactivateWorkstationError, workstationIdTooLarge)
+{
+    const Gint maxOpenWorkstations{1};
+    Gint badWsId{maxOpenWorkstations};
+
+    const Gint status = gdeactivatews(badWsId);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_WSID, GFN_DEACTIVATE_WORKSTATION));
+}
+
+TEST_F(TestDeactivateWorkstationError, workstationNotActivated)
+{
+    // This test requires support for multiple open workstations
+}
+
+namespace
+{
+
+class TestClearWorkstationError : public TestWSOpen
+{
+public:
+    ~TestClearWorkstationError() override = default;
+
+protected:
+    void SetUp() override;
+};
+
+void TestClearWorkstationError::SetUp()
+{
+    TestWSOpen::SetUp();
+
+    ASSERT_EQ(GWSOP, getGksOpState());
+    ASSERT_TRUE(g_recordedErrors.empty());
+}
+
+} // namespace
+
+TEST_F(TestClearWorkstationError, workstationIdNegative)
+{
+    Gint badWsId{-1};
+
+    const Gint status = gclearws(badWsId, GALWAYS);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_WSID, GFN_CLEAR_WORKSTATION));
+}
+
+TEST_F(TestClearWorkstationError, workstationIdTooLarge)
+{
+    const Gint maxOpenWorkstations{1};
+    Gint badWsId{maxOpenWorkstations};
+
+    const Gint status = gclearws(badWsId, GALWAYS);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_WSID, GFN_CLEAR_WORKSTATION));
+}
+
+TEST_F(TestClearWorkstationError, workstationNotActivated)
+{
+    // This test requires support for multiple open workstations
+}
+
+namespace
+{
+
+class TestUpdateWorkstationError : public TestWSOpen
+{
+public:
+    ~TestUpdateWorkstationError() override = default;
+
+protected:
+    void SetUp() override;
+};
+
+void TestUpdateWorkstationError::SetUp()
+{
+    TestWSOpen::SetUp();
+
+    ASSERT_EQ(GWSOP, getGksOpState());
+    ASSERT_TRUE(g_recordedErrors.empty());
+}
+
+} // namespace
+
+TEST_F(TestUpdateWorkstationError, workstationIdNegative)
+{
+    Gint badWsId{-1};
+
+    const Gint status = gupdatews(badWsId, GPERFORM);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_WSID, GFN_UPDATE_WORKSTATION));
+}
+
+TEST_F(TestUpdateWorkstationError, workstationIdTooLarge)
+{
+    const Gint maxOpenWorkstations{1};
+    Gint badWsId{maxOpenWorkstations};
+
+    const Gint status = gupdatews(badWsId, GPERFORM);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_WSID, GFN_UPDATE_WORKSTATION));
+}
+
+TEST_F(TestUpdateWorkstationError, workstationNotOpen)
+{
+    // This test requires multiple workstations to be open
+}
+
+namespace
+{
+
+class TestOutputPrimitives : public TestWSOpen
+{
+public:
+    ~TestOutputPrimitives() override = default;
+
+protected:
+    void SetUp() override;
+    void TearDown() override;
+};
+
+void TestOutputPrimitives::SetUp()
+{
+    TestWSOpen::SetUp();
+
+    EXPECT_EQ(GERROR_NONE, gactivatews(wsId));
+}
+
+void TestOutputPrimitives::TearDown()
+{
+    ASSERT_EQ(GERROR_NONE, gdeactivatews(wsId));
+
+    TestWSOpen::TearDown();
+}
+
+} // namespace
+
+TEST_F(TestOutputPrimitives, polyline)
+{
+    Gpoint points[] =
     {
-        {0.25f, 0.25f},
-        {0.50f, 0.25f},
-        {0.50f, 0.50f},
-        {0.25f, 0.50f}
+    { 0.0f, 0.5f },
+    { 0.5f, 0.5f }
     };
 
-    SECTION("polyline with too few points")
-    {
-        gpolyline(1, points);
+    const Gint status = gpolyline(sizeof(points)/sizeof(points[0]), points);
 
-        requireError(GERROR_INVALID_NUM_POINTS, GFN_POLYLINE);
-    }
-    SECTION("polymarker with too few points")
-    {
-        gpolymarker(0, points);
-
-        requireError(GERROR_INVALID_NUM_POINTS, GFN_POLYMARKER);
-    }
-    SECTION("fill area with too few points")
-    {
-        gfillarea(2, points);
-
-        requireError(GERROR_INVALID_NUM_POINTS, GFN_FILL_AREA);
-    }
-    SECTION("cell array")
-    {
-        Grect rect =
-        {
-            {0.25f, 0.75f},
-            {0.75f, 0.25f}
-        };
-        SECTION("invalid x dimension")
-        {
-            Gidim dim =
-            {
-                0, 1
-            };
-            Gint colors[] = { 0, 1 };
-            gcellarray(&rect, &dim, colors);
-
-            requireError(GERROR_INVALID_COLOR_DIMENSIONS, GFN_CELL_ARRAY);
-        }
-    }
-    SECTION("Generalized Drawing Primitive")
-    {
-        Gpoint points[] =
-        {
-            {0.1f, 0.1f},
-            {0.2f, 0.2f}
-        };
-        Gint gdpId = 1;
-        Ggdprec data{};
-        ggdp(sizeof(points)/sizeof(points[0]), points, gdpId, &data);
-    }
-
-    gdeactivatews(wsId);
-    gclosews(wsId);
-    gclosegks();
+    ASSERT_EQ(GERROR_NONE, status);
 }
 
-TEST_CASE("initial GKS state list values", "[output]")
+TEST_F(TestOutputPrimitives, polymarker)
 {
-    gopengks(stderr, 0L);
+    Gpoint points[] =
+    {
+    { 0.0f, 0.5f },
+    { 0.5f, 0.5f }
+    };
+
+    const Gint status = gpolymarker(sizeof(points)/sizeof(points[0]), points);
+
+    ASSERT_EQ(GERROR_NONE, status);
+}
+
+TEST_F(TestOutputPrimitives, text)
+{
+    Gpoint start{0.0f, 0.5f};
+
+    const Gint status = gtext(&start, "Hello, world!");
+
+    ASSERT_EQ(GERROR_NONE, status);
+}
+
+TEST_F(TestOutputPrimitives, fillArea)
+{
+    Gpoint points[] = 
+    {
+    {0.25f, 0.25f},
+    {0.50f, 0.25f},
+    {0.50f, 0.50f},
+    {0.25f, 0.50f}
+    };
+
+    const Gint status = gfillarea(sizeof(points)/sizeof(points[0]), points);
+
+    ASSERT_EQ(GERROR_NONE, status);
+}
+
+TEST_F(TestOutputPrimitives, cellArray)
+{
+    Grect rect =
+    {
+    {0.25f, 0.75f},
+    {0.75f, 0.25f}
+    };
+    Gidim dim =
+    {
+    128, 128
+    };
+    Gint colors[] = { 0, 1 };
+
+    const Gint status = gcellarray(&rect, &dim, colors);
+
+    ASSERT_EQ(GERROR_NONE, status);
+}
+
+TEST_F(TestOutputPrimitives, generalizedDrawingPrimitive)
+{
+    Gpoint points[] =
+    {
+    {0.1f, 0.1f},
+    {0.2f, 0.2f}
+    };
+    Gint gdpId = 1;
+    Ggdprec data{};
+
+    const Gint status = ggdp(sizeof(points)/sizeof(points[0]), points, gdpId, &data);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_GDP_ID, GFN_GENERALIZED_DRAWING_PRIMITIVE));
+}
+
+namespace
+{
+
+class TestOutputPrimitiveErrors : public TestOutputPrimitives
+{
+protected:
+    Gpoint points[4]{{0.25f, 0.25f}, {0.50f, 0.25f}, {0.50f, 0.50f}, {0.25f, 0.50f}};
+};
+
+} // namespace
+
+TEST_F(TestOutputPrimitiveErrors, polylineWithTooFewPoints)
+{
+    const Gint status = gpolyline(1, points);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_NUM_POINTS, GFN_POLYLINE));
+}
+
+TEST_F(TestOutputPrimitiveErrors, polymarkerWithTooFewPoints)
+{
+    const Gint status = gpolymarker(0, points);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_NUM_POINTS, GFN_POLYMARKER));
+}
+
+TEST_F(TestOutputPrimitiveErrors, fillAreaWithTooFewPoints)
+{
+    const Gint status = gfillarea(2, points);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_NUM_POINTS, GFN_FILL_AREA));
+}
+
+TEST_F(TestOutputPrimitiveErrors, cellArrayInvalidXDimension)
+{
+    Grect rect = {{0.25f, 0.75f}, {0.75f, 0.25f}};
+    Gidim dim = {0, 1};
+    Gint colors[] = {0, 1};
+
+    const Gint status = gcellarray(&rect, &dim, colors);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_COLOR_DIMENSIONS, GFN_CELL_ARRAY));
+}
+
+TEST_F(TestOutputPrimitiveErrors, generalizedDrawingPrimitive)
+{
+    Gpoint points[] =
+    {
+        {0.1f, 0.1f},
+        {0.2f, 0.2f}
+    };
+    Gint gdpId = 1;
+    Ggdprec data{};
+
+    const Gint status = ggdp(sizeof(points)/sizeof(points[0]), points, gdpId, &data);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_GDP_ID, GFN_GENERALIZED_DRAWING_PRIMITIVE));
+}
+
+namespace
+{
+
+class TestGKSInitialStateList : public TestGKSOpen
+{
+protected:
     Gint value{-1};
-    Gint status{-1};
+};
 
-    SECTION("line type is 1 (solid)")
-    {
-        status = ginqlinetype(&value);
+}//
 
-        REQUIRE(value == GLN_SOLID);
-    }
-    SECTION("line color index is 1")
-    {
-        status = ginqlinecolorind(&value);
+TEST_F(TestGKSInitialStateList, lineType)
+{
+    const Gint status = ginqlinetype(&value);
 
-        REQUIRE(value == 1);
-    }
-    SECTION("line index is 1")
-    {
-        status = ginqlineind(&value);
-
-        REQUIRE(value == 1);
-    }
-    SECTION("marker type is 3 (star)")
-    {
-        status = ginqmarkertype(&value);
-
-        REQUIRE(value == GMK_STAR);
-    }
-    SECTION("marker size is 1", "[output]")
-    {
-        Gfloat size{};
-        status = ginqmarkersize(&size);
-
-        REQUIRE(size == 1.0f);
-    }
-    SECTION("marker color index is 1")
-    {
-        status = ginqmarkercolorind(&value);
-
-        REQUIRE(value == 1);
-    }
-    SECTION("marker index is 1")
-    {
-        status = ginqmarkerind(&value);
-
-        REQUIRE(value == 1);
-    }
-    SECTION("text height is 0.01", "[output]")
-    {
-        Gfloat height{};
-        status = ginqcharheight(&height);
-
-        REQUIRE(height == 0.01f);
-    }
-    SECTION("char base vector is (1.00")
-    {
-        Gpoint base{-1.0f, -1.0f};
-        status = ginqcharbase(&base);
-
-        REQUIRE(base.x == 1.0f);
-        REQUIRE(base.y == 0.0f);
-    }
-    SECTION("char up vector is (0,1)")
-    {
-        Gpoint up{-1.0f, -1.0f};
-        status = ginqcharup(&up);
-
-        REQUIRE(up.x == 0.0f);
-        REQUIRE(up.y == 1.0f);
-    }
-    SECTION("character width is 0.01")
-    {
-        Gfloat width{-1.0f};
-        status = ginqcharwidth(&width);
-
-        REQUIRE(width == 0.01f);
-    }
-    SECTION("text color index is 1")
-    {
-        status = ginqtextcolorind(&value);
-
-        REQUIRE(value == 1);
-    }
-    SECTION("text index is 1", "[output]")
-    {
-        status = ginqtextind(&value);
-
-        REQUIRE(value == 1);
-    }
-    SECTION("text alignment is normal")
-    {
-        Gtxalign align{};
-        status = ginqtextalign(&align);
-
-        REQUIRE(align.hor == GAH_NORMAL);
-        REQUIRE(align.ver == GAV_NORMAL);
-    }
-    SECTION("text font and precision is (1, string)")
-    {
-        Gtxfp fontPrec{};
-        status = ginqtextfontprec(&fontPrec);
-
-        REQUIRE(fontPrec.font == 1);
-        REQUIRE(fontPrec.prec == GP_STRING);
-    }
-    SECTION("char expansion factor is 1.0")
-    {
-        Gfloat expandFactor{};
-        status = ginqcharexpan(&expandFactor);
-
-        REQUIRE(expandFactor == 1.0f);
-    }
-    SECTION("char spacing is 0.0")
-    {
-        Gfloat spacing{-1.0f};
-        status = ginqcharspace(&spacing);
-
-        REQUIRE(spacing == 0.0f);
-    }
-    SECTION("fill area interior style is HOLLOW")
-    {
-        Gflinter style{GSOLID};
-        status = ginqfillstyle(&style);
-
-        REQUIRE(style == GHOLLOW);
-    }
-    SECTION("fill area interior style index is 1", "[output]")
-    {
-        status = ginqfillstyleind(&value);
-
-        REQUIRE(value == 1);
-    }
-    SECTION("fill area color index is 1")
-    {
-        status = ginqfillcolorind(&value);
-
-        REQUIRE(value == 1);
-    }
-    SECTION("fill area index is 1")
-    {
-        status = ginqfillind(&value);
-
-        REQUIRE(value == 1);
-    }
-    SECTION("pattern height is (0,1)")
-    {
-        Gpoint vec{};
-        status = ginqpatheight(&vec);
-
-        REQUIRE(vec.x == 0.0f);
-        REQUIRE(vec.y == 1.0f);
-    }
-    SECTION("pattern width is (1,0)")
-    {
-        Gpoint vec{};
-        status = ginqpatwidth(&vec);
-
-        REQUIRE(vec.x == 1.0f);
-        REQUIRE(vec.y == 0.0f);
-    }
-    SECTION("pattern reference point is (0,0)")
-    {
-        Gpoint refPt{1.0f, 1.0f};
-        status = ginqpatrefpt(&refPt);
-
-        REQUIRE(refPt.x == 0.0f);
-        REQUIRE(refPt.y == 0.0f);
-    }
-    SECTION("attribute source flags")
-    {
-        Gasfs asfs{};
-        status = ginqasf(&asfs);
-
-        REQUIRE(asfs.ln_type == GINDIVIDUAL);
-        REQUIRE(asfs.ln_width == GINDIVIDUAL);
-        REQUIRE(asfs.ln_color == GINDIVIDUAL);
-        REQUIRE(asfs.mk_type == GINDIVIDUAL);
-        REQUIRE(asfs.mk_size == GINDIVIDUAL);
-        REQUIRE(asfs.mk_color == GINDIVIDUAL);
-        REQUIRE(asfs.tx_fp == GINDIVIDUAL);
-        REQUIRE(asfs.tx_exp == GINDIVIDUAL);
-        REQUIRE(asfs.tx_space == GINDIVIDUAL);
-        REQUIRE(asfs.tx_color == GINDIVIDUAL);
-        REQUIRE(asfs.fl_inter == GINDIVIDUAL);
-        REQUIRE(asfs.fl_style == GINDIVIDUAL);
-        REQUIRE(asfs.fl_color == GINDIVIDUAL);
-    }
-    SECTION("current normalization transform is 0")
-    {
-        Gint transform{-1};
-        status = ginqcurrntrannum(&transform);
-
-        REQUIRE(transform == 0);
-    }
-
-    REQUIRE(status == GERROR_NONE);
-
-    gclosegks();
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(GLN_SOLID, value);
 }
 
-TEST_CASE("Set global attribute values", "[output]")
+TEST_F(TestGKSInitialStateList, lineColorIndex)
 {
-    gopengks(stderr, 0L);
+    const Gint status = ginqlinecolorind(&value);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(1, value);
+}
+
+TEST_F(TestGKSInitialStateList, lineIndex)
+{
+    const Gint status = ginqlineind(&value);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(1, value);
+}
+
+TEST_F(TestGKSInitialStateList, markerType)
+{
+    const Gint status = ginqmarkertype(&value);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(GMK_STAR, value);
+}
+
+TEST_F(TestGKSInitialStateList, markerSize)
+{
+    Gfloat size{};
+
+    const Gint status = ginqmarkersize(&size);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(1.0f, size);
+}
+
+TEST_F(TestGKSInitialStateList, markerColorIndex)
+{
+    const Gint status = ginqmarkercolorind(&value);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(1, value);
+}
+
+TEST_F(TestGKSInitialStateList, markerIndex)
+{
+    const Gint status = ginqmarkerind(&value);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(1, value);
+}
+
+TEST_F(TestGKSInitialStateList, textHeight)
+{
+    Gfloat height{};
+    const Gint status = ginqcharheight(&height);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(0.01f, height);
+}
+
+TEST_F(TestGKSInitialStateList, charBaseVector)
+{
+    Gpoint base{-1.0f, -1.0f};
+    const Gint status = ginqcharbase(&base);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(1.0f, base.x);
+    ASSERT_EQ(0.0f, base.y);
+}
+
+TEST_F(TestGKSInitialStateList, charUpVector)
+{
+    Gpoint up{-1.0f, -1.0f};
+    const Gint status = ginqcharup(&up);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(0.0f, up.x);
+    ASSERT_EQ(1.0f, up.y);
+}
+
+TEST_F(TestGKSInitialStateList, characterWidth)
+{
+    Gfloat width{-1.0f};
+    const Gint status = ginqcharwidth(&width);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(0.01f, width);
+}
+
+TEST_F(TestGKSInitialStateList, textColorIndex)
+{
+    const Gint status = ginqtextcolorind(&value);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(1, value);
+}
+
+TEST_F(TestGKSInitialStateList, textIndex)
+{
+    const Gint status = ginqtextind(&value);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(1, value);
+}
+
+TEST_F(TestGKSInitialStateList, textAlignment)
+{
+    Gtxalign align{};
+    const Gint status = ginqtextalign(&align);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(GAH_NORMAL, align.hor);
+    ASSERT_EQ(GAV_NORMAL, align.ver);
+}
+
+TEST_F(TestGKSInitialStateList, textFontAndPrecision)
+{
+    Gtxfp fontPrec{};
+    const Gint status = ginqtextfontprec(&fontPrec);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(1, fontPrec.font);
+    ASSERT_EQ(GP_STRING, fontPrec.prec);
+}
+
+TEST_F(TestGKSInitialStateList, charExpansionFactor)
+{
+    Gfloat expandFactor{};
+    const Gint status = ginqcharexpan(&expandFactor);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(1.0f, expandFactor);
+}
+
+TEST_F(TestGKSInitialStateList, charSpacing)
+{
+    Gfloat spacing{-1.0f};
+    const Gint status = ginqcharspace(&spacing);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(0.0f, spacing);
+}
+
+TEST_F(TestGKSInitialStateList, fillAreaInteriorStyle)
+{
+    Gflinter style{GSOLID};
+    const Gint status = ginqfillstyle(&style);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(GHOLLOW, style);
+}
+
+TEST_F(TestGKSInitialStateList, fillAreaInteriorStyleIndex)
+{
+    const Gint status = ginqfillstyleind(&value);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(1, value);
+}
+
+TEST_F(TestGKSInitialStateList, fillAreaColorIndex)
+{
+    const Gint status = ginqfillcolorind(&value);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(1, value);
+}
+
+TEST_F(TestGKSInitialStateList, fillAreaIndex)
+{
+    const Gint status = ginqfillind(&value);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(1, value);
+}
+
+TEST_F(TestGKSInitialStateList, patternHeight)
+{
+    Gpoint vec{};
+    const Gint status = ginqpatheight(&vec);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(0.0f, vec.x);
+    ASSERT_EQ(1.0f, vec.y);
+}
+
+TEST_F(TestGKSInitialStateList, patternWidth)
+{
+    Gpoint vec{};
+    const Gint status = ginqpatwidth(&vec);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(1.0f, vec.x);
+    ASSERT_EQ(0.0f, vec.y);
+}
+
+TEST_F(TestGKSInitialStateList, patternReferencePoint)
+{
+    Gpoint refPt{1.0f, 1.0f};
+    const Gint status = ginqpatrefpt(&refPt);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(0.0f, refPt.x);
+    ASSERT_EQ(0.0f, refPt.y);
+}
+
+TEST_F(TestGKSInitialStateList, attributeSourceFlags)
+{
+    Gasfs asfs{};
+    const Gint status = ginqasf(&asfs);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(GINDIVIDUAL, asfs.ln_type);
+    ASSERT_EQ(GINDIVIDUAL, asfs.ln_width);
+    ASSERT_EQ(GINDIVIDUAL, asfs.ln_color);
+    ASSERT_EQ(GINDIVIDUAL, asfs.mk_type);
+    ASSERT_EQ(GINDIVIDUAL, asfs.mk_size);
+    ASSERT_EQ(GINDIVIDUAL, asfs.mk_color);
+    ASSERT_EQ(GINDIVIDUAL, asfs.tx_fp);
+    ASSERT_EQ(GINDIVIDUAL, asfs.tx_exp);
+    ASSERT_EQ(GINDIVIDUAL, asfs.tx_space);
+    ASSERT_EQ(GINDIVIDUAL, asfs.tx_color);
+    ASSERT_EQ(GINDIVIDUAL, asfs.fl_inter);
+    ASSERT_EQ(GINDIVIDUAL, asfs.fl_style);
+    ASSERT_EQ(GINDIVIDUAL, asfs.fl_color);
+}
+
+TEST_F(TestGKSInitialStateList, currentNormalizationTransform)
+{
+    Gint transform{-1};
+    const Gint status = ginqcurrntrannum(&transform);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(0, transform);
+}
+
+namespace
+{
+
+class TestGKSSetStateList : public TestGKSOpen
+{
+public:
+    ~TestGKSSetStateList() override = default;
+
+protected:
     Gint value{-1};
-    Gint status{-1};
+};
 
-    SECTION("aspect source flags")
-    {
-        Gasfs asfs =
-        {
-            GBUNDLED,
-            GINDIVIDUAL,
-            GBUNDLED,
-            GINDIVIDUAL,
-            GBUNDLED,
-            GINDIVIDUAL,
-            GBUNDLED,
-            GINDIVIDUAL,
-            GBUNDLED,
-            GINDIVIDUAL,
-            GBUNDLED,
-            GINDIVIDUAL,
-            GBUNDLED,
-        };
-        status = gsetasf(&asfs);
-
-        Gasfs current{};
-        ginqasf(&current);
-        REQUIRE(current.ln_type == asfs.ln_type);
-        REQUIRE(current.ln_width == asfs.ln_width);
-        REQUIRE(current.ln_color == asfs.ln_color);
-        REQUIRE(current.mk_type == asfs.mk_type);
-        REQUIRE(current.mk_size == asfs.mk_size);
-        REQUIRE(current.mk_color == asfs.mk_color);
-        REQUIRE(current.tx_fp == asfs.tx_fp);
-        REQUIRE(current.tx_exp == asfs.tx_exp);
-        REQUIRE(current.tx_space == asfs.tx_space);
-        REQUIRE(current.tx_color == asfs.tx_color);
-        REQUIRE(current.fl_inter == asfs.fl_inter);
-        REQUIRE(current.fl_style == asfs.fl_style);
-        REQUIRE(current.fl_color == asfs.fl_color);
-    }
-    SECTION("char expansion factor")
-    {
-        const Gfloat expan{0.5f};
-        status = gsetcharexpan(expan);
-
-        Gfloat current{};
-        ginqcharexpan(&current);
-        REQUIRE(current == expan);
-    }
-    SECTION("char height")
-    {
-        gsetcharheight(0.5f);
-
-        Gfloat charHeight{-1.0f};
-        status = ginqcharheight(&charHeight);
-        REQUIRE(charHeight == 0.5f);
-    }
-    SECTION("char spacing")
-    {
-        const Gfloat space{0.5f};
-        gsetcharspace(space);
-
-        Gfloat current{};
-        status = ginqcharspace(&current);
-        REQUIRE(current == space);
-    }
-    SECTION("char up vector")
-    {
-        Gpoint up{1.0f, 0.0f};
-        gsetcharup(&up);
-
-        Gpoint current{};
-        status = ginqcharup(&current);
-        REQUIRE(current.x == up.x);
-        REQUIRE(current.y == up.y);
-    }
-    SECTION("fill area color index")
-    {
-        gsetfillcolorind(0);
-
-        status = ginqfillcolorind(&value);
-        REQUIRE(value == 0);
-    }
-    SECTION("fill area index")
-    {
-        gsetfillind(1);
-
-        status = ginqfillind(&value);
-        REQUIRE(value == 1);
-    }
-    SECTION("fill area interior style")
-    {
-        gsetfillstyle(GSOLID);
-
-        Gflinter current{};
-        status = ginqfillstyle(&current);
-        REQUIRE(current == GSOLID);
-    }
-    SECTION("fill area interior style index")
-    {
-        gsetfillstyleind(2);
-
-        status = ginqfillstyleind(&value);
-        REQUIRE(value == 2);
-    }
-    SECTION("line type")
-    {
-        gsetlinetype(GLN_DASHED);
-
-        status = ginqlinetype(&value);
-        REQUIRE(value == GLN_DASHED);
-    }
-    SECTION("line color index")
-    {
-        gsetlinecolorind(1);
-
-        status = ginqlinecolorind(&value);
-        REQUIRE(value == 1);
-    }
-    SECTION("line index")
-    {
-        gsetlineind(1);
-
-        status = ginqlineind(&value);
-        REQUIRE(value == 1);
-    }
-    SECTION("marker type")
-    {
-        gsetmarkertype(GMK_DIAGONAL_CROSS);
-
-        status = ginqmarkertype(&value);
-        REQUIRE(value == GMK_DIAGONAL_CROSS);
-    }
-    SECTION("marker size")
-    {
-        gsetmarkersize(2.0f);
-
-        Gfloat size{-1.0f};
-        status = ginqmarkersize(&size);
-        REQUIRE(size == 2.0f);
-    }
-    SECTION("marker color index")
-    {
-        Gint index{1};
-        gsetmarkercolorind(index);
-
-        status = ginqmarkercolorind(&value);
-        REQUIRE(value == index);
-    }
-    SECTION("marker index")
-    {
-        Gint index{1};
-        gsetmarkerind(index);
-
-        status = ginqmarkerind(&value);
-        REQUIRE(value == index);
-    }
-    SECTION("normalization transform")
-    {
-        gselntran(1);
-
-        Gint transform{0};
-        status = ginqcurrntrannum(&transform);
-        REQUIRE(transform == 1);
-    }
-    SECTION("text alignment")
-    {
-        Gtxalign align{GAH_LEFT, GAV_BOTTOM};
-        gsettextalign(&align);
-
-        Gtxalign current{};
-        status = ginqtextalign(&current);
-        REQUIRE(current.hor == align.hor);
-        REQUIRE(current.ver == align.ver);
-    }
-    SECTION("text color index is 1")
-    {
-        const Gint color{0};
-        gsettextcolorind(color);
-
-        status = ginqtextcolorind(&value);
-        REQUIRE(value == color);
-    }
-    SECTION("text font and precision")
-    {
-        Gtxfp font{2, GP_STROKE};
-        gsettextfontprec(&font);
-
-        Gtxfp current{};
-        status = ginqtextfontprec(&current);
-        REQUIRE(current.font == font.font);
-        REQUIRE(current.prec == font.prec);
-    }
-    SECTION("text index")
-    {
-        const Gint index{1};
-        gsettextind(index);
-
-        status = ginqtextind(&value);
-        REQUIRE(value == index);
-    }
-
-    REQUIRE(status == GERROR_NONE);
-
-    gclosegks();
 }
 
-TEST_CASE("global attribute error handling", "[gks]")
+TEST_F(TestGKSSetStateList, aspectSourceFlags)
 {
-    g_recordedErrors.clear();
-    gopengks(stderr, 0L);
-    Gint status{-1};
-
-    SECTION("character expansion factor")
+    Gasfs asfs =
     {
-        gsetcharexpan(0.0f);
+        GBUNDLED,
+        GINDIVIDUAL,
+        GBUNDLED,
+        GINDIVIDUAL,
+        GBUNDLED,
+        GINDIVIDUAL,
+        GBUNDLED,
+        GINDIVIDUAL,
+        GBUNDLED,
+        GINDIVIDUAL,
+        GBUNDLED,
+        GINDIVIDUAL,
+        GBUNDLED,
+    };
+    const Gint status = gsetasf(&asfs);
 
-        requireError(GERROR_CHAR_EXPANSION_NOT_POSITIVE, GFN_SET_CHARACTER_EXPANSION_FACTOR);
-        Gfloat value{};
-        status = ginqcharexpan(&value);
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(value == 1.0f);
-    }
-    SECTION("character height")
-    {
-        SECTION("zero")
-        {
-            status = gsetcharheight(0.0f);
-        }
-        SECTION("negative")
-        {
-            status = gsetcharheight(-1.0f);
-        }
-
-        requireError(GERROR_CHAR_HEIGHT_NOT_POSITIVE, GFN_SET_CHARACTER_HEIGHT);
-        Gfloat value{-1.0f};
-        status = ginqcharheight(&value);
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(value == 0.01f);
-    }
-    SECTION("character up vector")
-    {
-        Gpoint up{};
-        gsetcharup(&up);
-
-        requireError(GERROR_CHAR_UP_LENGTH_ZERO, GFN_SET_CHARACTER_UP_VECTOR);
-        Gpoint value{};
-        status = ginqcharup(&value);
-        REQUIRE(value.x == 0.0f);
-        REQUIRE(value.y == 1.0f);
-    }
-    SECTION("fill area color")
-    {
-        gsetfillcolorind(-1);
-
-        requireError(GERROR_INVALID_COLOR_INDEX, GFN_SET_FILL_AREA_COLOR_INDEX);
-        Gint value{};
-        status = ginqfillcolorind(&value);
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(value == 1);
-    }
-    SECTION("fill area index")
-    {
-        gsetfillind(0);
-
-        requireError(GERROR_INVALID_FILL_INDEX, GFN_SET_FILL_AREA_INDEX);
-        Gint value{};
-        status = ginqfillind(&value);
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(value == 1);
-    }
-    SECTION("fill area interior style index")
-    {
-        gsetfillstyleind(0);
-
-        requireError(GERROR_FILL_STYLE_ZERO, GFN_SET_FILL_AREA_INTERIOR_STYLE);
-        Gint value{};
-        status = ginqfillstyleind(&value);
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(value == 1);
-    }
-    SECTION("line color")
-    {
-        SECTION("too small")
-        {
-            status = gsetlinecolorind(-1);
-        }
-        SECTION("too large")
-        {
-            status = gsetlinecolorind(2);
-        }
-
-        requireError(GERROR_INVALID_COLOR_INDEX, GFN_SET_POLYLINE_COLOR_INDEX);
-        Gint value{};
-        status = ginqlinecolorind(&value);
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(value == 1);
-    }
-    SECTION("line index")
-    {
-        gsetlineind(0);
-
-        requireError(GERROR_INVALID_LINE_INDEX, GFN_SET_POLYLINE_INDEX);
-        Gint value{};
-        status = ginqlineind(&value);
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(value == 1);
-    }
-    SECTION("line type")
-    {
-        gsetlinetype(0);
-
-        requireError(GERROR_LINE_TYPE_ZERO, GFN_SET_LINETYPE);
-        Gint value{};
-        status = ginqlinetype(&value);
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(value == 1);
-    }
-    SECTION("marker color")
-    {
-        SECTION("too small")
-        {
-            status = gsetmarkercolorind(-1);
-        }
-        SECTION("too large")
-        {
-            status = gsetmarkercolorind(2);
-        }
-
-        requireError(GERROR_INVALID_COLOR_INDEX, GFN_SET_POLYMARKER_COLOR_INDEX);
-        Gint value{};
-        status = ginqmarkercolorind(&value);
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(value == 1);
-    }
-    SECTION("marker index")
-    {
-        gsetmarkerind(0);
-
-        requireError(GERROR_INVALID_MARKER_INDEX, GFN_SET_POLYMARKER_INDEX);
-        Gint value{};
-        status = ginqmarkerind(&value);
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(value == 1);
-    }
-    SECTION("marker size")
-    {
-        gsetmarkersize(-1.0f);
-
-        requireError(GERROR_NEGATIVE_MARKER_SIZE, GFN_SET_MARKER_SIZE_SCALE_FACTOR);
-        Gfloat value{};
-        status = ginqmarkersize(&value);
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(value == 1.0f);
-    }
-    SECTION("marker type")
-    {
-        gsetmarkertype(0);
-
-        requireError(GERROR_MARKER_TYPE_ZERO, GFN_SET_MARKER_TYPE);
-        Gint value{};
-        status = ginqmarkertype(&value);
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(value == GMK_STAR);
-    }
-    SECTION("normalization transform")
-    {
-        SECTION("too small")
-        {
-            status = gselntran(-1);
-        }
-        SECTION("too large")
-        {
-            Gint maxTranNum{};
-            status = ginqmaxntrannum(&maxTranNum);
-            REQUIRE(status == GERROR_NONE);
-
-            gselntran(maxTranNum + 1);
-        }
-
-        requireError(GERROR_INVALID_TRAN_NUM, GFN_SELECT_NORMALIZATION_TRANSFORMATION);
-        Gint value{};
-        status = ginqcurrntrannum(&value);
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(value == 0);
-    }
-    SECTION("text color")
-    {
-        gsettextcolorind(-1);
-
-        requireError(GERROR_INVALID_COLOR_INDEX, GFN_SET_TEXT_COLOR_INDEX);
-        Gint value{};
-        status = ginqtextcolorind(&value);
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(value == 1);
-    }
-    SECTION("text font and precision")
-    {
-        Gtxfp fontPrec{0, GP_STROKE};
-        gsettextfontprec(&fontPrec);
-
-        requireError(GERROR_TEXT_FONT_ZERO, GFN_SET_TEXT_FONT_AND_PRECISION);
-        Gtxfp value{};
-        status = ginqtextfontprec(&value);
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(value.font == 1);
-    }
-    SECTION("text index")
-    {
-        gsettextind(0);
-
-        requireError(GERROR_INVALID_TEXT_INDEX, GFN_SET_TEXT_INDEX);
-        Gint value{};
-        status = ginqtextind(&value);
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(value == 1);
-    }
-    SECTION("viewport")
-    {
-        SECTION("invalid index")
-        {
-            Glimit viewport{0.0f, 1.0f, 0.0f, 1.0f};
-            gsetviewport(0, &viewport);
-
-            requireError(GERROR_INVALID_TRAN_NUM, GFN_SET_VIEWPORT);
-        }
-        SECTION("invalid rectangle")
-        {
-            SECTION("x range")
-            {
-                Glimit viewport{1.0f, 0.0f, 0.0f, 1.0f};
-                status = gsetviewport(1, &viewport);
-            }
-            SECTION("y range")
-            {
-                Glimit viewport{0.0f, 1.0f, 1.0f, 0.0f};
-                status = gsetviewport(1, &viewport);
-            }
-
-            requireError(GERROR_INVALID_RECT, GFN_SET_VIEWPORT);
-        }
-        SECTION("not in NDC unit square")
-        {
-            Glimit viewport{0.0f, 1.0f, 0.0f, 1.0f};
-
-            SECTION("x min out of range")
-            {
-                viewport.xmin = -1.0f;
-            }
-            SECTION("x max out of range")
-            {
-                viewport.xmax = 2.0f;
-            }
-            SECTION("y min out of range")
-            {
-                viewport.ymin = -1.0f;
-            }
-            SECTION("y max out of range")
-            {
-                viewport.ymax = 2.0f;
-            }
-
-            status = gsetviewport(1, &viewport);
-
-            requireError(GERROR_VIEWPORT_NOT_IN_NDC, GFN_SET_VIEWPORT);
-        }
-    }
-    SECTION("window")
-    {
-        SECTION("invalid index")
-        {
-            Glimit window{0.0f, 1.0f, 0.0f, 1.0f};
-            status = gsetwindow(0, &window);
-
-            requireError(GERROR_INVALID_TRAN_NUM, GFN_SET_WINDOW);
-        }
-        SECTION("invalid rectangle")
-        {
-            SECTION("x range")
-            {
-                Glimit window{1.0f, 0.0f, 0.0f, 1.0f};
-                status = gsetwindow(1, &window);
-            }
-            SECTION("y range")
-            {
-                Glimit window{0.0f, 1.0f, 1.0f, 0.0f};
-                status = gsetwindow(1, &window);
-            }
-
-            requireError(GERROR_INVALID_RECT, GFN_SET_WINDOW);
-        }
-    }
-
-    gclosegks();
+    ASSERT_EQ(GERROR_NONE, status);
+    Gasfs current{};
+    ginqasf(&current);
+    ASSERT_EQ(asfs.ln_type, current.ln_type);
+    ASSERT_EQ(asfs.ln_width, current.ln_width);
+    ASSERT_EQ(asfs.ln_color, current.ln_color);
+    ASSERT_EQ(asfs.mk_type, current.mk_type);
+    ASSERT_EQ(asfs.mk_size, current.mk_size);
+    ASSERT_EQ(asfs.mk_color, current.mk_color);
+    ASSERT_EQ(asfs.tx_fp, current.tx_fp);
+    ASSERT_EQ(asfs.tx_exp, current.tx_exp);
+    ASSERT_EQ(asfs.tx_space, current.tx_space);
+    ASSERT_EQ(asfs.tx_color, current.tx_color);
+    ASSERT_EQ(asfs.fl_inter, current.fl_inter);
+    ASSERT_EQ(asfs.fl_style, current.fl_style);
+    ASSERT_EQ(asfs.fl_color, current.fl_color);
 }
 
-TEST_CASE("initial workstation dependent attribute values", "[workstation]")
+TEST_F(TestGKSSetStateList, charExpansionFactor)
 {
-    gopengks(stderr, 0L);
-    Gint wsId{0};
-    std::string connId{"tek4105"};
-    Gint wsType{GWSTYPE_TEK4105};
-    gopenws(wsId, connId.c_str(), wsType);
+    const Gfloat expan{0.5f};
+    const Gint status = gsetcharexpan(expan);
 
-    SECTION("connection id and type")
-    {
-        Gwsct ct{};
-        Gint numCt{};
-        const Gint status = ginqwsconntype(wsId, 0, &numCt, &ct);
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(ct.conn == connId);
-        REQUIRE(ct.type == wsType);
-    }
-    SECTION("color indices")
-    {
-        Gint colors[16]{-1};
-        Gint numIndices{};
-        Gintlist indices{numOf(colors), colors};
-        const Gint status = ginqcolorindices(wsId, numOf(colors), 0, &indices, &numIndices);
-
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(numIndices == 2);
-        REQUIRE(colors[0] == 0);
-        REQUIRE(colors[1] == 1);
-    }
-
-    gclosews(wsId);
-    gclosegks();
-    REQUIRE(getGksOpState() == GGKCL);
+    ASSERT_EQ(GERROR_NONE, status);
+    Gfloat current{};
+    ginqcharexpan(&current);
+    ASSERT_EQ(expan, current);
 }
 
-TEST_CASE("set workstation dependent attribute values", "[output]")
+TEST_F(TestGKSSetStateList, charHeight)
 {
-    gopengks(stderr, 0L);
-    Gint wsId{0};
-    const Gchar *connId{"tek4105"};
-    Gint wsType{GWSTYPE_TEK4105};
-    gopenws(wsId, connId, wsType);
+    const Gint status = gsetcharheight(0.5f);
 
-    SECTION("color representation")
-    {
-        Gcobundl rep{0.5f, 0.5f, 0.5f};
-        gsetcolorrep(wsId, 0, &rep);
-
-        Gcobundl current{};
-        const Gint status = ginqcolorrep(wsId, 0, &current);
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(current.red == rep.red);
-        REQUIRE(current.green == rep.green);
-        REQUIRE(current.blue == rep.blue);
-    }
-
-    gclosews(wsId);
-    gclosegks();
+    ASSERT_EQ(GERROR_NONE, status);
+    Gfloat charHeight{-1.0f};
+    ginqcharheight(&charHeight);
+    ASSERT_EQ(0.5f, charHeight);
 }
 
-TEST_CASE("workstation dependent attribute error handling", "[workstation]")
+TEST_F(TestGKSSetStateList, charSpacing)
 {
-    g_recordedErrors.clear();
-    gopengks(stderr, 0L);
-    Gint wsId{0};
-    const Gchar *connId{"tek4105"};
-    Gint wsType{GWSTYPE_TEK4105};
-    gopenws(wsId, connId, wsType);
+    const Gfloat space{0.5f};
+    const Gint status = gsetcharspace(space);
 
-    SECTION("get color indices")
-    {
-        Gint colors[16]{};
-        Gint numIndices{};
-        Gintlist indices{};
-        const Gint status = ginqcolorindices(wsId + 1, numOf(colors), 0, &indices, &numIndices);
+    ASSERT_EQ(GERROR_NONE, status);
+    Gfloat current{};
+    ginqcharspace(&current);
+    ASSERT_EQ(space, current);
+}
 
-        REQUIRE(status == GERROR_WS_NOT_OPEN);
-    }
-    SECTION("get color representation")
-    {
-        Gint index{1};
-        Gcobundl value{};
+TEST_F(TestGKSSetStateList, charUpVector)
+{
+    Gpoint up{1.0f, 0.0f};
+    const Gint status = gsetcharup(&up);
 
-        SECTION("workstation not open")
-        {
-            const Gint status = ginqcolorrep(wsId + 1, index, &value);
+    ASSERT_EQ(GERROR_NONE, status);
+    Gpoint current{};
+    ginqcharup(&current);
+    ASSERT_EQ(up.x, current.x);
+    ASSERT_EQ(up.y, current.y);
+}
 
-            REQUIRE(status == GERROR_WS_NOT_OPEN);
-        }
-        SECTION("bad color index")
-        {
-            const Gint status = ginqcolorrep(wsId, -1, &value);
+TEST_F(TestGKSSetStateList, fillAreaColorIndex)
+{
+    const Gint status = gsetfillcolorind(0);
 
-            REQUIRE(status == GERROR_INVALID_COLOR_INDEX);
-        }
-    }
-    SECTION("get connection and type")
-    {
-        Gwsct ct{};
-        Gint buffSize{};
-        Gint numCts{};
-        const Gint status = ginqwsconntype(wsId + 1, buffSize, &numCts, &ct);
+    ASSERT_EQ(GERROR_NONE, status);
+    ginqfillcolorind(&value);
+    ASSERT_EQ(0, value);
+}
 
-        REQUIRE(status == GERROR_WS_NOT_OPEN);
-    }
-    SECTION("get workstation transformation ws not open")
-    {
-        Gwsti transform{};
-        const Gint status = ginqwstran(wsId + 1, &transform);
+TEST_F(TestGKSSetStateList, fillAreaIndex)
+{
+    const Gint status = gsetfillind(1);
 
-        REQUIRE(status == GERROR_WS_NOT_OPEN);
-    }
-    SECTION("set color representation bad index")
-    {
-        Gcobundl rep{0.5f, 0.5f, 0.5f};
-        gsetcolorrep(wsId, -1, &rep);
+    ASSERT_EQ(GERROR_NONE, status);
+    ginqfillind(&value);
+    ASSERT_EQ(1, value);
+}
 
-        requireError(GERROR_INVALID_COLOR_INDEX, GFN_SET_COLOR_REPRESENTATION);
-        Gcobundl current{};
-        const Gint status = ginqcolorrep(wsId, 0, &current);
-        REQUIRE(status == GERROR_NONE);
-        REQUIRE(current.red == 0.0f);
-        REQUIRE(current.green == 0.0f);
-        REQUIRE(current.blue == 0.0f);
-    }
-    SECTION("set viewport")
-    {
-        Glimit viewport{0.0f, 1.0f, 0.0f, 1.0f};
+TEST_F(TestGKSSetStateList, fillAreaInteriorStyle)
+{
+    const Gint status = gsetfillstyle(GSOLID);
 
-        SECTION("invalid rectangle")
-        {
-            SECTION("x range")
-            {
-                viewport.xmin = 2.0f;
-            }
-            SECTION("y range")
-            {
-                viewport.ymin = 2.0f;
-            }
+    ASSERT_EQ(GERROR_NONE, status);
+    Gflinter current{};
+    ginqfillstyle(&current);
+    ASSERT_EQ(GSOLID, current);
+}
 
-            gsetwsviewport(wsId, &viewport);
+TEST_F(TestGKSSetStateList, fillAreaInteriorStyleIndex)
+{
+    const Gint status = gsetfillstyleind(2);
 
-            requireError(GERROR_INVALID_RECT, GFN_SET_WORKSTATION_VIEWPORT);
-        }
-    }
-    SECTION("set window")
-    {
-        Glimit window{0.0f, 1.0f, 0.0f, 1.0f};
+    ASSERT_EQ(GERROR_NONE, status);
+    ginqfillstyleind(&value);
+    ASSERT_EQ(2, value);
+}
 
-        SECTION("invalid rectangle")
-        {
-            SECTION("x range")
-            {
-                window.xmin = 2.0f;
-            }
-            SECTION("y range")
-            {
-                window.ymin = 2.0f;
-            }
+TEST_F(TestGKSSetStateList, lineType)
+{
+    const Gint status = gsetlinetype(GLN_DASHED);
 
-            gsetwswindow(wsId, &window);
+    ASSERT_EQ(GERROR_NONE, status);
+    ginqlinetype(&value);
+    ASSERT_EQ(GLN_DASHED, value);
+}
 
-            requireError(GERROR_INVALID_RECT, GFN_SET_WORKSTATION_WINDOW);
-        }
-    }
+TEST_F(TestGKSSetStateList, lineColorIndex)
+{
+    const Gint status = gsetlinecolorind(1);
 
-    gclosews(wsId);
-    gclosegks();
+    ASSERT_EQ(GERROR_NONE, status);
+    ginqlinecolorind(&value);
+    ASSERT_EQ(1, value);
+}
+
+TEST_F(TestGKSSetStateList, lineIndex)
+{
+    const Gint status = gsetlineind(1);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ginqlineind(&value);
+    ASSERT_EQ(1, value);
+}
+
+TEST_F(TestGKSSetStateList, markerType)
+{
+    const Gint status = gsetmarkertype(GMK_DIAGONAL_CROSS);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ginqmarkertype(&value);
+    ASSERT_EQ(GMK_DIAGONAL_CROSS, value);
+}
+
+TEST_F(TestGKSSetStateList, markerSize)
+{
+    const Gint status = gsetmarkersize(2.0f);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    Gfloat size{-1.0f};
+    ginqmarkersize(&size);
+    ASSERT_EQ(2.0f, size);
+}
+
+TEST_F(TestGKSSetStateList, markerColorIndex)
+{
+    Gint index{1};
+    const Gint status = gsetmarkercolorind(index);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ginqmarkercolorind(&value);
+    ASSERT_EQ(index, value);
+}
+
+TEST_F(TestGKSSetStateList, markerIndex)
+{
+    Gint index{1};
+    const Gint status = gsetmarkerind(index);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ginqmarkerind(&value);
+    ASSERT_EQ(index, value);
+}
+
+TEST_F(TestGKSSetStateList, normalizationTransform)
+{
+    const Gint status = gselntran(1);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    Gint transform{0};
+    ginqcurrntrannum(&transform);
+    ASSERT_EQ(1, transform);
+}
+
+TEST_F(TestGKSSetStateList, textAlignment)
+{
+    Gtxalign align{GAH_LEFT, GAV_BOTTOM};
+    const Gint status = gsettextalign(&align);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    Gtxalign current{};
+    ginqtextalign(&current);
+    ASSERT_EQ(align.hor, current.hor);
+    ASSERT_EQ(align.ver, current.ver);
+}
+
+TEST_F(TestGKSSetStateList, textColorIndex)
+{
+    const Gint color{0};
+    const Gint status = gsettextcolorind(color);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ginqtextcolorind(&value);
+    ASSERT_EQ(color, value);
+}
+
+TEST_F(TestGKSSetStateList, textFontAndPrecision)
+{
+    Gtxfp font{2, GP_STROKE};
+    const Gint status = gsettextfontprec(&font);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    Gtxfp current{};
+    ginqtextfontprec(&current);
+    ASSERT_EQ(font.font, current.font);
+    ASSERT_EQ(font.prec, current.prec);
+}
+
+TEST_F(TestGKSSetStateList, textIndex)
+{
+    const Gint index{1};
+    const Gint status = gsettextind(index);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ginqtextind(&value);
+    ASSERT_EQ(index, value);
+}
+
+namespace
+{
+
+class TestGKSSetStateListErrorHandling : public TestGKSOpen
+{
+public:
+    ~TestGKSSetStateListErrorHandling() override = default;
+
+protected:
+    Gint value{-1};
+};
+
+} // namespace
+
+TEST_F(TestGKSSetStateListErrorHandling, characterExpansionFactor)
+{
+    const Gint status = gsetcharexpan(0.0f);
+
+    ASSERT_TRUE(expectError(status, GERROR_CHAR_EXPANSION_NOT_POSITIVE, GFN_SET_CHARACTER_EXPANSION_FACTOR));
+    Gfloat value{};
+    ASSERT_EQ(GERROR_NONE, ginqcharexpan(&value));
+    ASSERT_EQ(1.0f, value);
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, characterHeightZero)
+{
+    const Gint status = gsetcharheight(0.0f);
+
+    ASSERT_TRUE(expectError(status, GERROR_CHAR_HEIGHT_NOT_POSITIVE, GFN_SET_CHARACTER_HEIGHT));
+    Gfloat value{-1.0f};
+    ginqcharheight(&value);
+    ASSERT_EQ(0.01f, value);
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, characterHeightNegative)
+{
+    const Gint status = gsetcharheight(-1.0f);
+
+    ASSERT_TRUE(expectError(status, GERROR_CHAR_HEIGHT_NOT_POSITIVE, GFN_SET_CHARACTER_HEIGHT));
+    Gfloat value{-1.0f};
+    ginqcharheight(&value);
+    ASSERT_EQ(0.01f, value);
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, characterUpVector)
+{
+    Gpoint up{};
+    const Gint status = gsetcharup(&up);
+
+    ASSERT_TRUE(expectError(status, GERROR_CHAR_UP_LENGTH_ZERO, GFN_SET_CHARACTER_UP_VECTOR));
+    Gpoint value{};
+    ginqcharup(&value);
+    ASSERT_EQ(0.0f, value.x);
+    ASSERT_EQ(1.0f, value.y);
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, fillAreaColor)
+{
+    const Gint status = gsetfillcolorind(-1);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_COLOR_INDEX, GFN_SET_FILL_AREA_COLOR_INDEX));
+    Gint value{};
+    ginqfillcolorind(&value);
+    ASSERT_EQ(1, value);
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, fillAreaIndex)
+{
+    const Gint status = gsetfillind(0);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_FILL_INDEX, GFN_SET_FILL_AREA_INDEX));
+    Gint value{};
+    ginqfillind(&value);
+    ASSERT_EQ(1, value);
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, fillAreaInteriorStyleIndex)
+{
+    const Gint status = gsetfillstyleind(0);
+
+    ASSERT_TRUE(expectError(status, GERROR_FILL_STYLE_ZERO, GFN_SET_FILL_AREA_INTERIOR_STYLE));
+    Gint value{};
+    ginqfillstyleind(&value);
+    ASSERT_EQ(1, value);
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, lineColorTooSmall)
+{
+    const Gint status = gsetlinecolorind(-1);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_COLOR_INDEX, GFN_SET_POLYLINE_COLOR_INDEX));
+    Gint value{};
+    ginqlinecolorind(&value);
+    ASSERT_EQ(1, value);
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, lineColorTooLarge)
+{
+    const Gint status = gsetlinecolorind(2);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_COLOR_INDEX, GFN_SET_POLYLINE_COLOR_INDEX));
+    Gint value{};
+    ginqlinecolorind(&value);
+    ASSERT_EQ(1, value);
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, lineIndex)
+{
+    const Gint status = gsetlineind(0);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_LINE_INDEX, GFN_SET_POLYLINE_INDEX));
+    Gint value{};
+    ginqlineind(&value);
+    ASSERT_EQ(1, value);
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, lineType)
+{
+    const Gint status = gsetlinetype(0);
+
+    ASSERT_TRUE(expectError(status, GERROR_LINE_TYPE_ZERO, GFN_SET_LINETYPE));
+    Gint value{};
+    ginqlinetype(&value);
+    ASSERT_EQ(1, value);
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, markerColorTooSmall)
+{
+    const Gint status = gsetmarkercolorind(-1);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_COLOR_INDEX, GFN_SET_POLYMARKER_COLOR_INDEX));
+    Gint value{};
+    ginqmarkercolorind(&value);
+    ASSERT_EQ(1, value);
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, markerColorTooLarge)
+{
+    const Gint status = gsetmarkercolorind(2);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_COLOR_INDEX, GFN_SET_POLYMARKER_COLOR_INDEX));
+    Gint value{};
+    ginqmarkercolorind(&value);
+    ASSERT_EQ(1, value);
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, markerIndex)
+{
+    const Gint status = gsetmarkerind(0);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_MARKER_INDEX, GFN_SET_POLYMARKER_INDEX));
+    Gint value{};
+    ginqmarkerind(&value);
+    ASSERT_EQ(1, value);
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, markerSize)
+{
+    const Gint status = gsetmarkersize(-1.0f);
+
+    ASSERT_TRUE(expectError(status, GERROR_NEGATIVE_MARKER_SIZE, GFN_SET_MARKER_SIZE_SCALE_FACTOR));
+    Gfloat value{};
+    ginqmarkersize(&value);
+    ASSERT_EQ(1.0f, value);
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, markerType)
+{
+    const Gint status = gsetmarkertype(0);
+
+    ASSERT_TRUE(expectError(status, GERROR_MARKER_TYPE_ZERO, GFN_SET_MARKER_TYPE));
+    Gint value{};
+    ginqmarkertype(&value);
+    ASSERT_EQ(GMK_STAR, value);
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, normalizationTransformTooSmall)
+{
+    const Gint status = gselntran(-1);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_TRAN_NUM, GFN_SELECT_NORMALIZATION_TRANSFORMATION));
+    Gint value{};
+    ginqcurrntrannum(&value);
+    ASSERT_EQ(0, value);
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, normalizationTransformTooLarge)
+{
+    Gint maxTranNum{};
+    ASSERT_EQ(GERROR_NONE, ginqmaxntrannum(&maxTranNum));
+
+    const Gint status = gselntran(maxTranNum + 1);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_TRAN_NUM, GFN_SELECT_NORMALIZATION_TRANSFORMATION));
+    Gint value{};
+    ginqcurrntrannum(&value);
+    ASSERT_EQ(0, value);
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, textColor)
+{
+    const Gint status = gsettextcolorind(-1);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_COLOR_INDEX, GFN_SET_TEXT_COLOR_INDEX));
+    Gint value{};
+    ginqtextcolorind(&value);
+    ASSERT_EQ(1, value);
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, textFontAndPrecision)
+{
+    Gtxfp fontPrec{0, GP_STROKE};
+    const Gint status = gsettextfontprec(&fontPrec);
+
+    ASSERT_TRUE(expectError(status, GERROR_TEXT_FONT_ZERO, GFN_SET_TEXT_FONT_AND_PRECISION));
+    Gtxfp value{};
+    ginqtextfontprec(&value);
+    ASSERT_EQ(1, value.font);
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, textIndex)
+{
+    const Gint status = gsettextind(0);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_TEXT_INDEX, GFN_SET_TEXT_INDEX));
+    Gint value{};
+    ginqtextind(&value);
+    ASSERT_EQ(1, value);
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, viewportInvalidIndex)
+{
+    Glimit viewport{0.0f, 1.0f, 0.0f, 1.0f};
+    const Gint status = gsetviewport(0, &viewport);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_TRAN_NUM, GFN_SET_VIEWPORT));
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, invalidRectangleXRange)
+{
+    Glimit viewport{1.0f, 0.0f, 0.0f, 1.0f};
+    const Gint status = gsetviewport(1, &viewport);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_RECT, GFN_SET_VIEWPORT));
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, invalidRectangleYRange)
+{
+    Glimit viewport{0.0f, 1.0f, 1.0f, 0.0f};
+    const Gint status = gsetviewport(1, &viewport);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_RECT, GFN_SET_VIEWPORT));
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, viewportXMinOutOfRange)
+{
+    Glimit viewport{-1.0f, 1.0f, 0.0f, 1.0f};
+
+    const Gint status = gsetviewport(1, &viewport);
+
+    ASSERT_TRUE(expectError(status, GERROR_VIEWPORT_NOT_IN_NDC, GFN_SET_VIEWPORT));
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, viewportXMaxOutOfRange)
+{
+    Glimit viewport{0.0f, 2.0f, 0.0f, 1.0f};
+
+    const Gint status = gsetviewport(1, &viewport);
+
+    ASSERT_TRUE(expectError(status, GERROR_VIEWPORT_NOT_IN_NDC, GFN_SET_VIEWPORT));
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, viewportYMinOutOfRange)
+{
+    Glimit viewport{0.0f, 1.0f, -1.0f, 1.0f};
+
+    const Gint status = gsetviewport(1, &viewport);
+
+    ASSERT_TRUE(expectError(status, GERROR_VIEWPORT_NOT_IN_NDC, GFN_SET_VIEWPORT));
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, viewportYMaxOutOfRange)
+{
+    Glimit viewport{0.0f, 1.0f, 0.0f, 2.0f};
+
+    const Gint status = gsetviewport(1, &viewport);
+
+    ASSERT_TRUE(expectError(status, GERROR_VIEWPORT_NOT_IN_NDC, GFN_SET_VIEWPORT));
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, windowInvalidIndex)
+{
+    Glimit window{0.0f, 1.0f, 0.0f, 1.0f};
+    const Gint status = gsetwindow(0, &window);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_TRAN_NUM, GFN_SET_WINDOW));
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, windowInvalidXRange)
+{
+    Glimit window{1.0f, 0.0f, 0.0f, 1.0f};
+    const Gint status = gsetwindow(1, &window);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_RECT, GFN_SET_WINDOW));
+}
+
+TEST_F(TestGKSSetStateListErrorHandling, windowInvalidYRange)
+{
+    Glimit window{0.0f, 1.0f, 1.0f, 0.0f};
+    const Gint status = gsetwindow(1, &window);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_RECT, GFN_SET_WINDOW));
+}
+
+namespace
+{
+
+class TestWorkstationDependentStateList : public TestWSOpen
+{
+};
+
+} // namespace
+
+TEST_F(TestWorkstationDependentStateList, connectionIdAndType)
+{
+    Gwsct ct{};
+    Gint numCt{};
+    const Gint status = ginqwsconntype(wsId, 0, &numCt, &ct);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(connId, ct.conn);
+    ASSERT_EQ(wsType, ct.type);
+}
+
+TEST_F(TestWorkstationDependentStateList, colorIndices)
+{
+    Gint colors[16]{-1};
+    Gint numIndices{};
+    Gintlist indices{numOf(colors), colors};
+    const Gint status = ginqcolorindices(wsId, numOf(colors), 0, &indices, &numIndices);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    ASSERT_EQ(2, numIndices);
+    ASSERT_EQ(0, colors[0]);
+    ASSERT_EQ(1, colors[1]);
+}
+
+namespace
+{
+
+class TestSetWorkstationDependentState : public TestWSOpen
+{
+};
+
+} // namespace
+
+TEST_F(TestSetWorkstationDependentState, colorRepresentation)
+{
+    Gcobundl rep{0.5f, 0.5f, 0.5f};
+    const Gint status = gsetcolorrep(wsId, 0, &rep);
+
+    ASSERT_EQ(GERROR_NONE, status);
+    Gcobundl current{};
+    ginqcolorrep(wsId, 0, &current);
+    ASSERT_EQ(rep.red, current.red);
+    ASSERT_EQ(rep.green, current.green);
+    ASSERT_EQ(rep.blue, current.blue);
+}
+
+namespace
+{
+
+class TestSetWorkstationDependentStateErrorHandling : public TestWSOpen
+{
+};
+
+} // namespace
+
+TEST_F(TestSetWorkstationDependentStateErrorHandling, getColorIndices)
+{
+    Gint colors[16]{};
+    Gint numIndices{};
+    Gintlist indices{};
+    const Gint status = ginqcolorindices(wsId + 1, numOf(colors), 0, &indices, &numIndices);
+
+    ASSERT_TRUE(expectError(status, GERROR_WS_NOT_OPEN, GFN_INQUIRE_COLOR_INDICES));
+}
+
+TEST_F(TestSetWorkstationDependentStateErrorHandling, getColorRepresentationWorkstationNotOpen)
+{
+    Gint index{1};
+    Gcobundl value{};
+
+    const Gint status = ginqcolorrep(wsId + 1, index, &value);
+
+    ASSERT_TRUE(expectError(status, GERROR_WS_NOT_OPEN, GFN_INQUIRE_COLOR_REPRESENTATION));
+}
+
+TEST_F(TestSetWorkstationDependentStateErrorHandling, getColorRepresentationInvalidIndex)
+{
+    Gcobundl value{};
+
+    const Gint status = ginqcolorrep(wsId, -1, &value);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_COLOR_INDEX, GFN_INQUIRE_COLOR_REPRESENTATION));
+}
+
+TEST_F(TestSetWorkstationDependentStateErrorHandling, getConnectionAndType)
+{
+    Gwsct ct{};
+    Gint buffSize{};
+    Gint numCts{};
+    const Gint status = ginqwsconntype(wsId + 1, buffSize, &numCts, &ct);
+
+    ASSERT_TRUE(expectError(status, GERROR_WS_NOT_OPEN, GFN_INQUIRE_WORKSTATION_CONNECTION_AND_TYPE));
+}
+
+TEST_F(TestSetWorkstationDependentStateErrorHandling, getWorkstationTransformationWSNotOpen)
+{
+    Gwsti transform{};
+    const Gint status = ginqwstran(wsId + 1, &transform);
+
+    ASSERT_TRUE(expectError(status, GERROR_WS_NOT_OPEN, GFN_INQUIRE_WORKSTATION_TRANSFORMATION));
+}
+
+TEST_F(TestSetWorkstationDependentStateErrorHandling, setColorRepresentationBadIndex)
+{
+    Gcobundl rep{0.5f, 0.5f, 0.5f};
+    const Gint status = gsetcolorrep(wsId, -1, &rep);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_COLOR_INDEX, GFN_SET_COLOR_REPRESENTATION));
+    Gcobundl current{};
+    ginqcolorrep(wsId, 0, &current);
+    ASSERT_EQ(0.0f, current.red);
+    ASSERT_EQ(0.0f, current.green);
+    ASSERT_EQ(0.0f, current.blue);
+}
+
+TEST_F(TestSetWorkstationDependentStateErrorHandling, setViewportInvalidXRange)
+{
+    Glimit viewport{2.0f, 1.0f, 0.0f, 1.0f};
+
+    const Gint status = gsetwsviewport(wsId, &viewport);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_RECT, GFN_SET_WORKSTATION_VIEWPORT));
+}
+
+TEST_F(TestSetWorkstationDependentStateErrorHandling, setViewportInvalidYRange)
+{
+    Glimit viewport{0.0f, 1.0f, 2.0f, 1.0f};
+
+    const Gint status = gsetwsviewport(wsId, &viewport);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_RECT, GFN_SET_WORKSTATION_VIEWPORT));
+}
+
+TEST_F(TestSetWorkstationDependentStateErrorHandling, setWindowInvalidXRange)
+{
+    Glimit window{2.0f, 1.0f, 0.0f, 1.0f};
+
+    const Gint status = gsetwswindow(wsId, &window);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_RECT, GFN_SET_WORKSTATION_WINDOW));
+}
+
+TEST_F(TestSetWorkstationDependentStateErrorHandling, setWindowInvalidYRange)
+{
+    Glimit window{2.0f, 1.0f, 2.0f, 1.0f};
+
+    const Gint status = gsetwswindow(wsId, &window);
+
+    ASSERT_TRUE(expectError(status, GERROR_INVALID_RECT, GFN_SET_WORKSTATION_WINDOW));
 }

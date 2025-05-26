@@ -690,7 +690,7 @@ TEST_F(TestGKSClosed, generalizedDrawingPrimitive)
 {
     const Gint status = ggdp(0, nullptr, 0, nullptr);
 
-    ASSERT_TRUE(expectError(status, GERROR_NOT_STATE_WSAC_SGOP, GFN_GDP));
+    ASSERT_TRUE(expectError(status, GERROR_NOT_STATE_WSAC_SGOP, GFN_GENERALIZED_DRAWING_PRIMITIVE));
 }
 
 TEST_F(TestGKSClosed, polyline)

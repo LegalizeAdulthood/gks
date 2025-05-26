@@ -1,4 +1,3 @@
-find_package(Catch2 CONFIG REQUIRED)
 find_package(GTest CONFIG REQUIRED)
 
 include(GoogleTest)
@@ -11,7 +10,9 @@ add_executable(test-gks
     gkop_test.cpp
     wsop_test.cpp
     wsac_test.cpp
+    TestGKSOpen.h TestGKSOpen.cpp
+    TestWSOpen.h TestWSOpen.cpp
     )
-target_link_libraries(test-gks PUBLIC gks Catch2::Catch2 GTest::gtest_main)
+target_link_libraries(test-gks PUBLIC gks GTest::gtest_main)
 target_folder(test-gks "Tests")
 gtest_discover_tests(test-gks)

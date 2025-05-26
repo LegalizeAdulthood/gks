@@ -1,4 +1,5 @@
 #include "error.h"
+#include "TestWSOpen.h"
 
 #include <gks/gks.h>
 #include <gks/gkserror.h>
@@ -6,42 +7,6 @@
 #include <gtest/gtest.h>
 
 using namespace testing;
-
-namespace
-{
-
-class TestWSOpen : public Test
-{
-public:
-    ~TestWSOpen() override = default;
-
-protected:
-    void SetUp() override;
-    void TearDown() override;
-
-    Gint wsId{0};
-};
-
-void TestWSOpen::SetUp()
-{
-    Test::SetUp();
-
-    g_recordedErrors.clear();
-    ASSERT_EQ(GERROR_NONE, gopengks(stderr, 0));
-    const Gchar *connId{"tek4105"};
-    const Gint wsType{GWSTYPE_TEK4105};
-    ASSERT_EQ(GERROR_NONE, gopenws(wsId, connId, wsType));
-}
-
-void TestWSOpen::TearDown()
-{
-    ASSERT_EQ(GERROR_NONE, gclosews(wsId));
-    ASSERT_EQ(GERROR_NONE, gclosegks());
-
-    Test::TearDown();
-}
-
-} // namespace
 
 TEST_F(TestWSOpen, gopengks)
 {
@@ -95,7 +60,7 @@ TEST_F(TestWSOpen, ggdp)
 {
     const Gint status = ggdp(0, nullptr, 0, nullptr);
 
-    ASSERT_TRUE(expectError(status, GERROR_NOT_STATE_WSAC_SGOP, GFN_GDP));
+    ASSERT_TRUE(expectError(status, GERROR_NOT_STATE_WSAC_SGOP, GFN_GENERALIZED_DRAWING_PRIMITIVE));
 }
 
 TEST_F(TestWSOpen, gpolyline)

@@ -1,4 +1,5 @@
 #include "error.h"
+#include "TestGKSOpen.h"
 
 #include <gks/gks.h>
 #include <gks/gkserror.h>
@@ -6,37 +7,6 @@
 #include <gtest/gtest.h>
 
 using namespace testing;
-
-namespace
-{
-
-class TestGKSOpen : public Test
-{
-public:
-    ~TestGKSOpen() override = default;
-
-protected:
-    void SetUp() override;
-    void TearDown() override;
-};
-
-void TestGKSOpen::SetUp()
-{
-    Test::SetUp();
-
-    g_recordedErrors.clear();
-    ASSERT_EQ(GERROR_NONE, gopengks(stderr, 0));
-}
-
-void TestGKSOpen::TearDown()
-{
-    ASSERT_EQ(GGKOP, getGksOpState());
-    ASSERT_EQ(GERROR_NONE, gclosegks());
-
-    Test::TearDown();
-}
-
-} // namespace
 
 TEST_F(TestGKSOpen, alreadyOpen)
 {
@@ -121,7 +91,7 @@ TEST_F(TestGKSOpen, ggdp)
 {
     const Gint status = ggdp(0, nullptr, 0, nullptr);
 
-    ASSERT_TRUE(expectError(status, GERROR_NOT_STATE_WSAC_SGOP, GFN_GDP));
+    ASSERT_TRUE(expectError(status, GERROR_NOT_STATE_WSAC_SGOP, GFN_GENERALIZED_DRAWING_PRIMITIVE));
 }
 
 TEST_F(TestGKSOpen, gpolyline)
