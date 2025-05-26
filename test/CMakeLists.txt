@@ -9,7 +9,7 @@ add_executable(test-gks
     error.cpp
     gkcl_test.cpp
     gkop_test.cpp
-    wsop.cpp
+    wsop_test.cpp
     wsac.cpp
     )
 target_link_libraries(test-gks PUBLIC gks Catch2::Catch2 GTest::gtest_main)
