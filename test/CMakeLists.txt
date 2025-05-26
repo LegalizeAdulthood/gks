@@ -10,7 +10,7 @@ add_executable(test-gks
     gkcl_test.cpp
     gkop_test.cpp
     wsop_test.cpp
-    wsac.cpp
+    wsac_test.cpp
     )
 target_link_libraries(test-gks PUBLIC gks Catch2::Catch2 GTest::gtest_main)
 target_folder(test-gks "Tests")
