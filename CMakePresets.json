@@ -56,19 +56,8 @@
       "name": "default",
       "displayName": "Test with default settings",
       "inherits": [ "settings" ],
-      "configurePreset": "default"
-    },
-    {
-      "name": "ci-linux",
-      "displayName": "Test with default settings but suppress tests on linux CI that have goofy google mocks",
-      "description": "Suppress some tests that don't currently pass on linux due to weirdness with google mock",
-      "inherits": [ "settings" ],
       "configurePreset": "default",
-      "filter": {
-        "exclude": {
-          "name": "NNTPConnectedTest\\.server_init_(ok|posting_prohibited|(temporarily|permanently)_unavailable)"
-        }
-      }
+      "configuration": "Debug"
     }
   ],
   "workflowPresets": [
@@ -87,24 +76,6 @@
         {
           "type": "test",
           "name": "default"
-        }
-      ]
-    },
-    {
-      "name": "ci-linux",
-      "displayName": "Workflow with settings for continuous integratoin on linux: configure, build and test",
-      "steps": [
-        {
-          "type": "configure",
-          "name": "default"
-        },
-        {
-          "type": "build",
-          "name": "default"
-        },
-        {
-          "type": "test",
-          "name": "ci-linux"
         }
       ]
     }

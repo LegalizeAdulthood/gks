@@ -1,15 +1,17 @@
 find_package(Catch2 CONFIG REQUIRED)
+find_package(GTest CONFIG REQUIRED)
+
+include(GoogleTest)
 
 add_executable(test-gks
     test.cpp
     error.h
     error.cpp
     gkcl.cpp
-    gkop.cpp
+    gkop_test.cpp
     wsop.cpp
     wsac.cpp
     )
-target_link_libraries(test-gks PUBLIC gks Catch2::Catch2WithMain)
+target_link_libraries(test-gks PUBLIC gks Catch2::Catch2 GTest::gtest_main)
 target_folder(test-gks "Tests")
-
-add_custom_command(TARGET test-gks POST_BUILD COMMAND test-gks)
+gtest_discover_tests(test-gks)

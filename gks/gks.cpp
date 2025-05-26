@@ -1258,10 +1258,12 @@ Gint ginqcolorrep(Gint wsId, Gint index, Gcobundl *value)
         {
             if (!wsIsOpen(wsId))
             {
+                gerrorhand(GERROR_WS_NOT_OPEN, GFN_INQUIRE_COLOR_REPRESENTATION, g_errFile);
                 return GERROR_WS_NOT_OPEN;
             }
             if (index < 0 || index > 1)
             {
+                gerrorhand(GERROR_INVALID_COLOR_INDEX, GFN_INQUIRE_COLOR_REPRESENTATION, g_errFile);
                 return GERROR_INVALID_COLOR_INDEX;
             }
             return GERROR_NONE;
